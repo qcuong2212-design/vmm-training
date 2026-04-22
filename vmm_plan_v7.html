@@ -1,0 +1,1047 @@
+<!DOCTYPE html>  
+<html lang="vi">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>VMM 100M Training & AI Assistant</title>  
+<style>  
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');  
+*{box-sizing:border-box;margin:0;padding:0}  
+:root{  
+  --bg:#f7f5f0;--surface:#fff;--surface2:#f0ede8;--surface3:#e8e4dc;  
+  --border:#ddd8ce;--border2:#ccc7bc;  
+  --text:#1a1814;--muted:#7a756a;--muted2:#aaa49a;  
+  --uphill:#d4531e;--downhill:#1e6eb5;--gym:#2e7d3e;--road:#6b4fc7;--rest:#aaa49a;--race:#c0392b;  
+    
+  --p1:#1e6eb5;--p2:#d4531e;--p3:#c0392b;--p4:#6b4fc7;  
+}  
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.5}  
+  
+/* HEADER */  
+.header{background:var(--text);color:#f7f5f0;padding:20px 22px}  
+.htop{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}  
+.race-info h1{font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:2px}  
+.race-info p{font-size:11px;opacity:.6;font-family:'IBM Plex Mono',monospace}  
+.countdown{text-align:right}  
+.countdown-num{font-size:28px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0}  
+.countdown-label{font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.1em}  
+.stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;margin-top:16px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden}  
+.stat{background:rgba(255,255,255,.07);padding:10px 12px}  
+.stat-val{font-size:16px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0}  
+.stat-label{font-size:9px;opacity:.5;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}  
+  
+/* LEGEND */  
+.legend{display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;background:var(--surface);border-bottom:1px solid var(--border)}  
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace}  
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}  
+  
+/* TABS */  
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--surface);overflow-x:auto}  
+.tab{padding:10px 16px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}  
+.tab:hover{color:var(--text)}  
+.tab.active{color:var(--text);border-bottom-color:var(--text)}  
+.tab-special{color:var(--gym);border-left:1px solid var(--border);}  
+.tab-special.active{color:var(--gym);border-bottom-color:var(--gym)}  
+  
+  
+  
+/* PHASE BANNER */  
+.phase-banner{padding:14px 22px;border-bottom:1px solid var(--border)}  
+.phase-title{font-size:14px;font-weight:700;margin-bottom:3px}  
+.phase-meta{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px}  
+.phase-body{font-size:12px;color:var(--muted);line-height:1.7;max-width:680px}  
+.phase-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}  
+.ptag{font-size:10px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace}  
+  
+/* WEEK LIST */  
+.weeks{padding:12px 22px;display:flex;flex-direction:column;gap:6px}  
+.week{background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .15s,box-shadow .15s}  
+.week:hover{border-color:var(--border2);box-shadow:0 1px 4px rgba(0,0,0,.06)}  
+.week.open{border-color:var(--border2)}  
+.whead{display:grid;align-items:center;grid-template-columns:46px 90px 64px 72px 64px 1fr;gap:0;padding:10px 14px}  
+@media (max-width: 600px) {  
+  .whead{grid-template-columns:40px 70px 50px 1fr;}  
+  .wgain, .wloss{display:none;}  
+  .wnote{font-size: 10px;}  
+}  
+.wnum{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;color:var(--muted2)}  
+.wdate{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace}  
+.wkm{font-weight:700;font-size:13px;font-family:'IBM Plex Mono',monospace}  
+.wgain{font-size:11px;color:var(--uphill);font-family:'IBM Plex Mono',monospace}  
+.wloss{font-size:11px;color:var(--downhill);font-family:'IBM Plex Mono',monospace}  
+.wnote{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}  
+.wbar{height:3px;background:var(--surface2)}  
+.wbar-fill{height:3px;transition:width .4s}  
+  
+/* WEEK DETAIL */  
+.wdetail{display:none;border-top:1px solid var(--border);padding:14px}  
+.week.open .wdetail{display:block}  
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px}  
+@media (max-width: 768px) {  
+  .day-grid{grid-template-columns:repeat(2,1fr);}  
+  .day-grid .day:last-child {grid-column: span 2;}  
+}  
+.day{border:1px solid var(--border);border-radius:5px;padding:7px;min-height:110px}  
+.day-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}  
+.day-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);font-family:'IBM Plex Mono',monospace}  
+.day-dot{width:7px;height:7px;border-radius:50%}  
+.day-label{font-size:10px;font-weight:600;margin-bottom:3px}  
+.day-text{font-size:9px;color:var(--muted);line-height:1.5;font-family:'IBM Plex Mono',monospace}  
+  
+/* SESSION BLOCKS & TOOLTIPS */  
+.sblock{border-radius:3px;padding:3px 5px;margin-bottom:3px;font-size:10px;font-weight:500; line-height:1.3;}  
+.sb-uphill{background:#fde8df;color:#8b2800;border-left:2px solid var(--uphill)}  
+.sb-downhill{background:#ddeeff;color:#0a3d6b;border-left:2px solid var(--downhill)}  
+.sb-gym{background:#e0f0e4;color:#1a5228;border-left:2px solid var(--gym)}  
+.sb-road{background:#ede8fb;color:#3a1f8a;border-left:2px solid var(--road)}  
+.sb-rest{background:var(--surface2);color:var(--muted2);border-left:2px solid var(--muted2)}  
+.sb-race{background:#fde8e8;color:#7a0000;border-left:2px solid var(--race)}  
+  
+.sblock.has-tooltip { position: relative; cursor: help; }  
+.sblock.has-tooltip::after { content: "ⓘ"; float: right; font-size: 8px; opacity: 0.4; margin-top: 1px; }  
+.sblock .tooltip {  
+  visibility: hidden; width: 220px; background-color: var(--text); color: #fff;  
+  text-align: left; border-radius: 6px; padding: 8px 10px; position: absolute;  
+  z-index: 999; bottom: 115%; left: 50%; transform: translateX(-50%);  
+  opacity: 0; transition: opacity 0.2s, visibility 0.2s; font-size: 11px;  
+  font-weight: 400; line-height: 1.5; font-family: 'IBM Plex Sans', sans-serif;  
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2); pointer-events: none; white-space: normal;  
+}  
+.sblock .tooltip::after {  
+  content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;  
+  border-width: 5px; border-style: solid; border-color: var(--text) transparent transparent transparent;  
+}  
+.sblock.has-tooltip:hover .tooltip { visibility: visible; opacity: 1; }  
+.day:nth-child(1) .sblock .tooltip, .day:nth-child(2) .sblock .tooltip { left: 0; transform: translateX(-10%); }  
+.day:nth-child(1) .sblock .tooltip::after, .day:nth-child(2) .sblock .tooltip::after { left: 15%; }  
+.day:nth-child(7) .sblock .tooltip, .day:nth-child(6) .sblock .tooltip { left: auto; right: 0; transform: translateX(10%); }  
+.day:nth-child(7) .sblock .tooltip::after, .day:nth-child(6) .sblock .tooltip::after { left: auto; right: 15%; }  
+  
+/* FOCUS BOXES */  
+.focus-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:0}  
+@media (max-width: 600px) { .focus-row{grid-template-columns:1fr;} }  
+.focus-box{border-radius:5px;padding:10px 12px;border:1px solid}  
+.focus-up{background:#fdf5f2;border-color:#f0c4b0}  
+.focus-dn{background:#f2f7fd;border-color:#b0cdf0}  
+.focus-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'IBM Plex Mono',monospace}  
+.focus-text{font-size:11px;line-height:1.6;color:var(--muted)}  
+  
+/* NUTRITION & AI PANELS */  
+  
+.nutri-header{margin-bottom: 20px;}  
+.nutri-header h2{font-size: 18px; font-weight: 700; margin-bottom: 5px; color: var(--text);}  
+.nutri-header p{font-size: 12px; color: var(--muted); max-width: 600px;}  
+.nutri-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;}  
+@media (max-width: 768px) { .nutri-grid{grid-template-columns: 1fr;} }  
+.nutri-card{background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px;}  
+.nutri-card h3{font-size: 13px; font-weight: 700; margin-bottom: 12px; display:flex; align-items:center; gap:6px; text-transform: uppercase; letter-spacing: 0.05em; font-family:'IBM Plex Mono',monospace;}  
+.nutri-card.before h3{color: var(--road);}  
+.nutri-card.during h3{color: var(--uphill);}  
+.nutri-card.after h3{color: var(--gym);}  
+.nutri-list{list-style: none;}  
+.nutri-list li{font-size: 12px; color: var(--muted); margin-bottom: 8px; padding-left: 14px; position: relative;}  
+.nutri-list li::before{content: '•'; position: absolute; left: 0; color: var(--border2); font-weight: bold;}  
+.macro-box{display: flex; justify-content: space-between; background: var(--surface2); padding: 8px 10px; border-radius: 4px; margin-top: 10px;}  
+.macro-item{text-align: center;}  
+.macro-val{font-size: 14px; font-weight: 700; color: var(--text); font-family:'IBM Plex Mono',monospace;}  
+.macro-lbl{font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;}  
+  
+.gut-training{background: #fff8e1; border: 1px solid #f0e6c8; border-radius: 6px; padding: 16px; margin-top: 10px;}  
+.gut-training h4{font-size: 13px; font-weight: 700; color: #b08d1e; margin-bottom: 6px; font-family:'IBM Plex Mono',monospace; text-transform: uppercase;}  
+.gut-training p{font-size: 12px; color: var(--text); margin-bottom: 8px;}  
+  
+/* AI COACH CHAT */  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 40% { color: inherit; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; } 60% { text-shadow: .25em 0 0 inherit, .5em 0 0 transparent; } 80%, 100% { text-shadow: .25em 0 0 inherit, .5em 0 0 inherit; } }  
+#nutri-panel {display:none; padding: 22px; max-width: 900px; margin: 0 auto;}
+
+/* ═══ COMPLETION SYSTEM ═══ */
+.day { cursor: pointer; transition: all .2s; }
+.day.done { background: #f0faf4; border-color: #6abf82; }
+.day.done .day-name { color: #2e7d3e; }
+.day.done::after { content: '✓'; position: absolute; top: 6px; right: 7px;
+  font-size: 13px; font-weight: 700; color: #2e7d3e; }
+.day { position: relative; }
+.day:hover:not(.done) { border-color: var(--border2); background: #fafaf8; }
+.day:hover.done { opacity: .9; }
+
+/* week done-count badge */
+.w-done-badge { font-size: 10px; font-family:'IBM Plex Mono',monospace;
+  color: var(--gym); margin-left: 8px; opacity: 0; transition: opacity .3s; }
+.w-done-badge.visible { opacity: 1; }
+.week.week-done .whead { background: #f6fdf8; }
+.week.week-done .wnum { color: var(--gym); }
+
+/* ═══ TRAIL PROGRESS BAR ═══ */
+#trail-progress {
+  background: var(--text); padding: 14px 22px 12px; 
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.trail-label { display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px; }
+.trail-km { font-size: 22px; font-weight: 700; font-family:'IBM Plex Mono',monospace;
+  color: #c8f0a0; }
+.trail-total { font-size: 11px; color: rgba(255,255,255,.4); }
+.trail-subtitle { font-size: 10px; color: rgba(255,255,255,.5); margin-top: 1px; }
+
+.trail-track { position: relative; height: 20px; background: rgba(255,255,255,.08);
+  border-radius: 10px; overflow: hidden; }
+.trail-fill { height: 100%; border-radius: 10px;
+  background: linear-gradient(90deg, #3a7a20, #c8f0a0);
+  transition: width .6s cubic-bezier(.4,0,.2,1); min-width: 0; }
+.trail-runner { position: absolute; top: 50%; transform: translateY(-50%) scaleX(-1);
+  font-size: 14px; pointer-events: none; transition: left .6s cubic-bezier(.4,0,.2,1);
+  filter: drop-shadow(0 0 4px rgba(200,240,160,.6)); }
+
+/* CP milestones */
+.trail-cps { display: flex; justify-content: space-between;
+  margin-top: 6px; padding: 0 2px; }
+.cp { display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: default; }
+.cp-dot { width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,.2); transition: background .3s; }
+.cp.reached .cp-dot { background: #c8f0a0; box-shadow: 0 0 6px rgba(200,240,160,.5); }
+.cp-label { font-size: 9px; color: rgba(255,255,255,.3); font-family:'IBM Plex Mono',monospace;
+  transition: color .3s; white-space: nowrap; }
+.cp.reached .cp-label { color: rgba(200,240,160,.8); }
+
+/* milestone flash */
+@keyframes milestone-flash {
+  0%,100%{background:rgba(200,240,160,.05)} 
+  50%{background:rgba(200,240,160,.15)}
+}
+.milestone-flash { animation: milestone-flash .8s ease 2; }
+
+/* done stats row */
+.done-stats { display: flex; gap: 16px; margin-top: 8px; }
+.done-stat { font-size: 10px; color: rgba(255,255,255,.4); font-family:'IBM Plex Mono',monospace; }
+.done-stat span { color: #c8f0a0; font-weight: 600; }
+
+
+/* ═══ REDESIGNED HEADER WITH ELEVATION MAP ═══ */
+.header-inner { display: grid; grid-template-columns: 280px 1fr; gap: 0; align-items: stretch; }
+.header-left { padding: 18px 22px 14px; }
+.header-right { position: relative; border-left: 1px solid rgba(255,255,255,.08); overflow: hidden; }
+#vmm-elevation { display: block; width: 100%; height: 100%; min-height: 120px; }
+#elev-runner, #elev-runner-glow { transition: cx .6s cubic-bezier(.4,0,.2,1), cy .6s cubic-bezier(.4,0,.2,1); }
+.prog-row { display: flex; align-items: baseline; gap: 10px; margin: 8px 0 3px; flex-wrap: wrap; }
+.prog-km { font-size: 24px; font-weight: 700; font-family:'IBM Plex Mono',monospace; color: #c8f0a0; line-height: 1; }
+.prog-of { font-size: 11px; color: rgba(255,255,255,.35); }
+.prog-sessions { font-size: 11px; color: rgba(255,255,255,.4); font-family:'IBM Plex Mono',monospace; }
+.prog-next { font-size: 10px; color: rgba(200,240,160,.55); margin-top: 2px; }
+.prog-bar-wrap { position: relative; height: 3px; background: rgba(255,255,255,.1); border-radius: 2px; margin-top: 7px; overflow: hidden; }
+.prog-bar-fill { height: 3px; background: linear-gradient(90deg, #3a7a20, #c8f0a0); border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1); min-width: 0; }
+@media (max-width: 650px) {
+  .header-inner { grid-template-columns: 1fr; }
+  .header-right { display: none; }
+}
+
+</style>  
+</head>  
+<body>  
+  
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="htop">
+        <div class="race-info">
+          <h1>VMM 100M — Lịch tập toàn diện</h1>
+          <p>Uphill · Downhill · Sức mạnh · Dinh dưỡng · Sapa 20/9/2026</p>
+        </div>
+        <div class="countdown">
+          <div class="countdown-num">21</div>
+          <div class="countdown-label">tuần còn lại</div>
+        </div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><div class="stat-val">~1,500</div><div class="stat-label">km tổng</div></div>
+        <div class="stat"><div class="stat-val">~65k</div><div class="stat-label">D+ (m)</div></div>
+        <div class="stat"><div class="stat-val">4x/tuần</div><div class="stat-label">gym lunchbreak</div></div>
+        <div class="stat"><div class="stat-val">147</div><div class="stat-label">buổi tập</div></div>
+        <div class="stat"><div class="stat-val">CN</div><div class="stat-label">núi mỗi tuần</div></div>
+      </div>
+      <div class="prog-row">
+        <span class="prog-km"><span id="tp-km">0.0</span> km</span>
+        <span class="prog-of">/ 161 km VMM</span>
+        <span class="prog-sessions"><span id="tp-sessions">0</span>/147 buổi</span>
+      </div>
+      <div class="prog-next" id="tp-next">Đánh dấu buổi tập đầu tiên để bắt đầu hành trình →</div>
+      <div class="prog-bar-wrap"><div class="prog-bar-fill" id="tp-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-right">
+      <svg id="vmm-elevation" viewBox="0 0 300 90" preserveAspectRatio="none"
+           xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7ec8e3" stop-opacity="0.55"/>
+            <stop offset="70%" stop-color="#1e6eb5" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#0a2a4a" stop-opacity="0.15"/>
+          </linearGradient>
+        </defs>
+        <!-- Filled mountain silhouette - VMM 2026 actual profile -->
+        <path d="M0,90 L0.0,42.2 L3.7,39.2 L7.5,36.5 L12.1,27.0 L16.8,23.2 L22.2,27.0 L26.1,38.4 L30.4,42.2 L34.5,36.5 L40.8,28.9 L46.6,42.2 L53.5,57.5 L58.7,53.7 L63.2,53.7 L67.1,63.2 L73.6,65.1 L77.8,80.3 L82.5,80.3 L87.7,75.4 L95.6,61.3 L100.8,65.1 L106.6,65.1 L112.0,74.6 L122.8,74.6 L128.9,83.3 L137.7,83.3 L143.8,73.5 L150.7,67.0 L155.2,65.1 L160.8,65.1 L165.1,67.0 L170.1,67.0 L177.3,53.7 L187.1,48.0 L195.9,49.9 L203.1,48.0 L212.0,53.7 L218.5,36.5 L226.4,11.8 L230.6,27.0 L237.4,57.5 L243.5,53.7 L250.3,49.9 L257.7,49.9 L265.0,46.0 L266.5,46.0 L274.7,34.6 L280.8,49.9 L285.1,49.9 L290.1,46.0 L294.0,57.5 L300.0,61.3 L300,90 Z" fill="url(#eg)"/>
+        <!-- Elevation line -->
+        <polyline points="0.0,42.2 3.7,39.2 7.5,36.5 12.1,27.0 16.8,23.2 22.2,27.0 26.1,38.4 30.4,42.2 34.5,36.5 40.8,28.9 46.6,42.2 53.5,57.5 58.7,53.7 63.2,53.7 67.1,63.2 73.6,65.1 77.8,80.3 82.5,80.3 87.7,75.4 95.6,61.3 100.8,65.1 106.6,65.1 112.0,74.6 122.8,74.6 128.9,83.3 137.7,83.3 143.8,73.5 150.7,67.0 155.2,65.1 160.8,65.1 165.1,67.0 170.1,67.0 177.3,53.7 187.1,48.0 195.9,49.9 203.1,48.0 212.0,53.7 218.5,36.5 226.4,11.8 230.6,27.0 237.4,57.5 243.5,53.7 250.3,49.9 257.7,49.9 265.0,46.0 266.5,46.0 274.7,34.6 280.8,49.9 285.1,49.9 290.1,46.0 294.0,57.5 300.0,61.3"
+                 fill="none" stroke="#7ec8e3" stroke-width="1.3" stroke-opacity="0.85"
+                 stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- O Quy Ho peak vertical guide -->
+        <line x1="226.4" y1="11.8" x2="226.4" y2="90" stroke="rgba(200,240,160,0.12)" stroke-width="1" stroke-dasharray="2 3"/>
+        <!-- CP dots -->
+        <circle cx="7.5" cy="36.5" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="22.2" cy="27.0" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="40.8" cy="28.9" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="82.5" cy="80.3" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="137.7" cy="83.3" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="160.8" cy="65.1" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="187.1" cy="48.0" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="203.1" cy="48.0" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="226.4" cy="11.8" r="3.2" fill="rgba(200,240,160,0.95)"/>
+        <circle cx="243.5" cy="53.7" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="274.7" cy="34.6" r="2" fill="rgba(200,240,160,0.55)"/>
+        <circle cx="300.0" cy="61.3" r="3.2" fill="rgba(200,240,160,0.95)"/>
+        <!-- Labels -->
+        <text x="2" y="49" fill="rgba(255,255,255,0.35)" font-size="5.5" font-family="IBM Plex Mono,monospace">Start</text>
+        <text x="226.4" y="8.5" fill="rgba(200,240,160,0.8)" font-size="5.5" font-family="IBM Plex Mono,monospace" text-anchor="middle">O Quy Ho</text>
+        <text x="297" y="58" fill="rgba(200,240,160,0.9)" font-size="7" text-anchor="end">🏆</text>
+        <text x="297" y="88" fill="rgba(255,255,255,0.12)" font-size="5" font-family="IBM Plex Mono,monospace" text-anchor="end">161km · 8,800m D+</text>
+        <!-- Runner glow + dot -->
+        <circle id="elev-runner-glow" cx="0" cy="42.2" r="7" fill="rgba(200,240,160,0.18)"/>
+        <circle id="elev-runner" cx="0" cy="42.2" r="3.5" fill="#c8f0a0" opacity="0.95"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="legend">  
+  <div class="leg"><div class="leg-dot" style="background:var(--uphill)"></div>Uphill / Treadmill incline</div>  
+  <div class="leg"><div class="leg-dot" style="background:var(--downhill)"></div>Downhill training</div>  
+  <div class="leg"><div class="leg-dot" style="background:var(--gym)"></div>Gym / Sức mạnh</div>  
+  <div class="leg"><div class="leg-dot" style="background:var(--road)"></div>Road / Tempo</div>  
+  <div class="leg"><div class="leg-dot" style="background:var(--rest)"></div>Nghỉ / Phục hồi</div>  
+  <div class="leg"><div class="leg-dot" style="background:var(--race)"></div>Race</div>  
+</div>  
+  
+<div class="tabs">  
+  <button id="tab-0" class="tab active" onclick="showPhase(0)">Tất cả</button>  
+  <button id="tab-1" class="tab" onclick="showPhase(1)">P1 · Tái thiết</button>  
+  <button id="tab-2" class="tab" onclick="showPhase(2)">P2 · Tích lũy</button>  
+  <button id="tab-3" class="tab" onclick="showPhase(3)">P3 · Peak</button>  
+  <button id="tab-4" class="tab" onclick="showPhase(4)">P4 · Taper</button>  
+  <button id="tab-nutri" class="tab tab-special" onclick="showNutrition()">⚡ Dinh dưỡng & Bù giải</button>
+</div>  
+  
+<!-- NUTRITION PANEL -->  
+<div id="nutri-panel">  
+  <div class="nutri-header">  
+    <h2>Chiến thuật Dinh dưỡng & Bù giải (Nutrition & Hydration)</h2>  
+    <p>Áp dụng ngay chiến thuật này vào các buổi <b>Sunday Long Run từ W10 trở đi</b>. Dạ dày tốt là chìa khóa để về đích.</p>  
+  </div>  
+  
+  <div class="nutri-grid">  
+    <div class="nutri-card before">  
+      <h3>1. TRƯỚC CHẠY (Pre-Run)</h3>  
+      <ul class="nutri-list">  
+        <li><b>Carb-loading:</b> Bắt đầu ăn tăng tinh bột trước race 2-3 ngày.</li>  
+        <li><b>Bữa sáng trước khi chạy:</b> Ăn trước 2 tiếng. Ưu tiên Carb dễ tiêu (Bánh mì trắng, yến mạch).</li>  
+        <li><b>Pre-hydration:</b> Uống 300-500ml nước có pha điện giải.</li>  
+      </ul>  
+    </div>  
+    <div class="nutri-card during">  
+      <h3>2. TRONG KHI CHẠY (During)</h3>  
+      <ul class="nutri-list">  
+        <li><b>Quy tắc vàng:</b> Ăn trước khi đói, uống trước khi khát (mỗi 30-45p).</li>  
+        <li><b>Carb:</b> Phối hợp gel và thức ăn thật (cơm nắm, chuối) để tránh lợm giọng.</li>  
+        <li><b>Power Hike:</b> Thời điểm tốt nhất để nhai thức ăn thật.</li>  
+      </ul>  
+    </div>  
+    <div class="nutri-card after">  
+      <h3>3. PHỤC HỒI (Post-Run)</h3>  
+      <ul class="nutri-list">  
+        <li><b>Cửa sổ vàng 30p:</b> Nạp ngay tỷ lệ 3 Carb : 1 Protein (Sữa sô-cô-la, whey).</li>  
+        <li>Uống nước liên tục cho đến khi cân nặng trở về như cũ.</li>  
+      </ul>  
+    </div>  
+  </div>  
+  
+  <div class="gut-training">  
+    <h4>💡 Train Your Gut (Huấn luyện dạ dày)</h4>  
+    <p>Hãy bắt đầu mô phỏng nạp năng lượng trong lúc chạy dài:</p>  
+    <p><code>Phút 00:</code> Uống Tailwind/Maurten (10g carb).<br>  
+       <code>Phút 20:</code> Cắn nửa thanh Bar/Chew (~15g carb) + Nước.<br>  
+       <code>Phút 40:</code> Cắn 1 gói Gel (~25g carb) + Nước.<br>  
+       Mục tiêu nạp được <b>~50-60g Carb/giờ</b>. Tăng dần giới hạn của dạ dày.</p>  
+  </div>
+</div>
+</div>
+
+<div id="phase-banner" class="phase-banner" style="display:none"></div>  
+<div class="weeks" id="week-list"></div>  
+  
+<script>  
+// --- CORE DATA & UI ---  
+  
+const C = {up:'var(--uphill)',dn:'var(--downhill)',gym:'var(--gym)',road:'var(--road)',rest:'var(--muted2)',race:'var(--race)'};  
+const pColors = ['var(--text)','var(--p1)','var(--p2)','var(--p3)','var(--p4)'];  
+  
+// DICTIONARY FOR TOOLTIPS  
+const tooltips = {  
+  'step-down': 'Đứng 1 chân trên bậc/bục, từ từ hạ gót chân kia chạm sàn rồi đẩy lên. Hãm lực chậm rãi khi hạ xuống để rèn co cơ ly tâm (Eccentric), chuẩn bị cơ đùi cho đổ dốc.',  
+  'nordic curl': 'Quỳ gối, cố định gót chân. Ngả người thẳng về trước, gồng cơ đùi sau (hamstring) để hãm đà rơi lâu nhất có thể.',  
+  'lunge sau': 'Bước lùi về sau, hạ trọng tâm đến khi 2 gối vuông góc. Đẩy mạnh gót chân trước để đứng lên. Rất tốt cho sức mạnh đồi núi.',  
+  'sl squat': 'Single-leg squat: Squat 1 chân. Rất quan trọng để duy trì thăng bằng lệch bên trên đường trail gập ghềnh.',  
+  'sl deadlift': 'Đứng 1 chân, gập hông ngả người về trước, chân kia duỗi thẳng ra sau. Kích hoạt chuỗi cơ mặt sau (đùi sau và mông).',  
+  'step-up': 'Bước lên bục cao (30-40cm). Nhấn mạnh gót chân, dùng sức mạnh bùng nổ của đùi trước và mông bốc người lên. Bổ trợ khả năng leo dốc gắt.',  
+  'calf': 'Nhón gót chân lên cao nhất có thể, sau đó hạ gót sâu xuống dưới mép bục để giãn toàn bộ gân Achilles.',  
+  'box jump': 'Nhún người bật nhảy cả 2 chân lên bục/hộp. Bước xuống từng chân nhẹ nhàng. Rèn luyện sức mạnh bùng nổ.',  
+  'lateral': 'Bật nhảy ngang sang 2 bên bằng 1 hoặc 2 chân. Mô phỏng động tác nhảy lách né đá/rễ cây.',  
+  'glute bridge': 'Nằm ngửa, co gối, đẩy hông lên cao và siết chặt cơ mông. Đánh thức nhóm cơ mông để giảm tải khớp gối.',  
+  'split squat': 'Đứng chân trước sau, hạ trọng tâm thẳng xuống. Rất tốt cho sức mạnh đùi trước.',  
+  'core': 'Tập cơ lõi (bụng, hông, lưng). Giúp duy trì tư thế thẳng, không bị đổ gập người khi mỏi.',  
+  'mobility': 'Giãn cơ động, xoay khớp. Giúp tăng biên độ vận động và thải axit lactic.',  
+  'tempo': 'Chạy ở tốc độ "khó chịu nhưng duy trì được" (~80-85% Nhịp tim tối đa). Tập trung vào sự nhịp nhàng.',  
+  'strides': 'Chạy tăng tốc mượt mà khoảng 20s (90% tốc độ max) rồi đi bộ. Đánh thức thần kinh cơ.',  
+  'easy': 'Chạy rất chậm, có thể trò chuyện (Zone 2, HR < 145). Giúp xây dựng nền tảng hiếu khí.',  
+  'hard down': 'Đổ dốc nhanh, bước ngắn, cadence cao, đáp midfoot. Tạo vi tổn thương có kiểm soát để "chai lỳ" cơ bắp.',  
+  'dh kỹ thuật': 'Đổ dốc tự nhiên trên địa hình gồ ghề. Mắt quét đường liên tục 3-5m phía trước.',  
+  'uphill int': 'Leo dốc nỗ lực cao (Zone 4). Sải bước cực ngắn, duy trì nỗ lực hết khoảng thời gian quy định.',  
+  'uphill hard': 'Leo dốc nỗ lực bền bỉ. Cố gắng chạy, hạn chế đi bộ nếu dốc còn cho phép.',  
+  'power hike': 'Đi bộ dốc có nhịp điệu (>20%). Gập hông về trước, tay ấn lên đùi hoặc dùng gậy (poles) để đẩy người lên.',  
+  'heel-lock': 'Thắt dây giày khóa gót. Ngăn gót trượt lên xuống gây rộp (blister) và ngón chân cắm mũi giày.',  
+  'móng': 'Cắt móng chân thẳng ngang, dũa góc. Bắt buộc làm trước ngày race.',  
+  'night': 'Tập chạy đêm dùng đèn. Mắt điều chỉnh không gian chậm hơn nên cần tập trung cao độ.',  
+  'treadmill 15%': 'ME Protocol trên máy: dốc 15%, power hike 3.5–4.5km/h cho đến khi CHÂN (không phải tim) kiệt sức. Theo sách Uphill Athlete: ~70% hiệu quả ME ngoài trời.',
+  'treadmill 12%': 'Uphill Z2 trên máy: 12%, HR 145–155. Kích hoạt glute, hamstring, calf mạnh hơn chạy bằng cùng HR. Nghiên cứu 2005: 9%+ gần như loại bỏ lực va đập.',
+  'treadmill 10%': 'Z2 Incline steady: máy 10%, HR 145–155. Bổ sung aerobic volume mà không tăng injury risk. Phù hợp cho double sessions sau gym.',
+  'treadmill intervals': 'UH Intervals trên máy: 8–12%, chạy 6–8km/h × 3ph Z3–Z4, nghỉ 90s walk. Jason Koop: uphill intervals giúp đạt 90% VO2max ổn định hơn chạy phẳng.',
+  'treadmill 8%': 'Recovery incline: 8%, pace nhẹ, Z1. Duy trì cảm giác leo dốc mà không tạo thêm mệt mỏi cho cơ thể đang hồi phục.',
+  'last me': 'Buổi ME cuối cùng trước taper. Theo sách: ME cần kích thích 2–3 tuần trước race để duy trì adaptation.',
+  'me protocol': 'Muscular Endurance (ME) — cornerstone sách Uphill Athlete. Mục tiêu: chân mệt trước tim. Leo cho đến khi đùi bốc cháy, không phải hụt hơi.',
+};  
+  
+function sb(cls, text) {  
+  let matchedTooltip = '';  
+  let lowerText = text.toLowerCase();  
+  for(let key in tooltips) {  
+    if(lowerText.includes(key.toLowerCase())) { matchedTooltip = tooltips[key]; break; }  
+  }  
+  if(matchedTooltip) {  
+    return `<div class="sblock ${cls} has-tooltip">${text}<span class="tooltip">${matchedTooltip}</span></div>`;  
+  }  
+  return `<div class="sblock ${cls}">${text}</div>`;  
+}  
+  
+function gymBlock(text){return sb('sb-gym',text)}  
+function uphillBlock(text){return sb('sb-uphill',text)}  
+function downhillBlock(text){return sb('sb-downhill',text)}  
+function roadBlock(text){return sb('sb-road',text)}  
+function restBlock(text){return sb('sb-rest',text)}  
+function raceBlock(text){return sb('sb-race',text)}  
+  
+const phaseInfo = [null,  
+  {name:'Phase 1 · BASE — Xây nền tảng hiếu khí (Capacity Training)',dates:'W01–W05 · 21/4 – 25/5',
+   desc:'Theo sách "Training for the Uphill Athlete": Base Period là giai đoạn quan trọng nhất. 85–90% khối lượng ở Z1–Z2 (HR <155). Mục tiêu: nâng AeT pace (test thở mũi). Gym: Stage 2–3 general strength + ME workout bắt đầu W3. CẢNH BÁO: Dữ liệu Strava cho thấy các buổi easy road của bạn đang ở HR 141–149 — đây là Z3, không phải easy. Phải GIẢM pace để HR <145 trên đường bằng.',
+   tags:['85–90% Z1–Z2','AeT test W1','ME workout từ W3','HR <145 easy runs','3:1 build:recovery']},
+  {name:'Phase 2 · BASE nâng cao — Aerobic Capacity + ME (Capacity Training)',dates:'W06–W12 · 26/5 – 13/7',
+   desc:'Tiếp tục xây nền tảng. Theo sách: tăng volume, thêm Muscular Endurance (ME) workout 1x/tuần — đây là bài tập OUTDOOR trên dốc 20–50%, chạy/đi bộ cho đến khi chân (không phải tim) giới hạn. Thêm Hill Sprints (Z5, 8–10 giây, 2–3 phút nghỉ). Z3 tempo chỉ khi AeT/LT spread ≤10%. Sunday lên 25–35km.',
+   tags:['ME outdoor 1x/tuần','Hill sprints Z5','AeT kiểm tra mỗi 2 tuần','25–35km Sunday','Z3 max 10% volume']},
+  {name:'Phase 3 · PRECOMP — Race-specific Training (Utilization Training)',dates:'W13–W17 · 14/7 – 17/8',
+   desc:'Theo sách: Precompetition Period = "sexy training gets added". Kết hợp tất cả năng lực đã xây. Back-to-back T7+CN (simulate race fatigue). W15 BIG WEEK: 20km+50km. Theo phương pháp polarized của Seiler: giữ 80% Z1–Z2, thêm 12–14% Z4. Race simulation đầy đủ: gear, nutrition, night running.',
+   tags:['Back-to-back T7+CN','80–100km/tuần','Race simulation','Night running','80%Z1-2 + 12-14%Z4']},
+  {name:'Phase 4 · TAPER — Competition Prep',dates:'W18–W21 · 18/8 – 20/9',
+   desc:'Theo sách: Category 2 athlete taper 2–3 tuần. Giảm 40–60% volume, GIỮ cường độ. W18: buổi ME/DH intervals cuối. W19–20: chạy nhẹ với một số strides để giữ tốc độ thần kinh. Race week: chỉ shake-out runs. Kiểm tra gear, cắt móng vuông, buộc heel-lock.',
+   tags:['Taper 3 tuần','Giữ cường độ','Strides duy trì tốc độ','Kiểm tra gear','Cắt móng + heel-lock']}  
+];  
+  
+// 21 WEEKS - THEO PHƯƠNG PHÁP 'TRAINING FOR THE UPHILL ATHLETE' (House/Johnston)
+const weeks = [
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 1 · BASE — Xây nền tảng hiếu khí (W01–W05)
+// Mục tiêu: 85-90% Z1-Z2 | AeT test | Eccentric rebuild | 3:1 cycle
+// ═══════════════════════════════════════════════════════════════════
+
+{w:1,dates:'21/4–27/4',km:45,gain:900,loss:900,phase:1,
+ note:'AeT test + phục hồi HMT · nền tảng Z1-Z2',
+ up_focus:'[BASE] Uphill Z2: Leo dốc với cường độ bạn CÓ THỂ THỞ HOÀN TOÀN bằng mũi. Đây là đỉnh Zone 2 (AeT). Pace không quan trọng — HR điều khiển tất cả. Vert target 200–250m/h (thấp hơn pace thông thường). W01 ưu tiên AeT test: tìm pace mà thở mũi được liên tục 20 phút trên dốc.',
+ dn_focus:'[DH Eccentric] Chạy xuống tự nhiên sau UH, không kìm. TEST heel-lock lacing ngay W01. Mục tiêu: cơ đùi học hấp thụ lực eccentric. Quan sát móng sau buổi — benchmark trước khi bắt đầu kế hoạch.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('Stage 2 Strength:'),gymBlock('3×10 step-down'),gymBlock('3×10 lunge sau'),gymBlock('2×8 SL squat'),uphillBlock('Treadmill 10% 20ph'),uphillBlock('Power walk Z2 · HR 145–155')]},
+  {n:'T3',dot:'var(--road)',label:'Z1–Z2 Easy',blocks:[roadBlock('Tối 19h – 8km'),roadBlock('HR <145 (Z1-Z2)'),roadBlock('⚠️ Chạy CHẬM hơn thường'),roadBlock('Test: thở mũi được không?')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('UH Strength:'),gymBlock('3×10 step-up cao'),gymBlock('3×12 calf raise'),gymBlock('3×8 SL deadlift'),uphillBlock('Treadmill 12% 20ph'),uphillBlock('Steady hike · chân hết→dừng')]},
+  {n:'T5',dot:'var(--road)',label:'Z1 Recovery',blocks:[gymBlock('Gym 12–13:15'),gymBlock('Mobility + hip'),roadBlock('Tối: 8km Z1'),roadBlock('HR <140')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ hoàn toàn'),restBlock('Cắt móng VUÔNG'),restBlock('Test heel-lock'),restBlock('Note: HR pace ratio')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 Road',blocks:[roadBlock('12km Z2'),roadBlock('HR 145–155'),roadBlock('AeT TEST: 20ph thở mũi'),roadBlock('Note pace tương ứng')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi Z2 UH+DH',blocks:[uphillBlock('17km · +900m'),uphillBlock('UH: thở mũi = Z2'),uphillBlock('3×4ph uphill Z2'),downhillBlock('DH tự nhiên'),downhillBlock('Heel-lock + test')]},
+ ]},
+
+{w:2,dates:'28/4–4/5',km:48,gain:1000,loss:1000,phase:1,
+ note:'Tăng 7% · UH form + DH cadence',
+ up_focus:'[BASE Z2] 4×4ph uphill Z2 (thở mũi). Học forward lean 5–10°, mắt nhìn 3m trước mặt, arm swing đẩy người lên. Vert rate target 230–280m/h — pace mà HR ở 145–155. Nếu HR vọt lên >155 = đi bộ power hike ngay.',
+ dn_focus:'[DH Form] Bước ngắn, cadence 170–180spm, midfoot strike. Không ngả người ra sau — ngả ra sau = gót tiếp đất = lực va đập lớn = thâm móng. Thân thẳng góc với dốc.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×12 step-down'),gymBlock('4×8 Nordic curl'),gymBlock('3×10 lunge sau'),uphillBlock('Treadmill 10% 20ph'),uphillBlock('Z2 steady · HR 145–155')]},
+  {n:'T3',dot:'var(--road)',label:'Z1–Z2 + Hills',blocks:[roadBlock('Tối: 9km'),roadBlock('HR <145'),roadBlock('Tìm dốc nhỏ: 4×1ph'),roadBlock('UH Z2, DH natural')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('3×8 step-up + knee'),gymBlock('3×10 split squat'),gymBlock('Plyos: 3×8 box jump'),uphillBlock('Treadmill 12% 20ph'),uphillBlock('Hike Z2 sau plyos')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 10km Z2'),roadBlock('HR 145–155'),roadBlock('Kiểm soát HR')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ'),restBlock('Foam roll quads'),restBlock('Note AeT pace từ W1')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 13km',blocks:[roadBlock('13km Z2'),roadBlock('HR 145–155'),roadBlock('6×20s strides cuối')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi 18km UH+DH',blocks:[uphillBlock('18km · +1000m'),uphillBlock('4×4ph UH Z2'),downhillBlock('DH: cadence 175+'),downhillBlock('Midfoot focus'),uphillBlock('Vert 250–300m/h')]},
+ ]},
+
+{w:3,dates:'5/5–11/5',km:52,gain:1100,loss:1100,phase:1,
+ note:'ME WORKOUT bắt đầu + DH intervals lần 1',
+ up_focus:'[ME WORKOUT - cornerstone của sách] BÀI TẬP QUAN TRỌNG NHẤT. Tìm dốc 20–40% (cầu thang cao, đường núi dốc). Leo đến khi CHÂN MỎI (không phải tim). HR sẽ thấp hơn AeT nhưng cơ sẽ cháy. Đây là Muscular Endurance theo sách House/Johnston — khác hoàn toàn với gym strength.',
+ dn_focus:'[DH Intervals lần 1] 3×10ph chạy xuống tích cực (không lao đầu, không kìm). Kích thích eccentric lớn đầu tiên. Cơ đùi sẽ DOMS T2-T3 sau. Bình thường — đây là adaptation. Gym T2 tuần sau: mobility only.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Mobility',blocks:[gymBlock('Mobility ONLY'),gymBlock('Không eccentric'),gymBlock('Hip + ankle roll'),gymBlock('Foam roll legs')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 8km Z1'),roadBlock('HR <140'),roadBlock('Phục hồi DH int.')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('3×12 step-down'),gymBlock('Plyos: box jump'),uphillBlock('Treadmill 12% 20ph'),uphillBlock('Z2 steady')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 10km'),roadBlock('8×30s strides (Z4 brief)')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ'),restBlock('Chuẩn bị ME Sunday')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 13km',blocks:[roadBlock('13km Z2'),roadBlock('HR 145–155')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi ME + DH INT.',blocks:[uphillBlock('20km · +1100m'),uphillBlock('ME WORKOUT:'),uphillBlock('Dốc 25%+, leo khi chân hết'),downhillBlock('DH INT: 3×10ph hard'),downhillBlock('Jog recovery lên')]},
+ ]},
+
+{w:4,dates:'12/5–18/5',km:48,gain:1100,loss:1100,phase:1,
+ note:'← RECOVERY tuần (3:1 cycle) · supercompensation',
+ up_focus:'[RECOVERY] Theo sách: 3 tuần build + 1 tuần recovery = chu kỳ tối ưu. Tuần này GIẢM 10% volume. Uphill easy Z1-Z2, không intervals, không ME workout. Đây là khi cơ thể thực sự mạnh hơn (supercompensation xảy ra trong nghỉ ngơi, không phải khi tập).',
+ dn_focus:'[DH Recovery] Không DH intervals. Chạy xuống kỹ thuật nhẹ trong long run. Kiểm tra: móng chân có thâm thêm không? Nếu không → heel-lock đang hoạt động.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Moderate',blocks:[gymBlock('2×10 step-down'),gymBlock('2×10 lunge sau'),gymBlock('Mobility focus'),uphillBlock('Treadmill 8% 15ph'),uphillBlock('Recovery easy walk')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 8km Z1'),roadBlock('HR <140')]},
+  {n:'T4',dot:'var(--gym)',label:'Gym – Core',blocks:[gymBlock('Glute bridge 3×15'),gymBlock('Dead bug 3×10'),gymBlock('Hip circle'),gymBlock('Calf stretch')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z1',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 8km Z1')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ hoàn toàn')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 12km',blocks:[roadBlock('12km Z2'),roadBlock('HR 145–155')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi Easy Z2',blocks:[uphillBlock('17km · +1100m'),uphillBlock('UH tự nhiên Z2'),downhillBlock('DH kỹ thuật easy'),restBlock('HR <150 toàn buổi')]},
+ ]},
+
+{w:5,dates:'19/5–25/5',km:55,gain:1300,loss:1300,phase:1,
+ note:'Kết thúc Base 1 · test AeT progress',
+ up_focus:'[BASE Test] 5×5ph uphill Z2. So sánh: pace tương ứng AeT (thở mũi) W5 so với W1 có nhanh hơn không? Nếu nhanh hơn = AeT đang nâng = tốt. Nếu không đổi = cần thêm Z1-Z2 volume trước khi lên Z3.',
+ dn_focus:'[DH Test] Sau uphill intervals, chạy 2×10ph DH với kỹ thuật tốt nhất có thể. Test: giữ được midfoot + cadence 175+ khi chân đã mỏi không? Chụp ảnh móng cuối buổi để so sánh.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('3×12 step-down'),gymBlock('3×8 SL squat'),uphillBlock('Treadmill 12% 25ph'),uphillBlock('ME protocol: hike→chân hết')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 Tempo nhẹ',blocks:[roadBlock('Tối: 10km'),roadBlock('2km Z1 warm'),roadBlock('6km Z2 solid'),roadBlock('2km Z1 cool')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('Plyometrics:'),gymBlock('3×10 box jump'),gymBlock('3×10 lateral'),uphillBlock('Treadmill 10% 20ph'),uphillBlock('Z2 hike · HR 145–155')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 10km Z2')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ'),restBlock('Đánh giá AeT W1→W5')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 14km',blocks:[roadBlock('14km Z2'),roadBlock('HR 145–155')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi Test UH+DH',blocks:[uphillBlock('21km · +1300m'),uphillBlock('5×5ph UH Z2'),uphillBlock('AeT pace nhanh hơn W1?'),downhillBlock('2×10ph DH test'),downhillBlock('Chụp ảnh móng')]}
+ ]},
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 2 · BASE nâng cao — ME + Aerobic Capacity (W06–W12)
+// Mục tiêu: ME weekly | Hill Sprints Z5 | 25–35km Sunday | 3:1 cycle
+// ═══════════════════════════════════════════════════════════════════
+
+{w:6,dates:'26/5–1/6',km:58,gain:1500,loss:1500,phase:2,
+ note:'Bắt đầu Phase 2 · ME weekly + Hill Sprints',
+ up_focus:'[ME + Hill Sprints] ME outdoor: leo dốc 20-40% cho đến khi chân hết (không phải tim). Sau đó Hill Sprints Z5: 6×8 giây TOÀN SỨC trên dốc, nghỉ 2–3ph, jog về. Sprints Z5 ngắn kích hoạt fast-twitch, KHÔNG gây mệt mỏi hệ aerobic. Theo sách: "hill sprints are free speed".',
+ dn_focus:'[DH Volume] Volume DH tăng tự nhiên theo Sunday dài hơn. Focus: chạy xuống moderate — không kìm, không lao. Power hike trên đoạn >20% khi leo lên.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('4×8 SL squat'),gymBlock('3×12 lunge sau'),uphillBlock('Treadmill 15% 25ph'),uphillBlock('ME: hike cho đến chân hết')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 + Hill Sprints',blocks:[roadBlock('Tối: 10km'),roadBlock('7km Z2'),roadBlock('6×8s Hill Sprint Z5'),roadBlock('2ph nghỉ giữa')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill Intervals',blocks:[gymBlock('Plyometrics heavy:'),gymBlock('4×10 box jump'),gymBlock('3×10 lateral bound'),uphillBlock('Treadmill Intervals:'),uphillBlock('8–12% · 5×3ph run Z3'),uphillBlock('90s walk giữa')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 12km Z2'),roadBlock('HR 145–155')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 16km',blocks:[roadBlock('16km Z2'),roadBlock('HR <155')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi ME 22km',blocks:[uphillBlock('22km · +1500m'),uphillBlock('ME: dốc 25%+ sampai chân hết'),uphillBlock('Power hike nhịp điệu'),downhillBlock('DH natural pace'),downhillBlock('Midfoot + cadence')]},
+ ]},
+
+{w:7,dates:'2/6–8/6',km:62,gain:1800,loss:1800,phase:2,
+ note:'Back-to-back đầu tiên T7+CN · fatigue simulation',
+ up_focus:'[Back-to-back UH] T7 road 20km (Z2, include hills) + CN trail 24km. Khi bạn leo dốc CN với chân đã mỏi từ T7 — đây chính xác là simulation race conditions. Uphill khi mệt là kỹ năng riêng biệt cần luyện.',
+ dn_focus:'[DH khi mệt] DH form CN sau back-to-back: đây là quan trọng nhất. Cơ đùi mệt → nguy cơ ngả người ra sau tăng → thâm móng tăng. Chủ ý: step short, land midfoot, dùng tay balancing.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('4×8 SL squat'),gymBlock('Plyos 2 set'),uphillBlock('Treadmill 15% 25ph'),uphillBlock('ME steady · chân giới hạn')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 + Hills',blocks:[roadBlock('Tối: 10km'),roadBlock('5×1ph uphill Z2'),roadBlock('Hill sprints 5×8s')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 step-up cao'),gymBlock('3×10 split squat'),gymBlock('Hip extension'),uphillBlock('Treadmill 12% 20ph'),uphillBlock('UH Intervals: 4×3ph Z3')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Tempo',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 12km'),roadBlock('5km Z2 solid')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ/Easy',blocks:[restBlock('6km Z1 easy'),restBlock('hoặc nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Road 20km Z2',blocks:[roadBlock('20km Z2'),roadBlock('Include hills'),roadBlock('HR <155')]},
+  {n:'CN',dot:'var(--downhill)',label:'Núi 24km B2B',blocks:[uphillBlock('24km · +1800m'),uphillBlock('ME: leo cho đến chân hết'),downhillBlock('DH form khi mệt'),downhillBlock('Conscious midfoot')]},
+ ]},
+
+{w:8,dates:'9/6–15/6',km:65,gain:2000,loss:2000,phase:2,
+ note:'DH Intervals chu kỳ 2 + UH Tempo Z3',
+ up_focus:'[UH Tempo Z3] Lần đầu tiên chạy Z3 có kiểm soát: 2×15ph uphill ở pace bạn có thể nói 3–4 từ nhưng khó chịu (HR 155–165). Theo sách: Z3 tối đa 10% weekly volume — tương đương 30ph trong tuần 65km. Chính xác. Không làm thêm Z3 trong tuần này.',
+ dn_focus:'[DH Intervals chu kỳ 2] 4×10ph DH hard. Sau Sunday: gym T2 chỉ mobility (không Nordic curl, không eccentric nặng). DOMS ngày T3-T4 = bình thường và cần thiết cho adaptation.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Nhẹ',blocks:[gymBlock('Mobility ONLY'),gymBlock('Không eccentric'),gymBlock('Hip + ankle'),gymBlock('Foam roll')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Recovery',blocks:[roadBlock('Tối: 8km Z1'),roadBlock('HR <140')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('3×10 Nordic curl'),gymBlock('3×10 step-down'),gymBlock('Plyos 2 set'),uphillBlock('Treadmill 12% 20ph'),uphillBlock('Z2 steady recovery')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 12km Z2')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 18km',blocks:[roadBlock('18km Z2'),roadBlock('HR <155')]},
+  {n:'CN',dot:'var(--downhill)',label:'Núi UH Z3 + DH INT',blocks:[uphillBlock('27km · +2000m'),uphillBlock('2×15ph UH Z3 (155–165)'),uphillBlock('ME sau Z3'),downhillBlock('DH INT: 4×10ph hard'),downhillBlock('Jog up recovery')]},
+ ]},
+
+{w:9,dates:'16/6–22/6',km:58,gain:1500,loss:1500,phase:2,
+ note:'← RECOVERY tuần · supercompensation P2',
+ up_focus:'[RECOVERY] 3:1 cycle — tuần phục hồi sau W08 peak. Không ME, không intervals, không Z3. Chỉ Z1-Z2 nhẹ trong Sunday. Đây là khi adaptation từ W06-W08 được cố định vào cơ thể.',
+ dn_focus:'[DH Recovery] DH kỹ thuật nhẹ trong Sunday. Không intervals. Lắng nghe cơ thể — nếu gối đau khác với mỏi thông thường → cần nghỉ thêm.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Nhẹ',blocks:[gymBlock('Mobility only'),gymBlock('Hip + ankle'),uphillBlock('Treadmill 8% 15ph'),uphillBlock('Very easy Z1 walk')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 8km Z1')]},
+  {n:'T4',dot:'var(--gym)',label:'Gym – Core',blocks:[gymBlock('Core + hip'),gymBlock('Glute bridge'),gymBlock('Không Nordic curl')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z1',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 8km Z1')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ ngơi')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 16km',blocks:[roadBlock('16km Z2')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi Easy 20km',blocks:[uphillBlock('20km · +1500m'),uphillBlock('UH Z1-Z2 tự nhiên'),downhillBlock('DH kỹ thuật easy'),restBlock('Không push')]},
+ ]},
+
+{w:10,dates:'23/6–29/6',km:68,gain:2200,loss:2200,phase:2,
+ note:'Sunday 30km đầu tiên · ME outdoor + nutrition test',
+ up_focus:'[ME + 30km milestone] ME outdoor đầu tiên trong buổi dài: leo dốc 25%+ cho đến khi chân giới hạn, sau đó chạy tiếp. Bắt đầu tập Power Hike có nhịp điệu trên đoạn >20% — đếm 70–80 bước/phút, dùng tay đẩy lên đùi để giảm tải.',
+ dn_focus:'[DH 30km] Volume downhill tăng tự nhiên. Ăn/uống trong khi chạy như race: gel mỗi 45ph, nước 400ml/h. Gut training từ W10.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('4×8 SL squat'),gymBlock('Plyos full'),uphillBlock('Treadmill 15% 30ph'),uphillBlock('ME Protocol: hike→chân hết')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 + Hill Sprints',blocks:[roadBlock('Tối: 10km'),roadBlock('4×2ph UH Z2'),roadBlock('6×8s Hill Sprints Z5')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill Intervals',blocks:[gymBlock('4×8 jump squat'),gymBlock('3×10 lateral hop'),uphillBlock('Treadmill Intervals:'),uphillBlock('10% · 5×3ph run Z3–Z4'),uphillBlock('90s walk between')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 13km Z2')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 20km',blocks:[roadBlock('20km Z2'),roadBlock('HR <155')]},
+  {n:'CN',dot:'var(--uphill)',label:'30km FIRST · ME',blocks:[uphillBlock('30km · +2200m'),uphillBlock('ME: cho đến chân hết'),uphillBlock('Power hike nhịp điệu'),downhillBlock('DH race nutrition'),roadBlock('Gel 45ph, nước 400ml/h')]},
+ ]},
+
+{w:11,dates:'30/6–6/7',km:72,gain:2500,loss:2500,phase:2,
+ note:'Peak Phase 2 · ME + DH Intervals chu kỳ 3',
+ up_focus:'[ME + UH Intervals Peak] 4×8ph UH Z3 hard + ME trước đó. Tổng UH chất lượng cao nhất Phase 2. Back-to-back T7+CN: T7 road 22km (Z2) + CN trail 35km (ME + DH intervals). Đây là tuần khó nhất Phase 2.',
+ dn_focus:'[DH Intervals chu kỳ 3] 4×12ph DH hard sau 35km trail. Khi cơ đùi đã mệt + DH intervals = simulation gần nhất với race conditions thực tế.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('4×8 SL squat'),gymBlock('Full plyos'),uphillBlock('Treadmill 15% 30ph'),uphillBlock('ME: chân hết mới dừng')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 + Hills',blocks:[roadBlock('Tối: 11km'),roadBlock('4×2ph UH Z2'),roadBlock('Hill sprints 5×8s')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill Peak',blocks:[gymBlock('Plyometrics heavy'),gymBlock('4×10 box jump'),uphillBlock('Treadmill UH Tempo:'),uphillBlock('12% · 2×10ph run Z3'),uphillBlock('5ph easy giữa')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Tempo',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 13km'),roadBlock('5km Z2-Z3 tempo')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Road 22km Z2',blocks:[roadBlock('22km Z2'),roadBlock('B2B prep')]},
+  {n:'CN',dot:'var(--downhill)',label:'35km · ME+DH INT',blocks:[uphillBlock('35km · +2500m'),uphillBlock('ME + 4×8ph UH Z3'),downhillBlock('DH INT chu kỳ 3:'),downhillBlock('4×12ph DH hard'),downhillBlock('Total ~48ph DH')]},
+ ]},
+
+{w:12,dates:'7/7–13/7',km:62,gain:1800,loss:1800,phase:2,
+ note:'← RECOVERY · chuẩn bị Phase 3 PRECOMP',
+ up_focus:'[RECOVERY + Transition check] Sau W11 peak: đánh giá AeT progress. Nếu pace AeT (thở mũi) nhanh hơn W1 ≥5% → aerobic base đang nâng tốt. Nếu không đổi → cần thêm Z1-Z2 trong Phase 3.',
+ dn_focus:'[DH Easy] Không intervals. Chạy DH kỹ thuật easy trong Sunday 22km. Chuẩn bị thể lực tươi cho Phase 3 PRECOMP.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Moderate',blocks:[gymBlock('3×8 mỗi bài'),gymBlock('Moderate eccentric'),uphillBlock('Treadmill 10% 20ph'),uphillBlock('Easy Z1-Z2')]},
+  {n:'T3',dot:'var(--road)',label:'Z1–Z2 Easy',blocks:[roadBlock('Tối: 9km Z1-Z2')]},
+  {n:'T4',dot:'var(--gym)',label:'Gym – Core',blocks:[gymBlock('Core + mobility')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 10km Z2')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 18km',blocks:[roadBlock('18km Z2')]},
+  {n:'CN',dot:'var(--uphill)',label:'Núi 22km Moderate',blocks:[uphillBlock('22km · +1800m'),uphillBlock('UH Z2 tự nhiên'),downhillBlock('DH kỹ thuật'),restBlock('AeT check: thở mũi')]},
+ ]},
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 3 · PRECOMP — Race-specific Training (W13–W17)
+// 80% Z1-Z2 + 12-14% Z4 | Back-to-back | Race simulation | Night
+// ═══════════════════════════════════════════════════════════════════
+
+{w:13,dates:'14/7–20/7',km:80,gain:2800,loss:2800,phase:3,
+ note:'Bắt đầu PRECOMP · 40km Sunday đầu tiên',
+ up_focus:'[PRECOMP UH Power Z4] 3×12ph UH Z4 (165–175bpm, cố gắng). Theo sách: Precomp = thêm Z4 work có mục tiêu. Nhưng 80% volume vẫn Z1-Z2. 40km Sunday: mang full race gear, ăn uống đúng protocol, chạy đêm nếu VMM có phần đêm.',
+ dn_focus:'[DH Night Sim] Nếu VMM có đoạn đêm → tập chạy DH với đèn head-lamp. Night DH khác: mắt điều chỉnh chậm, cần cadence cao hơn, nhìn gần hơn. Cần ít nhất 2-3 lần tập đêm trước race.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('4×8 SL squat'),gymBlock('Heavy plyos'),uphillBlock('Treadmill 15% 35ph'),uphillBlock('ME Protocol peak')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 + Hill Sprints',blocks:[roadBlock('Tối: 11km'),roadBlock('5×2ph UH Z2'),roadBlock('6×8s Hill Sprints Z5')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill Intervals',blocks:[gymBlock('Plyos heavy'),gymBlock('Jump squat'),uphillBlock('Treadmill UH Intervals:'),uphillBlock('10–12% · 6×3ph Z3–Z4'),uphillBlock('90s walk recovery')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 14km Z2')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 22km',blocks:[roadBlock('22km Z2'),roadBlock('B2B prep')]},
+  {n:'CN',dot:'var(--downhill)',label:'40km FIRST · Race Sim',blocks:[uphillBlock('40km · +2800m'),uphillBlock('3×12ph UH Z4'),downhillBlock('DH Natural fast'),roadBlock('Night sim'),roadBlock('Full race gear + nutrition')]},
+ ]},
+
+{w:14,dates:'21/7–27/7',km:88,gain:3000,loss:3000,phase:3,
+ note:'Volume lên · 45km + DH Intervals Z4',
+ up_focus:'[UH Power Peak] 4×10ph UH Z4. Power hike nhịp điệu trên đoạn >20%: đếm bước 70–80/phút, poles nếu có. Efficient power hike quyết định 30-40% thời gian trong 100M. Mỗi giây/bước leo dốc nhân 9000m = hàng giờ tiết kiệm.',
+ dn_focus:'[DH Intervals chu kỳ 4] 5×10ph DH hard. Sau 45km + DH intervals = cơ đùi trải qua kích thích eccentric cao nhất từ trước đến nay. Đây là "inoculation" trước race — theo Johnston: "be as close to impervious as possible".',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill',blocks:[gymBlock('Full heavy set'),gymBlock('Nordic curl heavy'),gymBlock('SL squat heavy'),uphillBlock('Treadmill 15% 35ph'),uphillBlock('ME chân giới hạn')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 + UH',blocks:[roadBlock('Tối: 12km'),roadBlock('6×2ph UH Z2-Z3')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill Peak',blocks:[gymBlock('Heavy plyos'),gymBlock('Jump squat'),gymBlock('Lateral bounds'),uphillBlock('Treadmill 12% 30ph'),uphillBlock('UH Tempo Z3 · 2×12ph')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Tempo',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 14km'),roadBlock('6km Z2-Z3')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Road 24km Z2',blocks:[roadBlock('24km Z2'),roadBlock('Include hills')]},
+  {n:'CN',dot:'var(--downhill)',label:'45km · UH Z4 + DH INT',blocks:[uphillBlock('45km · +3000m'),uphillBlock('4×10ph UH Z4'),uphillBlock('Power hike nhịp điệu'),downhillBlock('DH INT chu kỳ 4:'),downhillBlock('5×10ph hard down')]},
+ ]},
+
+{w:15,dates:'28/7–3/8',km:100,gain:3500,loss:3500,phase:3,
+ note:'★ BIG WEEK · T7 20km + CN 50km+ · Gym nhẹ',
+ up_focus:'[BIG WEEK UH Race Sim] CN 50km+: chạy uphill ở "sustainable uncomfortable" pace — pace bạn có thể duy trì 20+ giờ. Không sprint lên đỉnh. Power hike khi dốc >20%. Vert rate target 260–300m/h. Theo sách: race sim là trải nghiệm đầy đủ nhất để biết mình đang ở đâu.',
+ dn_focus:'[BIG WEEK DH Race Speed] Chạy DH ở race speed — không kìm, không lao. Full nutrition on course. Night running nếu có. Gym tuần này chỉ mobility (tiết kiệm cho weekend).',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Nhẹ',blocks:[gymBlock('Mobility ONLY'),gymBlock('Core + hip'),uphillBlock('Treadmill 8% 15ph'),uphillBlock('Nhẹ · tiết kiệm cho CN')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 10km Z1'),roadBlock('HR <140')]},
+  {n:'T4',dot:'var(--gym)',label:'Gym – Nhẹ',blocks:[gymBlock('Stretch + foam roll'),gymBlock('Hip flexor')]},
+  {n:'T5',dot:'var(--road)',label:'Z1 Easy',blocks:[gymBlock('Gym nhẹ trưa'),roadBlock('Tối: 12km Z1')]},
+  {n:'T6',dot:'var(--rest)',label:'NGHỈ HOÀN TOÀN',blocks:[restBlock('NGHỈ HOÀN TOÀN'),restBlock('Check gear'),restBlock('Carb-load nhẹ')]},
+  {n:'T7',dot:'var(--road)',label:'Road 20km Z2',blocks:[roadBlock('20km Z2'),roadBlock('HR <150'),roadBlock('Full race gear'),roadBlock('Ăn uống on-course')]},
+  {n:'CN',dot:'var(--downhill)',label:'★ 50km+ RACE SIM',blocks:[uphillBlock('50km+ · +3500m'),uphillBlock('UH sustainable hard'),downhillBlock('DH race speed'),roadBlock('Night running'),roadBlock('Full nutrition plan')]},
+ ]},
+
+{w:16,dates:'4/8–10/8',km:78,gain:2500,loss:2500,phase:3,
+ note:'Recovery sau big week · supercompensation',
+ up_focus:'[RECOVERY] Không ME, không Z3-Z4. Chạy UH Z1-Z2 nhẹ trong Sunday 35km. Cơ thể đang supercompensate sau W15. Đây là tuần quan trọng nhất về adaptation — đừng cản trở.',
+ dn_focus:'[DH Recovery] DH kỹ thuật easy. Không intervals. Lắng nghe: đau gối ≠ DOMS thông thường. Nếu đau khớp → nghỉ thêm 1-2 ngày.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Mobility',blocks:[gymBlock('Mobility only'),uphillBlock('Treadmill 8% 15ph'),uphillBlock('Very easy Z1')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 8km Z1')]},
+  {n:'T4',dot:'var(--gym)',label:'Gym – Core',blocks:[gymBlock('Core + hip nhẹ')]},
+  {n:'T5',dot:'var(--road)',label:'Z1 Easy',blocks:[gymBlock('Gym nhẹ trưa'),roadBlock('Tối: 10km Z1')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 20km',blocks:[roadBlock('20km Z2')]},
+  {n:'CN',dot:'var(--uphill)',label:'35km Recovery',blocks:[uphillBlock('35km · +2500m'),uphillBlock('UH Z1-Z2 easy'),downhillBlock('DH kỹ thuật'),restBlock('Không push')]},
+ ]},
+
+{w:17,dates:'11/8–17/8',km:90,gain:3000,loss:3000,phase:3,
+ note:'Final Peak · Last Race Sim trước Taper',
+ up_focus:'[FINAL PEAK UH] 3×15ph UH Z4 — set dài nhất toàn kế hoạch. Sau đây không bao giờ tập Z4 nữa trước race. 50km CN: chạy như race thật — gear, nutrition, pace, mental. Evaluate: ở km 40+ bạn còn giữ được UH form không?',
+ dn_focus:'[FINAL DH RACE SIM] DH ở race speed trong 50km. Kiểm tra tổng hợp: heel-lock, midfoot, cadence, ngón chân. Đây là lần cuối cùng đánh giá DH form trước taper.',
+ days:[
+  {n:'T2',dot:'var(--uphill)',label:'Gym + Treadmill (last)',blocks:[gymBlock('4×10 Nordic curl'),gymBlock('4×8 SL squat'),gymBlock('Full plyos'),uphillBlock('Treadmill 15% 35ph'),uphillBlock('LAST ME session')]},
+  {n:'T3',dot:'var(--road)',label:'Z2 Tempo',blocks:[roadBlock('Tối: 12km'),roadBlock('7km Z2-Z3')]},
+  {n:'T4',dot:'var(--uphill)',label:'Gym + Treadmill (last)',blocks:[gymBlock('Plyos heavy'),uphillBlock('Treadmill UH Tempo:'),uphillBlock('12% · 2×12ph Z3'),uphillBlock('Lần cuối Phase 3')]},
+  {n:'T5',dot:'var(--road)',label:'Gym + Z2',blocks:[gymBlock('Gym trưa'),roadBlock('Tối: 13km Z2')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 22km',blocks:[roadBlock('22km Z2')]},
+  {n:'CN',dot:'var(--downhill)',label:'FINAL RACE SIM 50km',blocks:[uphillBlock('50km · +3000m'),uphillBlock('3×15ph UH Z4 — LAST'),downhillBlock('DH Race Speed'),roadBlock('Full gear + nutrition'),roadBlock('Evaluate km 40+ form')]},
+ ]},
+
+// ═══════════════════════════════════════════════════════════════════
+// PHASE 4 · TAPER — Competition Prep (W18–W21)
+// Category 2: 3 tuần taper | Giảm 40-60% volume | Giữ cường độ
+// ═══════════════════════════════════════════════════════════════════
+
+{w:18,dates:'18/8–24/8',km:55,gain:1200,loss:1200,phase:4,
+ note:'Taper bắt đầu · Last ME + DH Intervals',
+ up_focus:'[LAST ME WORKOUT] Buổi ME cuối cùng trong Sunday 20km. Ngắn hơn nhưng chất lượng. Theo sách: kích thích ME cần thiết 2-3 tuần trước race để duy trì adaptation. Không cần UH intervals nặng nữa.',
+ dn_focus:'[LAST DH INTERVALS] 3×10ph DH hard — lần cuối cùng. Sau tuần này: không DH intervals nữa. CẮT MÓNG VUÔNG ngay tuần này. Kiểm tra heel-lock lacing.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Gym – Nhẹ',blocks:[gymBlock('Mobility only'),uphillBlock('Treadmill 10% 15ph'),uphillBlock('Easy Z1-Z2 walk')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 8km Z1')]},
+  {n:'T4',dot:'var(--gym)',label:'Gym – Core',blocks:[gymBlock('Core + hip nhẹ')]},
+  {n:'T5',dot:'var(--road)',label:'Z1 + Strides',blocks:[gymBlock('Gym nhẹ trưa'),roadBlock('Tối: 8km Z1'),roadBlock('4×20s strides')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('CẮT MÓNG VUÔNG'),restBlock('Test heel-lock'),restBlock('Check giày size')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 14km',blocks:[roadBlock('14km Z2')]},
+  {n:'CN',dot:'var(--downhill)',label:'Last ME + DH INT',blocks:[uphillBlock('20km · +1200m'),uphillBlock('ME: last time'),downhillBlock('DH INT: 3×10ph'),downhillBlock('Last DH intervals ever')]},
+ ]},
+
+{w:19,dates:'25/8–31/8',km:40,gain:800,loss:800,phase:4,
+ note:'Deep taper · kiểm tra gear + shoes',
+ up_focus:'[TAPER Z1-Z2] Chạy UH easy Z1-Z2. Mục tiêu duy trì cảm giác chân, không fitness building. Legs sẽ cảm thấy nặng (taper legs) — bình thường hoàn toàn. Đây không phải mất thể lực.',
+ dn_focus:'[DH Gear Test] DH nhẹ trong Sunday. Test giày race day với heel-lock: kiểm tra khoảng cách 1 ngón tay ở mũi khi đứng thẳng. Test tất race day. Không thay giày mới lạ tại đây.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Mobility',blocks:[gymBlock('Yoga/stretch'),gymBlock('Light mobility'),uphillBlock('Treadmill 8% 10ph'),uphillBlock('Very easy walk')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 7km Z1')]},
+  {n:'T4',dot:'var(--gym)',label:'Mobility',blocks:[gymBlock('Foam roll'),gymBlock('Hip + calf')]},
+  {n:'T5',dot:'var(--road)',label:'Z1 + Strides',blocks:[gymBlock('Gym nhẹ trưa'),roadBlock('Tối: 6km Z1'),roadBlock('3×20s strides')]},
+  {n:'T6',dot:'var(--rest)',label:'Check Gear',blocks:[restBlock('Test giày race day'),restBlock('Heel-lock lacing'),restBlock('Pack drop bag')]},
+  {n:'T7',dot:'var(--road)',label:'Z2 10km',blocks:[roadBlock('10km Z2')]},
+  {n:'CN',dot:'var(--uphill)',label:'Short Trail 12km',blocks:[uphillBlock('12km · +800m'),uphillBlock('Z1-Z2 easy'),downhillBlock('Test giày + heel-lock'),downhillBlock('Check tất race day')]},
+ ]},
+
+{w:20,dates:'1/9–7/9',km:28,gain:500,loss:500,phase:4,
+ note:'Taper sâu · chân nghỉ ngơi',
+ up_focus:'[DEEP TAPER] Tối thiểu UH. 1 đoạn ngắn Sunday để duy trì cảm giác. Taper legs sẽ đỉnh điểm tuần này — cảm thấy chậm và nặng. Đây là dấu hiệu TỐT — glycogen đang tích đầy. Theo sách: đừng bao giờ "panic train" trong taper.',
+ dn_focus:'[DH Easy] 1 đoạn ngắn DH easy. Không intervals. Không push. Mental preparation: visualize race day, uphill pace, DH form, nutrition timing.',
+ days:[
+  {n:'T2',dot:'var(--gym)',label:'Mobility',blocks:[gymBlock('Yoga/stretch'),uphillBlock('Treadmill 5% 10ph'),uphillBlock('Rất nhẹ Z1')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 Easy',blocks:[roadBlock('Tối: 6km Z1')]},
+  {n:'T4',dot:'var(--gym)',label:'Mobility',blocks:[gymBlock('Foam roll')]},
+  {n:'T5',dot:'var(--road)',label:'Z1 + Strides',blocks:[gymBlock('Gym nhẹ trưa'),roadBlock('Tối: 6km Z1'),roadBlock('3×20s strides')]},
+  {n:'T6',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ hoàn toàn')]},
+  {n:'T7',dot:'var(--road)',label:'Z1 Easy 8km',blocks:[roadBlock('8km Z1'),roadBlock('2× dốc ngắn')]},
+  {n:'CN',dot:'var(--uphill)',label:'Short Trail 8km',blocks:[uphillBlock('8km · +500m'),uphillBlock('Z1 very easy'),downhillBlock('DH kỹ thuật nhẹ'),restBlock('Thư giãn, visualize')]},
+ ]},
+
+{w:21,dates:'8/9–20/9',km:20,gain:300,loss:300,phase:4,
+ note:'Race week · 20/9 VMM 100M 🏆',
+ up_focus:'[RACE WEEK] Không tập UH. Chỉ shake-out runs để duy trì nhịp chân. Mọi năng lượng dành cho race day. Theo sách: "The hay is in the barn" — mọi thứ đã được tích lũy. Không thể tập thêm để tốt hơn lúc này.',
+ dn_focus:'[DH RACE DAY PROTOCOL] Sáng race: cắt móng nếu cần, buộc heel-lock trước xuất phát. Drop bag km 50–80: tất dự phòng, giày dự phòng. DH trong race: bước ngắn, midfoot, cadence 175+. Khi mệt: cố ý chủ động midfoot hơn.',
+ days:[
+  {n:'T2',dot:'var(--road)',label:'Z1 Easy 8km',blocks:[roadBlock('8km Z1'),roadBlock('HR <135')]},
+  {n:'T3',dot:'var(--road)',label:'Z1 + Strides',blocks:[roadBlock('6km Z1'),roadBlock('4×20s strides')]},
+  {n:'T4',dot:'var(--rest)',label:'Nghỉ',blocks:[restBlock('Nghỉ'),restBlock('Pack race bag')]},
+  {n:'T5',dot:'var(--road)',label:'Shake-out 4km',blocks:[roadBlock('4km Z1 rất nhẹ'),roadBlock('3× strides ngắn')]},
+  {n:'T6',dot:'var(--rest)',label:'Di chuyển VMM',blocks:[restBlock('Di chuyển race venue'),restBlock('Check in'),restBlock('Carb-load')]},
+  {n:'T7',dot:'var(--rest)',label:'Pre-race',blocks:[restBlock('Nghỉ ngơi'),restBlock('Cắt móng lần cuối'),restBlock('Ngủ sớm 21h'),restBlock('Heel-lock sẵn sàng')]},
+  {n:'CN',dot:'var(--race)',label:'🏆 VMM 100M',blocks:[raceBlock('VMM 100M'),raceBlock('20/9/2026'),raceBlock('~160km ~9,000m D+'),raceBlock('GÒ ĐI! 💪')]},
+ ]},
+];
+
+let activePhase = 0;  
+  
+function resetTabs() {  
+  document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));  
+  document.getElementById('phase-banner').style.display = 'none';  
+  document.getElementById('week-list').style.display = 'none';  
+  document.getElementById('nutri-panel').style.display = 'none';  
+}  
+  
+function showPhase(p) {  
+  activePhase = p;  
+  resetTabs();  
+  document.getElementById('tab-' + p).classList.add('active');  
+  document.getElementById('week-list').style.display = 'flex';  
+    
+  const banner = document.getElementById('phase-banner');  
+  if (p !== 0) {  
+    const ph = phaseInfo[p];  
+    const col = pColors[p];  
+    banner.style.display='block';  
+    banner.innerHTML = `<div class="phase-title" style="color:${col}">${ph.name}</div>  
+      <div class="phase-meta">${ph.dates}</div>  
+      <div class="phase-body">${ph.desc}</div>  
+      <div class="phase-tags">${ph.tags.map(t=>`<span class="ptag">${t}</span>`).join('')}</div>`;  
+  }  
+  renderWeeks();  
+}  
+  
+function showNutrition() {  
+  resetTabs();  
+  document.getElementById('tab-nutri').classList.add('active');  
+  document.getElementById('nutri-panel').style.display = 'block';  
+}  
+  
+function renderWeeks() {  
+  const list = document.getElementById('week-list');  
+  const filtered = activePhase===0 ? weeks : weeks.filter(w=>w.phase===activePhase);  
+  const maxKm = 100; // Hardcoded peak week volume  
+  const phCol = ['#1a1814','var(--p1)','var(--p2)','var(--p3)','var(--p4)'];  
+  
+  list.innerHTML = filtered.map(w => `  
+    <div class="week" id="wk${w.w}" onclick="toggle(${w.w})">  
+      <div class="whead">  
+        <span class="wnum">W${String(w.w).padStart(2,'0')}</span>  
+        <span class="wdate">${w.dates}</span>  
+        <span class="wkm" style="color:${phCol[w.phase]}">${w.km}km</span>  
+        <span class="wgain">+${w.gain}m</span>  
+        <span class="wloss">−${w.loss}m</span>  
+        <span class="wnote">${w.note}</span><span class="w-done-badge" id="badge-w${w.w}"></span>  
+      </div>  
+      <div class="wbar"><div class="wbar-fill" style="width:${(w.km/maxKm*100).toFixed(0)}%;background:${phCol[w.phase]}"></div></div>  
+      <div class="wdetail">  
+        <div class="day-grid">  
+          ${w.days.map((d,i)=>`  
+            <div class="day" data-i="${i}" onclick="toggleDayDone(${w.w},${i},this,event)">  
+              <div class="day-hd"><span class="day-name">${d.n}</span><span class="day-dot" style="background:${d.dot}"></span></div>  
+              <div class="day-label">${d.label}</div>  
+              ${d.blocks.join('')}  
+            </div>`).join('')}  
+        </div>  
+        <div class="focus-row">  
+          <div class="focus-box focus-up"><div class="focus-title" style="color:var(--uphill)">⬆ Uphill</div><div class="focus-text">${w.up_focus}</div></div>  
+          <div class="focus-box focus-dn"><div class="focus-title" style="color:var(--downhill)">⬇ Downhill</div><div class="focus-text">${w.dn_focus}</div></div>  
+        </div>  
+      </div>  
+    </div>`).join('');  
+}  
+  
+function toggle(n) { 
+  document.getElementById('wk'+n).classList.toggle('open');
+  initDayStates(n);
+}  
+document.getElementById('week-list').addEventListener('click', e => { if (e.target.closest('.sblock')) e.stopPropagation(); });  
+  
+
+
+// ═══ COMPLETION & PROGRESS SYSTEM ═══
+const TOTAL_SESSIONS = 147;
+const RACE_KM = 160;
+const STORAGE_KEY = 'vmm_done_v1';
+const MILESTONES = [
+  {km:16, msg:'🎉 CP1 km 16 — Bước chân đầu tiên trên đường đua!'},
+  {km:40, msg:'💪 CP2 km 40 — Đã ¼ chặng đường! Đang build base tốt.'},
+  {km:80, msg:'🔥 CP3 km 80 — Nửa đường rồi! Fitness đang lên đỉnh.'},
+  {km:120, msg:'⚡ CP4 km 120 — Đang taper! Race day sắp đến.'},
+  {km:144, msg:'🌄 CP5 km 144 — Final push. Chỉ còn 16km về đích!'},
+  {km:160, msg:'🏆 FINISH! Đã sẵn sàng cho VMM 100M. Đi chinh phục thôi!'},
+];
+
+function loadDone() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } 
+  catch(e) { return {}; }
+}
+function saveDone(done) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(done)); } catch(e) {}
+}
+function doneKey(weekNum, dayIdx) { return `w${weekNum}_d${dayIdx}`; }
+function getTotalDone() { return Object.keys(loadDone()).length; }
+
+function updateTrailProgress(prevCount) {
+  const done = loadDone();
+  const n = Object.keys(done).length;
+  const km = (n / TOTAL_SESSIONS) * RACE_KM;
+  const pct = Math.min((n / TOTAL_SESSIONS) * 100, 100);
+
+  document.getElementById('tp-km').textContent = km.toFixed(1);
+  document.getElementById('tp-sessions').textContent = n;
+  document.getElementById('tp-fill').style.width = pct + '%';
+  
+  // Runner position (with 1% offset so it sits on the fill edge)
+  const runnerPct = Math.max(0, Math.min(pct - 1, 97));
+  // Update elevation runner
+  const elevProfile = [
+    {km:0.0,cx:0.0,cy:42.2},
+    {km:4.0,cx:7.5,cy:36.5},
+    {km:11.9,cx:22.2,cy:27.0},
+    {km:16.3,cx:30.4,cy:42.2},
+    {km:21.9,cx:40.8,cy:28.9},
+    {km:28.7,cx:53.5,cy:57.5},
+    {km:33.9,cx:63.2,cy:53.7},
+    {km:39.5,cx:73.6,cy:65.1},
+    {km:44.3,cx:82.5,cy:80.3},
+    {km:51.3,cx:95.6,cy:61.3},
+    {km:57.2,cx:106.6,cy:65.1},
+    {km:65.9,cx:122.8,cy:74.6},
+    {km:73.9,cx:137.7,cy:83.3},
+    {km:80.9,cx:150.7,cy:67.0},
+    {km:86.3,cx:160.8,cy:65.1},
+    {km:91.3,cx:170.1,cy:67.0},
+    {km:100.4,cx:187.1,cy:48.0},
+    {km:109.0,cx:203.1,cy:48.0},
+    {km:113.8,cx:212.0,cy:53.7},
+    {km:121.5,cx:226.4,cy:11.8},
+    {km:130.7,cx:243.5,cy:53.7},
+    {km:138.3,cx:257.7,cy:49.9},
+    {km:143.0,cx:266.5,cy:46.0},
+    {km:147.4,cx:274.7,cy:34.6},
+    {km:153.0,cx:285.1,cy:49.9},
+    {km:155.7,cx:290.1,cy:46.0},
+    {km:161.0,cx:300.0,cy:61.3}
+  ];
+  const runner = document.getElementById('elev-runner');
+  const glow = document.getElementById('elev-runner-glow');
+  if (runner) {
+    // Interpolate position
+    let px = 0, py = 64;
+    for (let i = 1; i < elevProfile.length; i++) {
+      if (km <= elevProfile[i].km) {
+        const prev = elevProfile[i-1], next = elevProfile[i];
+        const t = (km - prev.km) / (next.km - prev.km);
+        px = prev.cx + t * (next.cx - prev.cx);
+        py = prev.cy + t * (next.cy - prev.cy);
+        break;
+      }
+      if (i === elevProfile.length - 1) { px = 300; py = 45; }
+    }
+    runner.setAttribute('cx', px.toFixed(1));
+    runner.setAttribute('cy', py.toFixed(1));
+    if (glow) { glow.setAttribute('cx', px.toFixed(1)); glow.setAttribute('cy', py.toFixed(1)); }
+  }
+
+  // Next CP message
+  const nextCP = MILESTONES.find(m => km < m.km);
+  if (nextCP) {
+    const kmLeft = (nextCP.km - km).toFixed(1);
+    document.getElementById('tp-next').textContent = `→ ${kmLeft}km nữa đến ${nextCP.msg.split('—')[0].replace(/[🎉💪🔥⚡🌄🏆]/g,'').trim()}`;
+  } else {
+    document.getElementById('tp-next').textContent = '🏆 Đã sẵn sàng hoàn toàn cho VMM 100M!';
+  }
+
+  // Update CP dots
+  document.querySelectorAll('.cp').forEach(cp => {
+    const cpKm = parseFloat(cp.dataset.km);
+    cp.classList.toggle('reached', km >= cpKm);
+  });
+
+  // Check for milestone crossed
+  if (prevCount !== undefined && n > prevCount) {
+    const prevKm = (prevCount / TOTAL_SESSIONS) * RACE_KM;
+    const milestone = MILESTONES.find(m => prevKm < m.km && km >= m.km);
+    if (milestone) {
+      document.getElementById('trail-progress').classList.add('milestone-flash');
+      setTimeout(() => {
+        document.getElementById('trail-progress').classList.remove('milestone-flash');
+        showMilestoneToast(milestone.msg);
+      }, 200);
+    }
+  }
+}
+
+function showMilestoneToast(msg) {
+  const toast = document.createElement('div');
+  toast.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--text);color:#c8f0a0;padding:12px 20px;border-radius:8px;
+    font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);
+    transition:all .3s;opacity:0;max-width:340px;text-align:center;`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity='1'; toast.style.transform='translateX(-50%) translateY(0)'; });
+  setTimeout(() => { 
+    toast.style.opacity='0'; toast.style.transform='translateX(-50%) translateY(20px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+
+function toggleDayDone(weekNum, dayIdx, el, event) {
+  if (event) event.stopPropagation();
+  const done = loadDone();
+  const key = doneKey(weekNum, dayIdx);
+  const prevCount = Object.keys(done).length;
+  
+  if (done[key]) {
+    delete done[key];
+    el.classList.remove('done');
+  } else {
+    done[key] = 1;
+    el.classList.add('done');
+  }
+  saveDone(done);
+  updateTrailProgress(done[key] ? prevCount : undefined);
+  updateWeekBadge(weekNum);
+}
+
+function updateWeekBadge(weekNum) {
+  const done = loadDone();
+  const w = weeks.find(x => x.w === weekNum);
+  if (!w) return;
+  const total = w.days.length;
+  const count = w.days.filter((_, i) => done[doneKey(weekNum, i)]).length;
+  const badge = document.getElementById(`badge-w${weekNum}`);
+  if (badge) {
+    badge.textContent = count > 0 ? `${count}/${total}` : '';
+    badge.classList.toggle('visible', count > 0);
+  }
+  const weekEl = document.getElementById(`wk${weekNum}`);
+  if (weekEl) weekEl.classList.toggle('week-done', count === total);
+}
+
+function initDayStates(weekNum) {
+  const done = loadDone();
+  weeks.filter(w => w.w === weekNum).forEach(w => {
+    w.days.forEach((_, i) => {
+      const el = document.querySelector(`#wk${weekNum} .day[data-i="${i}"]`);
+      if (el && done[doneKey(weekNum, i)]) el.classList.add('done');
+    });
+    updateWeekBadge(weekNum);
+  });
+}
+
+// Khởi tạo
+updateTrailProgress();
+showPhase(0);
+</script>
+</body>
+</html>
