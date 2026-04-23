@@ -1088,7 +1088,7 @@ function clearAthleteData(){try{localStorage.removeItem(LOCAL_KEY);}catch(e){}}
 async function callEdge(payload){
   const resp=await fetch(EDGE_FN,{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI'},
+    headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI'},
     body:JSON.stringify(payload)
   });
   const data=await resp.json();
