@@ -257,28 +257,21 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 }
 
 
-/* ═══ STRAVA INTEGRATION ═══ */
-.strava-bar { display:flex; align-items:center; gap:10px; padding:8px 22px;
-  background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.06); }
-.strava-btn { display:inline-flex; align-items:center; gap:6px;
-  background:#FC4C02; color:#fff; border:none; border-radius:4px;
-  padding:6px 12px; font-size:11px; font-weight:700; cursor:pointer;
-  font-family:'IBM Plex Mono',monospace; letter-spacing:.03em; transition:opacity .15s; }
-.strava-btn:hover { opacity:.85; }
-.strava-btn svg { flex-shrink:0; }
-.strava-status { font-size:11px; color:rgba(255,255,255,.5); font-family:'IBM Plex Mono',monospace; }
-.strava-status.connected { color:#c8f0a0; }
-.strava-sync-btn { background:rgba(200,240,160,.12); color:#c8f0a0; border:1px solid rgba(200,240,160,.3);
-  border-radius:4px; padding:5px 10px; font-size:10px; font-weight:600; cursor:pointer;
-  font-family:'IBM Plex Mono',monospace; transition:all .15s; }
-.strava-sync-btn:hover { background:rgba(200,240,160,.2); }
-.strava-sync-btn:disabled { opacity:.4; cursor:not-allowed; }
-.strava-auto-tag { font-size:9px; padding:2px 5px; border-radius:3px;
-  background:rgba(252,76,2,.2); color:#FC4C02; font-family:'IBM Plex Mono',monospace;
-  margin-left:4px; vertical-align:middle; }
-.day.strava-done { background:#fff8f5; border-color:#FC4C02; }
-.day.strava-done::after { content:'🔁'; position:absolute; top:5px; right:6px;
-  font-size:11px; }
+/* ═══ STRAVA BAR ═══ */
+.strava-bar{display:flex;align-items:center;gap:10px;padding:8px 22px;
+  background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);}
+.strava-btn{display:inline-flex;align-items:center;gap:6px;background:#FC4C02;color:#fff;
+  border:none;border-radius:4px;padding:6px 12px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:opacity .15s;}
+.strava-btn:hover{opacity:.85;}
+.strava-status{font-size:11px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace;}
+.strava-status.connected{color:#c8f0a0;}
+.strava-sync-btn{background:rgba(200,240,160,.12);color:#c8f0a0;
+  border:1px solid rgba(200,240,160,.3);border-radius:4px;padding:5px 10px;
+  font-size:10px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
+.strava-sync-btn:disabled{opacity:.4;cursor:not-allowed;}
+.day.strava-done{background:#fff8f5;border-color:#FC4C02;}
+.day.strava-done::after{content:'🔁';position:absolute;top:5px;right:6px;font-size:11px;}
 
 </style>  
 </head>  
@@ -359,18 +352,17 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 <div class="strava-bar" id="strava-bar">
   <div id="strava-connect-area">
-    <button class="strava-btn" onclick="stravaConnect()" id="strava-connect-btn">
+    <button class="strava-btn" onclick="stravaConnect()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
         <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.581-5.831l2.509 4.931h4.104L12.82 0 3 13.828h4.105"/>
-      </svg>
-      Kết nối Strava
+      </svg>Kết nối Strava
     </button>
   </div>
-  <div id="strava-connected-area" style="display:none; align-items:center; gap:10px;">
+  <div id="strava-connected-area" style="display:none;align-items:center;gap:10px;">
     <span class="strava-status connected">⚡ <span id="strava-athlete-name">Strava</span></span>
     <button class="strava-sync-btn" onclick="stravaSync()" id="strava-sync-btn">↻ Đồng bộ ngay</button>
     <span class="strava-status" id="strava-sync-status"></span>
-    <button onclick="stravaDisconnect()" style="background:none;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer;padding:0;">Ngắt kết nối</button>
+    <button onclick="stravaDisconnect()" style="background:none;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer;">Ngắt kết nối</button>
   </div>
 </div>
 
@@ -1082,222 +1074,163 @@ function initDayStates(weekNum) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// STRAVA + SUPABASE INTEGRATION (athlete_id based, no Supabase Auth)
-// ═══════════════════════════════════════════════════════════════
+// ═══ STRAVA + SUPABASE ═══
 const STRAVA_CLIENT_ID = '226321';
 const STRAVA_REDIRECT  = 'https://qcuong2212-design.github.io/vmm-training/';
-const STRAVA_SCOPE     = 'read,activity:read_all';
 const EDGE_FN          = 'https://irbtnmiifivmurfxboqv.supabase.co/functions/v1/strava-auth';
 const PLAN_START       = new Date('2026-04-21T00:00:00');
-const LOCAL_KEY        = 'vmm_strava_athlete'; // {athlete_id, athlete_name}
+const LOCAL_KEY        = 'vmm_strava_athlete';
 
-function getAthleteData() {
-  try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null'); } catch(e) { return null; }
-}
-function saveAthleteData(d) {
-  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(d)); } catch(e) {}
-}
-function clearAthleteData() {
-  try { localStorage.removeItem(LOCAL_KEY); } catch(e) {}
-}
+function getAthleteData(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');}catch(e){return null;}}
+function saveAthleteData(d){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(d));}catch(e){}}
+function clearAthleteData(){try{localStorage.removeItem(LOCAL_KEY);}catch(e){}}
 
-// ── Date → week/day slot ─────────────────────────────────────
-function dateToSlot(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  const diff = Math.floor((d - PLAN_START) / 86400000);
-  if (diff < 0 || diff >= 21*7) return null;
-  return { weekNum: Math.floor(diff/7)+1, dayIdx: diff%7 };
-}
-
-function activityMatchesSlot(act, dayIdx) {
-  const type = (act.sport_type || act.type || '').toLowerCase();
-  const gain = act.total_elevation_gain || 0;
-  const dist = (act.distance || 0) / 1000;
-  const mt   = act.moving_time || 0;
-  if (dayIdx === 6) return (type.includes('run')||type.includes('trail')) && (gain>200||dist>10);
-  if (dayIdx === 5) return type.includes('run') && dist > 8;
-  if (dayIdx === 0 || dayIdx === 2) return type.includes('weight')||type.includes('crossfit')||
-    type.includes('workout')||type.includes('elliptical')||type.includes('stairstepper')||
-    (type.includes('run') && mt>=900 && mt<=5400);
-  if (dayIdx === 1 || dayIdx === 3) return type.includes('run') && dist >= 5;
-  return dist > 3 || mt > 600;
-}
-
-// ── Edge Function caller ──────────────────────────────────────
-async function callEdge(payload) {
-  const resp = await fetch(EDGE_FN, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json',
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI' },
-    body: JSON.stringify(payload)
+async function callEdge(payload){
+  const resp=await fetch(EDGE_FN,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI'},
+    body:JSON.stringify(payload)
   });
-  const data = await resp.json();
-  if (!resp.ok) throw new Error(data.error || 'Edge function error');
+  const data=await resp.json();
+  if(!resp.ok)throw new Error(data.error||'Edge error '+resp.status);
   return data;
 }
 
-// ── Cloud save/load (via Edge Function) ──────────────────────
-async function cloudSaveDone(done) {
-  saveDone(done); // always local first
-  const a = getAthleteData();
-  if (!a) return;
-  callEdge({ action:'save_progress', athlete_id:a.athlete_id, done_data:done })
-    .catch(e => console.warn('Cloud save failed:', e));
+function dateToSlot(s){
+  const d=new Date(s+'T12:00:00');
+  const diff=Math.floor((d-PLAN_START)/86400000);
+  if(diff<0||diff>=147)return null;
+  return{weekNum:Math.floor(diff/7)+1,dayIdx:diff%7};
 }
 
-async function cloudLoadDone() {
-  const a = getAthleteData();
-  if (!a) return loadDone();
-  try {
-    const r = await callEdge({ action:'load_progress', athlete_id:a.athlete_id });
-    if (r.done_data && Object.keys(r.done_data).length > 0) {
-      saveDone(r.done_data);
-      return r.done_data;
-    }
-  } catch(e) { console.warn('Cloud load failed, using local:', e); }
+function actMatches(act,di){
+  const t=(act.sport_type||act.type||'').toLowerCase();
+  const g=act.total_elevation_gain||0,dist=(act.distance||0)/1000,mt=act.moving_time||0;
+  if(di===6)return(t.includes('run')||t.includes('trail'))&&(g>200||dist>10);
+  if(di===5)return t.includes('run')&&dist>8;
+  if(di===0||di===2)return t.includes('weight')||t.includes('crossfit')||t.includes('workout')||
+    t.includes('elliptical')||t.includes('stairstepper')||(t.includes('run')&&mt>=900&&mt<=5400);
+  if(di===1||di===3)return t.includes('run')&&dist>=5;
+  return dist>3||mt>600;
+}
+
+async function cloudSaveDone(done){
+  saveDone(done);
+  const a=getAthleteData();if(!a)return;
+  callEdge({action:'save_progress',athlete_id:a.athlete_id,done_data:done}).catch(()=>{});
+}
+
+async function cloudLoadDone(){
+  const a=getAthleteData();if(!a)return loadDone();
+  try{
+    const r=await callEdge({action:'load_progress',athlete_id:a.athlete_id});
+    if(r.done_data&&Object.keys(r.done_data).length>0){saveDone(r.done_data);return r.done_data;}
+  }catch(e){}
   return loadDone();
 }
 
-// ── OAuth flow ────────────────────────────────────────────────
-function stravaConnect() {
-  const url = 'https://www.strava.com/oauth/authorize' +
-    '?client_id=' + STRAVA_CLIENT_ID +
-    '&redirect_uri=' + encodeURIComponent(STRAVA_REDIRECT) +
-    '&response_type=code&approval_prompt=auto&scope=' + STRAVA_SCOPE;
-  window.location.href = url;
+function stravaConnect(){
+  window.location.href='https://www.strava.com/oauth/authorize?client_id='+STRAVA_CLIENT_ID+
+    '&redirect_uri='+encodeURIComponent(STRAVA_REDIRECT)+
+    '&response_type=code&approval_prompt=auto&scope=read,activity:read_all';
 }
 
-async function handleStravaCallback() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const error = params.get('error');
-  if (error || !code) return;
-
-  window.history.replaceState({}, '', window.location.pathname);
-  document.getElementById('strava-sync-status').textContent = 'Đang kết nối...';
-
-  try {
-    const data = await callEdge({ action:'exchange', code });
-    saveAthleteData({ athlete_id: data.athlete_id, athlete_name: data.athlete_name });
-    stravaShowConnected(data.athlete_name?.split(' ')[0]);
-    await stravaSync();
-  } catch(e) {
-    document.getElementById('strava-sync-status').textContent = 'Lỗi: ' + e.message;
-    stravaShowConnect();
-  }
-}
-
-function stravaDisconnect() {
-  clearAthleteData();
-  stravaShowConnect();
-  document.getElementById('strava-sync-status').textContent = '';
+function stravaDisconnect(){
+  clearAthleteData();stravaShowConnect();
+  document.getElementById('strava-sync-status').textContent='';
   showMilestoneToast('Đã ngắt kết nối Strava');
 }
 
-function stravaShowConnect() {
-  document.getElementById('strava-connect-area').style.display = 'block';
-  document.getElementById('strava-connected-area').style.display = 'none';
+function stravaShowConnect(){
+  document.getElementById('strava-connect-area').style.display='block';
+  document.getElementById('strava-connected-area').style.display='none';
 }
 
-function stravaShowConnected(name) {
-  document.getElementById('strava-connect-area').style.display = 'none';
-  document.getElementById('strava-connected-area').style.display = 'flex';
-  document.getElementById('strava-athlete-name').textContent = name || 'Connected';
+function stravaShowConnected(name){
+  document.getElementById('strava-connect-area').style.display='none';
+  document.getElementById('strava-connected-area').style.display='flex';
+  document.getElementById('strava-athlete-name').textContent=name||'Connected';
 }
 
-// ── Strava sync ───────────────────────────────────────────────
-async function stravaSync() {
-  const btn    = document.getElementById('strava-sync-btn');
-  const status = document.getElementById('strava-sync-status');
-  const a      = getAthleteData();
-  if (!a) { stravaShowConnect(); return; }
-
-  btn.disabled = true;
-  btn.textContent = '↻ Đang sync...';
-
-  try {
-    const { activities, athlete_name } = await callEdge({
-      action: 'activities', athlete_id: a.athlete_id
-    });
-    if (athlete_name) stravaShowConnected(athlete_name.split(' ')[0]);
-
-    const done = await cloudLoadDone();
-    let autoMarked = 0;
-    activities.forEach(act => {
-      const localDate = act.start_date_local?.split('T')[0];
-      if (!localDate) return;
-      const slot = dateToSlot(localDate);
-      if (!slot) return;
-      if (activityMatchesSlot(act, slot.dayIdx)) {
-        const key = doneKey(slot.weekNum, slot.dayIdx);
-        if (!done[key]) { done[key] = { strava:true, actId:act.id }; autoMarked++; }
+async function stravaSync(){
+  const btn=document.getElementById('strava-sync-btn');
+  const status=document.getElementById('strava-sync-status');
+  const a=getAthleteData();if(!a){stravaShowConnect();return;}
+  btn.disabled=true;btn.textContent='↻ Đang sync...';
+  try{
+    const{activities,athlete_name}=await callEdge({action:'activities',athlete_id:a.athlete_id});
+    if(athlete_name)stravaShowConnected(athlete_name.split(' ')[0]);
+    const done=await cloudLoadDone();let marked=0;
+    activities.forEach(act=>{
+      const s=dateToSlot((act.start_date_local||'').split('T')[0]);if(!s)return;
+      if(actMatches(act,s.dayIdx)){
+        const k=doneKey(s.weekNum,s.dayIdx);
+        if(!done[k]){done[k]={strava:true,actId:act.id};marked++;}
       }
     });
-
-    await cloudSaveDone(done);
-    updateTrailProgress();
-    weeks.forEach(w => updateWeekBadge(w.w));
-    document.querySelectorAll('.week.open').forEach(el =>
-      initDayStates(parseInt(el.id.replace('wk','')))
-    );
-
-    const now = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
-    status.textContent = now + ' · +' + autoMarked + ' buổi';
-    localStorage.setItem('vmm_last_sync', Date.now().toString());
-    if (autoMarked > 0) showMilestoneToast('🔄 Strava: +' + autoMarked + ' buổi tập!');
-
-  } catch(err) {
-    status.textContent = 'Lỗi: ' + err.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '↻ Đồng bộ ngay';
-  }
+    await cloudSaveDone(done);updateTrailProgress();
+    weeks.forEach(w=>updateWeekBadge(w.w));
+    document.querySelectorAll('.week.open').forEach(el=>initDayStates(parseInt(el.id.replace('wk',''))));
+    const now=new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+    status.textContent=now+' · +'+marked+' buổi';
+    localStorage.setItem('vmm_last_sync',Date.now().toString());
+    if(marked>0)showMilestoneToast('🔄 Strava: +'+marked+' buổi tập!');
+  }catch(err){status.textContent='Lỗi: '+err.message;}
+  finally{btn.disabled=false;btn.textContent='↻ Đồng bộ ngay';}
 }
 
-// ── Patch toggleDayDone to cloud-save ────────────────────────
-function toggleDayDone(weekNum, dayIdx, el, event) {
-  if (event) event.stopPropagation();
-  const done = loadDone();
-  const key  = doneKey(weekNum, dayIdx);
-  const prev = Object.keys(done).length;
-  if (done[key]) { delete done[key]; el.classList.remove('done','strava-done'); }
-  else           { done[key] = 1;   el.classList.add('done'); }
+function toggleDayDone(weekNum,dayIdx,el,event){
+  if(event)event.stopPropagation();
+  const done=loadDone();const key=doneKey(weekNum,dayIdx);
+  const prev=Object.keys(done).length;
+  if(done[key]){delete done[key];el.classList.remove('done','strava-done');}
+  else{done[key]=1;el.classList.add('done');}
   cloudSaveDone(done);
-  updateTrailProgress(done[key] ? prev : undefined);
+  updateTrailProgress(done[key]?prev:undefined);
   updateWeekBadge(weekNum);
 }
 
-// ── initDayStates with strava-done style ─────────────────────
-function initDayStates(weekNum) {
-  const done = loadDone();
-  weeks.filter(w => w.w === weekNum).forEach(w => {
-    w.days.forEach((_,i) => {
-      const el = document.querySelector('#wk'+weekNum+' .day[data-i="'+i+'"]');
-      if (!el) return;
-      const val = done[doneKey(weekNum,i)];
-      el.classList.toggle('done', !!val);
-      el.classList.toggle('strava-done', !!(val && val.strava));
+function initDayStates(weekNum){
+  const done=loadDone();
+  weeks.filter(w=>w.w===weekNum).forEach(w=>{
+    w.days.forEach((_,i)=>{
+      const el=document.querySelector('#wk'+weekNum+' .day[data-i="'+i+'"]');if(!el)return;
+      const val=done[doneKey(weekNum,i)];
+      el.classList.toggle('done',!!val);
+      el.classList.toggle('strava-done',!!(val&&val.strava));
     });
     updateWeekBadge(weekNum);
   });
 }
 
-// ── Init ──────────────────────────────────────────────────────
-async function initStrava() {
-  await handleStravaCallback();
-  const a = getAthleteData();
-  if (a) {
-    stravaShowConnected(a.athlete_name?.split(' ')[0]);
-    const cloudDone = await cloudLoadDone();
-    updateTrailProgress();
-    weeks.forEach(w => updateWeekBadge(w.w));
-    const last = localStorage.getItem('vmm_last_sync');
-    if (!last || Date.now()-parseInt(last) > 3600000) await stravaSync();
-  } else {
+async function handleStravaCallback(){
+  const params=new URLSearchParams(window.location.search);
+  const code=params.get('code');if(!code)return;
+  window.history.replaceState({},'',window.location.pathname);
+  document.getElementById('strava-sync-status').textContent='Đang kết nối...';
+  try{
+    const data=await callEdge({action:'exchange',code});
+    saveAthleteData({athlete_id:data.athlete_id,athlete_name:data.athlete_name});
+    stravaShowConnected(data.athlete_name?.split(' ')[0]);
+    await stravaSync();
+  }catch(e){
+    document.getElementById('strava-sync-status').textContent='Lỗi: '+e.message;
     stravaShowConnect();
   }
 }
+
+async function initStrava(){
+  await handleStravaCallback();
+  const a=getAthleteData();
+  if(a){
+    stravaShowConnected(a.athlete_name?.split(' ')[0]);
+    const done=await cloudLoadDone();
+    updateTrailProgress();weeks.forEach(w=>updateWeekBadge(w.w));
+    const last=localStorage.getItem('vmm_last_sync');
+    if(!last||Date.now()-parseInt(last)>3600000)await stravaSync();
+  }else{stravaShowConnect();}
+}
+
 // Khởi tạo
 updateTrailProgress();
 showPhase(0);
