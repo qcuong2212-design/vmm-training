@@ -1205,29 +1205,49 @@ function initDayStates(weekNum){
 
 async function handleStravaCallback(){
   const params=new URLSearchParams(window.location.search);
-  const code=params.get('code');if(!code)return;
+  const code=params.get('code');
+  const error=params.get('error');
+  if(error){console.log('Strava auth error:',error);window.history.replaceState({},'',window.location.pathname);stravaShowConnect();return;}
+  if(!code){stravaShowConnect();return;}
+  console.log('Strava callback: exchanging code...');
   window.history.replaceState({},'',window.location.pathname);
-  document.getElementById('strava-sync-status').textContent='Đang kết nối...';
+  // Show status in the strava bar
+  stravaShowConnect();
+  document.getElementById('strava-sync-status') && (document.getElementById('strava-sync-status').textContent='Đang kết nối...');
   try{
     const data=await callEdge({action:'exchange',code});
+    console.log('Exchange success:',data);
+    if(!data.athlete_id)throw new Error('No athlete_id in response');
     saveAthleteData({athlete_id:data.athlete_id,athlete_name:data.athlete_name});
     stravaShowConnected(data.athlete_name?.split(' ')[0]);
     await stravaSync();
   }catch(e){
-    document.getElementById('strava-sync-status').textContent='Lỗi: '+e.message;
+    console.error('Strava callback error:',e);
+    const s=document.getElementById('strava-sync-status');
+    if(s)s.textContent='Lỗi kết nối: '+e.message;
     stravaShowConnect();
   }
 }
 
 async function initStrava(){
-  await handleStravaCallback();
+  // Step 1: handle OAuth callback FIRST (before anything else)
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('code')){
+    await handleStravaCallback();
+    return; // handleStravaCallback will call stravaSync after success
+  }
+  // Step 2: restore existing session
   const a=getAthleteData();
   if(a){
     stravaShowConnected(a.athlete_name?.split(' ')[0]);
-    const done=await cloudLoadDone();
-    updateTrailProgress();weeks.forEach(w=>updateWeekBadge(w.w));
+    try{
+      const done=await cloudLoadDone();
+      updateTrailProgress();weeks.forEach(w=>updateWeekBadge(w.w));
+    }catch(e){console.warn('Load progress failed:',e);}
     const last=localStorage.getItem('vmm_last_sync');
-    if(!last||Date.now()-parseInt(last)>3600000)await stravaSync();
+    if(!last||Date.now()-parseInt(last)>3600000){
+      stravaSync().catch(e=>console.warn('Auto sync failed:',e));
+    }
   }else{stravaShowConnect();}
 }
 
