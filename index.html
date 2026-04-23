@@ -1083,175 +1083,116 @@ function initDayStates(weekNum) {
 
 
 // ═══════════════════════════════════════════════════════════════
-// STRAVA INTEGRATION
+// STRAVA + SUPABASE INTEGRATION (athlete_id based, no Supabase Auth)
 // ═══════════════════════════════════════════════════════════════
 const STRAVA_CLIENT_ID = '226321';
-const STRAVA_REDIRECT = 'https://qcuong2212-design.github.io/vmm-training/';
-const STRAVA_SCOPE = 'read,activity:read_all';
-const STRAVA_TOKEN_KEY = 'vmm_strava_token';
+const STRAVA_REDIRECT  = 'https://qcuong2212-design.github.io/vmm-training/';
+const STRAVA_SCOPE     = 'read,activity:read_all';
+const EDGE_FN          = 'https://irbtnmiifivmurfxboqv.supabase.co/functions/v1/strava-auth';
+const PLAN_START       = new Date('2026-04-21T00:00:00');
+const LOCAL_KEY        = 'vmm_strava_athlete'; // {athlete_id, athlete_name}
 
-// Week start: Monday April 21 2026
-const PLAN_START = new Date('2026-04-21T00:00:00');
-
-function getTokenData() {
-  try { return JSON.parse(localStorage.getItem(STRAVA_TOKEN_KEY) || 'null'); }
-  catch(e) { return null; }
+function getAthleteData() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null'); } catch(e) { return null; }
 }
-function saveTokenData(data) {
-  try { localStorage.setItem(STRAVA_TOKEN_KEY, JSON.stringify(data)); } catch(e) {}
+function saveAthleteData(d) {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(d)); } catch(e) {}
 }
-function clearTokenData() {
-  try { localStorage.removeItem(STRAVA_TOKEN_KEY); } catch(e) {}
+function clearAthleteData() {
+  try { localStorage.removeItem(LOCAL_KEY); } catch(e) {}
 }
 
-// Map a date to {weekNum, dayIdx} in our plan (Mon=0 ... Sun=6)
+// ── Date → week/day slot ─────────────────────────────────────
 function dateToSlot(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
   const diff = Math.floor((d - PLAN_START) / 86400000);
   if (diff < 0 || diff >= 21*7) return null;
-  const weekNum = Math.floor(diff / 7) + 1;
-  const dayIdx = diff % 7;
-  return {weekNum, dayIdx};
+  return { weekNum: Math.floor(diff/7)+1, dayIdx: diff%7 };
 }
 
-// Determine if a Strava activity matches a day slot
-function activityMatchesSlot(act, dayIdx, weekNum) {
+function activityMatchesSlot(act, dayIdx) {
   const type = (act.sport_type || act.type || '').toLowerCase();
   const gain = act.total_elevation_gain || 0;
   const dist = (act.distance || 0) / 1000;
-  const movingTime = act.moving_time || 0;
-
-  // Sunday (dayIdx=6): trail run with elevation OR long run
-  if (dayIdx === 6) {
-    return (type.includes('run') || type.includes('trail')) && (gain > 200 || dist > 10);
-  }
-  // Saturday (dayIdx=5): road run
-  if (dayIdx === 5) {
-    return type.includes('run') && dist > 8;
-  }
-  // Mon/Wed (dayIdx=0,2): gym session OR treadmill (weight training, workout, crossfit)
-  if (dayIdx === 0 || dayIdx === 2) {
-    return type.includes('weight') || type.includes('crossfit') || 
-           type.includes('workout') || type.includes('elliptical') ||
-           type.includes('stairstepper') ||
-           (type.includes('run') && movingTime >= 900 && movingTime <= 5400);
-  }
-  // Tue/Thu (dayIdx=1,3): evening easy run
-  if (dayIdx === 1 || dayIdx === 3) {
-    return type.includes('run') && dist >= 5;
-  }
-  // Friday (dayIdx=4): rest — any activity counts
-  return dist > 3 || movingTime > 600;
+  const mt   = act.moving_time || 0;
+  if (dayIdx === 6) return (type.includes('run')||type.includes('trail')) && (gain>200||dist>10);
+  if (dayIdx === 5) return type.includes('run') && dist > 8;
+  if (dayIdx === 0 || dayIdx === 2) return type.includes('weight')||type.includes('crossfit')||
+    type.includes('workout')||type.includes('elliptical')||type.includes('stairstepper')||
+    (type.includes('run') && mt>=900 && mt<=5400);
+  if (dayIdx === 1 || dayIdx === 3) return type.includes('run') && dist >= 5;
+  return dist > 3 || mt > 600;
 }
 
-async function refreshAccessToken(tokenData) {
+// ── Edge Function caller ──────────────────────────────────────
+async function callEdge(payload) {
+  const resp = await fetch(EDGE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI' },
+    body: JSON.stringify(payload)
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || 'Edge function error');
+  return data;
+}
+
+// ── Cloud save/load (via Edge Function) ──────────────────────
+async function cloudSaveDone(done) {
+  saveDone(done); // always local first
+  const a = getAthleteData();
+  if (!a) return;
+  callEdge({ action:'save_progress', athlete_id:a.athlete_id, done_data:done })
+    .catch(e => console.warn('Cloud save failed:', e));
+}
+
+async function cloudLoadDone() {
+  const a = getAthleteData();
+  if (!a) return loadDone();
   try {
-    const resp = await fetch('https://www.strava.com/oauth/token', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        client_id: STRAVA_CLIENT_ID,
-        client_secret: tokenData.client_secret,
-        refresh_token: tokenData.refresh_token,
-        grant_type: 'refresh_token'
-      })
-    });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    const updated = {...tokenData, access_token: data.access_token,
-      expires_at: data.expires_at, refresh_token: data.refresh_token};
-    saveTokenData(updated);
-    return updated;
-  } catch(e) { return null; }
+    const r = await callEdge({ action:'load_progress', athlete_id:a.athlete_id });
+    if (r.done_data && Object.keys(r.done_data).length > 0) {
+      saveDone(r.done_data);
+      return r.done_data;
+    }
+  } catch(e) { console.warn('Cloud load failed, using local:', e); }
+  return loadDone();
 }
 
-async function getValidToken() {
-  let td = getTokenData();
-  if (!td) return null;
-  if (Date.now() / 1000 > td.expires_at - 300) {
-    td = await refreshAccessToken(td);
-  }
-  return td;
-}
-
-async function fetchStravaActivities(accessToken) {
-  // Fetch from plan start to now, max 200 activities
-  const after = Math.floor(PLAN_START.getTime() / 1000);
-  const url = `https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=200`;
-  const resp = await fetch(url, {headers:{Authorization:`Bearer ${accessToken}`}});
-  if (!resp.ok) throw new Error('Strava API error: ' + resp.status);
-  return await resp.json();
-}
-
-async function stravaSync() {
-  const btn = document.getElementById('strava-sync-btn');
-  const status = document.getElementById('strava-sync-status');
-  btn.disabled = true;
-  btn.textContent = '↻ Đang sync...';
-  status.textContent = '';
-
-  try {
-    const td = await getValidToken();
-    if (!td) { stravaShowConnect(); return; }
-
-    const activities = await fetchStravaActivities(td.access_token);
-    
-    // Load current done state
-    const done = loadDone();
-    let autoMarked = 0;
-
-    activities.forEach(act => {
-      // Get local date of activity
-      const localDate = act.start_date_local.split('T')[0];
-      const slot = dateToSlot(localDate);
-      if (!slot) return;
-
-      const {weekNum, dayIdx} = slot;
-      if (activityMatchesSlot(act, dayIdx, weekNum)) {
-        const key = doneKey(weekNum, dayIdx);
-        if (!done[key]) {
-          done[key] = {strava: true, actId: act.id};
-          autoMarked++;
-        }
-      }
-    });
-
-    saveDone(done);
-    updateTrailProgress();
-    
-    // Re-render open weeks to show strava marks
-    document.querySelectorAll('.week.open').forEach(el => {
-      const wnum = parseInt(el.id.replace('wk',''));
-      initDayStates(wnum);
-    });
-    // Re-init all visible weeks
-    weeks.forEach(w => updateWeekBadge(w.w));
-
-    // Update sync time
-    const now = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
-    status.textContent = `Sync lúc ${now} · +${autoMarked} buổi`;
-    btn.textContent = '↻ Đồng bộ ngay';
-    btn.disabled = false;
-
-    if (autoMarked > 0) showMilestoneToast(`🔄 Strava: tự động tick ${autoMarked} buổi tập!`);
-
-  } catch(err) {
-    status.textContent = 'Lỗi: ' + err.message;
-    btn.textContent = '↻ Đồng bộ ngay';
-    btn.disabled = false;
-    console.error('Strava sync error:', err);
-  }
-}
-
+// ── OAuth flow ────────────────────────────────────────────────
 function stravaConnect() {
-  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&redirect_uri=${encodeURIComponent(STRAVA_REDIRECT)}&response_type=code&approval_prompt=auto&scope=${STRAVA_SCOPE}`;
-  window.location.href = authUrl;
+  const url = 'https://www.strava.com/oauth/authorize' +
+    '?client_id=' + STRAVA_CLIENT_ID +
+    '&redirect_uri=' + encodeURIComponent(STRAVA_REDIRECT) +
+    '&response_type=code&approval_prompt=auto&scope=' + STRAVA_SCOPE;
+  window.location.href = url;
+}
+
+async function handleStravaCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+  if (error || !code) return;
+
+  window.history.replaceState({}, '', window.location.pathname);
+  document.getElementById('strava-sync-status').textContent = 'Đang kết nối...';
+
+  try {
+    const data = await callEdge({ action:'exchange', code });
+    saveAthleteData({ athlete_id: data.athlete_id, athlete_name: data.athlete_name });
+    stravaShowConnected(data.athlete_name?.split(' ')[0]);
+    await stravaSync();
+  } catch(e) {
+    document.getElementById('strava-sync-status').textContent = 'Lỗi: ' + e.message;
+    stravaShowConnect();
+  }
 }
 
 function stravaDisconnect() {
-  clearTokenData();
+  clearAthleteData();
   stravaShowConnect();
   document.getElementById('strava-sync-status').textContent = '';
+  showMilestoneToast('Đã ngắt kết nối Strava');
 }
 
 function stravaShowConnect() {
@@ -1265,179 +1206,98 @@ function stravaShowConnected(name) {
   document.getElementById('strava-athlete-name').textContent = name || 'Connected';
 }
 
-// Handle OAuth callback — Strava redirects back with ?code=...
-async function handleStravaCallback() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const error = params.get('error');
-  
-  if (error) {
-    console.log('Strava auth cancelled');
-    window.history.replaceState({}, '', window.location.pathname);
-    return;
-  }
-  if (!code) return;
+// ── Strava sync ───────────────────────────────────────────────
+async function stravaSync() {
+  const btn    = document.getElementById('strava-sync-btn');
+  const status = document.getElementById('strava-sync-status');
+  const a      = getAthleteData();
+  if (!a) { stravaShowConnect(); return; }
 
-  // Exchange code for token via Strava
-  // NOTE: We use implicit flow workaround — store code and show instructions
-  // because client_secret cannot be in frontend code
-  // Instead we use PKCE-less approach: exchange directly (Strava allows this for mobile/SPA)
-  try {
-    const resp = await fetch('https://www.strava.com/oauth/token', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        client_id: STRAVA_CLIENT_ID,
-        client_secret: '__CLIENT_SECRET__',
-        code: code,
-        grant_type: 'authorization_code'
-      })
-    });
-    
-    if (!resp.ok) {
-      // Client secret not set yet — show instructions
-      showClientSecretModal(code);
-      window.history.replaceState({}, '', window.location.pathname);
-      return;
-    }
-    
-    const data = await resp.json();
-    saveTokenData({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
-      expires_at: data.expires_at,
-      athlete_name: (data.athlete?.firstname || '') + ' ' + (data.athlete?.lastname || ''),
-      client_secret: '__CLIENT_SECRET__'
-    });
-    stravaShowConnected(data.athlete?.firstname);
-    window.history.replaceState({}, '', window.location.pathname);
-    await stravaSync();
-  } catch(e) {
-    showClientSecretModal(code);
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-}
-
-function showClientSecretModal(code) {
-  // Since client_secret can't be hardcoded in public HTML,
-  // user needs to enter it once — stored locally, never sent anywhere except Strava
-  const modal = document.createElement('div');
-  modal.id = 'strava-modal';
-  modal.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;
-    display:flex;align-items:center;justify-content:center;padding:20px;`;
-  modal.innerHTML = `
-    <div style="background:var(--surface);border-radius:12px;padding:24px;max-width:420px;width:100%;
-      border:1px solid var(--border2);box-shadow:0 20px 60px rgba(0,0,0,.4);">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔐 Nhập Strava Client Secret</h3>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
-        Cần nhập <b>Client Secret</b> từ trang Strava API của bạn một lần duy nhất.<br>
-        Thông tin này chỉ lưu trên máy bạn, không gửi đi đâu ngoài Strava.
-      </p>
-      <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">
-        Vào <a href="https://www.strava.com/settings/api" target="_blank" style="color:#FC4C02;">strava.com/settings/api</a> → copy <b>Client Secret</b>
-      </p>
-      <input type="password" id="secret-input" placeholder="Dán Client Secret vào đây..."
-        style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;
-        font-size:13px;font-family:inherit;outline:none;margin-bottom:12px;"
-        onkeydown="if(event.key==='Enter')submitSecret('${code}')"/>
-      <div style="display:flex;gap:8px;">
-        <button onclick="submitSecret('${code}')" 
-          style="flex:1;background:#FC4C02;color:#fff;border:none;border-radius:6px;
-          padding:10px;font-weight:700;font-size:13px;cursor:pointer;">Xác nhận & Kết nối</button>
-        <button onclick="document.getElementById('strava-modal').remove()"
-          style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;
-          padding:10px 14px;font-size:13px;cursor:pointer;color:var(--muted);">Hủy</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-  document.getElementById('secret-input').focus();
-}
-
-async function submitSecret(code) {
-  const secret = document.getElementById('secret-input').value.trim();
-  if (!secret) { alert('Vui lòng nhập Client Secret'); return; }
-  
-  const btn = document.querySelector('#strava-modal button');
-  btn.textContent = 'Đang kết nối...';
   btn.disabled = true;
+  btn.textContent = '↻ Đang sync...';
 
   try {
-    const resp = await fetch('https://www.strava.com/oauth/token', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        client_id: STRAVA_CLIENT_ID,
-        client_secret: secret,
-        code: code,
-        grant_type: 'authorization_code'
-      })
+    const { activities, athlete_name } = await callEdge({
+      action: 'activities', athlete_id: a.athlete_id
     });
-    if (!resp.ok) {
-      const err = await resp.json();
-      alert('Lỗi: ' + (err.message || 'Client Secret không đúng'));
-      btn.textContent = 'Xác nhận & Kết nối';
-      btn.disabled = false;
-      return;
-    }
-    const data = await resp.json();
-    saveTokenData({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
-      expires_at: data.expires_at,
-      athlete_name: (data.athlete?.firstname||'') + ' ' + (data.athlete?.lastname||''),
-      client_secret: secret
+    if (athlete_name) stravaShowConnected(athlete_name.split(' ')[0]);
+
+    const done = await cloudLoadDone();
+    let autoMarked = 0;
+    activities.forEach(act => {
+      const localDate = act.start_date_local?.split('T')[0];
+      if (!localDate) return;
+      const slot = dateToSlot(localDate);
+      if (!slot) return;
+      if (activityMatchesSlot(act, slot.dayIdx)) {
+        const key = doneKey(slot.weekNum, slot.dayIdx);
+        if (!done[key]) { done[key] = { strava:true, actId:act.id }; autoMarked++; }
+      }
     });
-    document.getElementById('strava-modal').remove();
-    stravaShowConnected(data.athlete?.firstname);
-    await stravaSync();
-  } catch(e) {
-    alert('Lỗi kết nối: ' + e.message);
-    btn.textContent = 'Xác nhận & Kết nối';
+
+    await cloudSaveDone(done);
+    updateTrailProgress();
+    weeks.forEach(w => updateWeekBadge(w.w));
+    document.querySelectorAll('.week.open').forEach(el =>
+      initDayStates(parseInt(el.id.replace('wk','')))
+    );
+
+    const now = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
+    status.textContent = now + ' · +' + autoMarked + ' buổi';
+    localStorage.setItem('vmm_last_sync', Date.now().toString());
+    if (autoMarked > 0) showMilestoneToast('🔄 Strava: +' + autoMarked + ' buổi tập!');
+
+  } catch(err) {
+    status.textContent = 'Lỗi: ' + err.message;
+  } finally {
     btn.disabled = false;
+    btn.textContent = '↻ Đồng bộ ngay';
   }
 }
 
-// Also update initDayStates to show strava-done style
-const _origInitDayStates = initDayStates;
+// ── Patch toggleDayDone to cloud-save ────────────────────────
+function toggleDayDone(weekNum, dayIdx, el, event) {
+  if (event) event.stopPropagation();
+  const done = loadDone();
+  const key  = doneKey(weekNum, dayIdx);
+  const prev = Object.keys(done).length;
+  if (done[key]) { delete done[key]; el.classList.remove('done','strava-done'); }
+  else           { done[key] = 1;   el.classList.add('done'); }
+  cloudSaveDone(done);
+  updateTrailProgress(done[key] ? prev : undefined);
+  updateWeekBadge(weekNum);
+}
+
+// ── initDayStates with strava-done style ─────────────────────
 function initDayStates(weekNum) {
   const done = loadDone();
   weeks.filter(w => w.w === weekNum).forEach(w => {
-    w.days.forEach((_, i) => {
-      const el = document.querySelector(`#wk${weekNum} .day[data-i="${i}"]`);
+    w.days.forEach((_,i) => {
+      const el = document.querySelector('#wk'+weekNum+' .day[data-i="'+i+'"]');
       if (!el) return;
-      const val = done[doneKey(weekNum, i)];
-      if (val) {
-        el.classList.add('done');
-        if (val.strava) el.classList.add('strava-done');
-        else el.classList.remove('strava-done');
-      } else {
-        el.classList.remove('done');
-        el.classList.remove('strava-done');
-      }
+      const val = done[doneKey(weekNum,i)];
+      el.classList.toggle('done', !!val);
+      el.classList.toggle('strava-done', !!(val && val.strava));
     });
     updateWeekBadge(weekNum);
   });
 }
 
-// Init Strava UI on page load
+// ── Init ──────────────────────────────────────────────────────
 async function initStrava() {
-  const td = getTokenData();
-  if (td) {
-    stravaShowConnected(td.athlete_name?.split(' ')[0] || 'Connected');
-    // Auto-sync if last sync was > 1 hour ago
-    const lastSync = localStorage.getItem('vmm_last_sync');
-    const now = Date.now();
-    if (!lastSync || now - parseInt(lastSync) > 3600000) {
-      localStorage.setItem('vmm_last_sync', now.toString());
-      await stravaSync();
-    }
+  await handleStravaCallback();
+  const a = getAthleteData();
+  if (a) {
+    stravaShowConnected(a.athlete_name?.split(' ')[0]);
+    const cloudDone = await cloudLoadDone();
+    updateTrailProgress();
+    weeks.forEach(w => updateWeekBadge(w.w));
+    const last = localStorage.getItem('vmm_last_sync');
+    if (!last || Date.now()-parseInt(last) > 3600000) await stravaSync();
   } else {
     stravaShowConnect();
   }
-  // Handle OAuth redirect
-  await handleStravaCallback();
 }
-
 // Khởi tạo
 updateTrailProgress();
 showPhase(0);
