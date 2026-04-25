@@ -273,6 +273,84 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .day.strava-done{background:#fff8f5;border-color:#FC4C02;}
 .day.strava-done::after{content:'🔁';position:absolute;top:5px;right:6px;font-size:11px;}
 
+
+/* ═══ MAIN LAYOUT: weeks + sidebar ═══ */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  align-items: start;
+}
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Sidebar sections */
+.sb-section { border-bottom: 1px solid var(--border); padding: 14px 16px; }
+.sb-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.sb-title-dot { width: 6px; height: 6px; border-radius: 50%; background: #FC4C02; }
+
+/* Activity list */
+.act-item { padding: 8px 0; border-bottom: 1px solid var(--border); cursor: default; }
+.act-item:last-child { border-bottom: none; }
+.act-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+.act-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.act-date { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.act-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.act-stat { font-size: 10px; color: var(--muted2); font-family: 'IBM Plex Mono', monospace; }
+.act-stat span { color: var(--text); font-weight: 600; }
+.act-type-badge { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 3px;
+  background: rgba(252,76,2,.12); color: #FC4C02; font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: 4px; }
+.act-elev { color: #c8f0a0 !important; }
+.no-acts { font-size: 12px; color: var(--muted); text-align: center; padding: 20px 0;
+  line-height: 1.6; }
+
+/* Weekly analysis */
+.analysis-week-sel { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.aw-btn { font-size: 9px; padding: 3px 7px; border-radius: 3px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted); cursor: pointer; font-family: 'IBM Plex Mono', monospace;
+  transition: all .15s; }
+.aw-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.analysis-content { font-size: 12px; line-height: 1.7; color: var(--muted2); }
+.analysis-content .an-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--muted); margin-top: 10px; margin-bottom: 3px; }
+.analysis-content .an-good { color: #6abf82; }
+.analysis-content .an-warn { color: #f0c070; }
+.analysis-content .an-tip { background: rgba(200,240,160,.07); border-left: 2px solid #c8f0a0;
+  padding: 6px 8px; border-radius: 0 4px 4px 0; margin-top: 6px; font-size: 11px;
+  color: var(--text); line-height: 1.6; }
+.analysis-loading { font-size: 11px; color: var(--muted); text-align: center; padding: 16px 0; }
+.analysis-btn { width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px; font-size: 11px; font-weight: 600; cursor: pointer;
+  color: var(--text); font-family: inherit; transition: all .15s; margin-top: 8px; }
+.analysis-btn:hover { border-color: #c8f0a0; color: #c8f0a0; }
+
+/* Stats summary */
+.sb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sb-stat-box { background: var(--surface2); border-radius: 6px; padding: 8px 10px; }
+.sb-stat-val { font-size: 16px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+  color: #c8f0a0; }
+.sb-stat-label { font-size: 9px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .05em; margin-top: 2px; }
+
+@media (max-width: 900px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; border-left: none; border-top: 1px solid var(--border); }
+}
+
 </style>  
 </head>  
 <body>  
@@ -428,8 +506,60 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 </div>
 </div>
 
-<div id="phase-banner" class="phase-banner" style="display:none"></div>  
-<div class="weeks" id="week-list"></div>  
+<div class="main-layout">
+<div class="weeks-col">
+<div id="phase-banner" class="phase-banner" style="display:none"></div>
+<div class="weeks" id="week-list"></div>
+</div>
+
+<div class="sidebar" id="sidebar">
+
+  <!-- Stats summary -->
+  <div class="sb-section">
+    <div class="sb-title"><span class="sb-title-dot" style="background:#c8f0a0"></span>Tổng kết</div>
+    <div class="sb-stats">
+      <div class="sb-stat-box">
+        <div class="sb-stat-val" id="sb-total-km">0</div>
+        <div class="sb-stat-label">km Strava</div>
+      </div>
+      <div class="sb-stat-box">
+        <div class="sb-stat-val" id="sb-total-acts">0</div>
+        <div class="sb-stat-label">buổi tập</div>
+      </div>
+      <div class="sb-stat-box">
+        <div class="sb-stat-val" id="sb-total-elev">0</div>
+        <div class="sb-stat-label">m D+</div>
+      </div>
+      <div class="sb-stat-box">
+        <div class="sb-stat-val" id="sb-total-time">0</div>
+        <div class="sb-stat-label">giờ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent activities -->
+  <div class="sb-section">
+    <div class="sb-title"><span class="sb-title-dot"></span>Hoạt động Strava gần đây</div>
+    <div id="sb-activities">
+      <div class="no-acts">Kết nối Strava để xem<br>các buổi tập đã đồng bộ</div>
+    </div>
+  </div>
+
+  <!-- Weekly analysis -->
+  <div class="sb-section">
+    <div class="sb-title"><span class="sb-title-dot" style="background:#7ec8e3"></span>Nhận xét & Khuyến nghị</div>
+    <div class="analysis-week-sel" id="aw-weeks"></div>
+    <div class="analysis-content" id="aw-content">
+      <div class="no-acts">Sync Strava để nhận<br>phân tích tuần tập luyện</div>
+    </div>
+    <button class="analysis-btn" id="aw-refresh-btn" onclick="refreshAnalysis()" style="display:none">
+      ↻ Cập nhật phân tích
+    </button>
+  </div>
+
+</div>
+
+</div>  
   
 <script>  
 // --- CORE DATA & UI ---  
@@ -1160,6 +1290,7 @@ async function stravaSync(){
   try{
     const{activities,athlete_name}=await callEdge({action:'activities',athlete_id:a.athlete_id});
     if(athlete_name)stravaShowConnected(athlete_name.split(' ')[0]);
+    if(activities)renderSidebarActivities(activities);
     const done=await cloudLoadDone();let marked=0;
     activities.forEach(act=>{
       const s=dateToSlot((act.start_date_local||'').split('T')[0]);if(!s)return;
@@ -1249,6 +1380,225 @@ async function initStrava(){
       stravaSync().catch(e=>console.warn('Auto sync failed:',e));
     }
   }else{stravaShowConnect();}
+}
+
+
+// ═══ SIDEBAR: Activities + Weekly Analysis ═══
+let _stravaActivities = [];
+let _selectedAnalysisWeek = 1;
+
+function formatDuration(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return h > 0 ? h + 'g' + (m > 0 ? m + 'p' : '') : m + 'ph';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.getDate() + '/' + (d.getMonth()+1);
+}
+
+function getActivityIcon(type) {
+  const t = (type || '').toLowerCase();
+  if (t.includes('trail')) return '🏔';
+  if (t.includes('run')) return '🏃';
+  if (t.includes('weight') || t.includes('workout') || t.includes('crossfit')) return '💪';
+  if (t.includes('hike') || t.includes('walk')) return '🥾';
+  if (t.includes('elliptical') || t.includes('stair')) return '📈';
+  return '⚡';
+}
+
+function renderSidebarActivities(activities) {
+  _stravaActivities = activities || [];
+  const el = document.getElementById('sb-activities');
+  if (!el) return;
+
+  if (!activities || activities.length === 0) {
+    el.innerHTML = '<div class="no-acts">Chưa có buổi tập nào<br>trong khoảng thời gian này</div>';
+    return;
+  }
+
+  // Sort by date desc, show last 15
+  const sorted = [...activities].sort((a,b) => new Date(b.start_date_local) - new Date(a.start_date_local)).slice(0, 15);
+
+  // Stats
+  const totalKm = activities.reduce((s,a) => s + (a.distance||0)/1000, 0);
+  const totalElev = activities.reduce((s,a) => s + (a.total_elevation_gain||0), 0);
+  const totalTime = activities.reduce((s,a) => s + (a.moving_time||0), 0);
+  document.getElementById('sb-total-km').textContent = totalKm.toFixed(0);
+  document.getElementById('sb-total-acts').textContent = activities.length;
+  document.getElementById('sb-total-elev').textContent = totalElev >= 1000 ? (totalElev/1000).toFixed(1)+'k' : totalElev.toFixed(0);
+  document.getElementById('sb-total-time').textContent = (totalTime/3600).toFixed(0);
+
+  el.innerHTML = sorted.map(act => {
+    const km = ((act.distance||0)/1000).toFixed(1);
+    const gain = (act.total_elevation_gain||0).toFixed(0);
+    const dur = formatDuration(act.moving_time||0);
+    const icon = getActivityIcon(act.sport_type||act.type);
+    const type = (act.sport_type||act.type||'').replace(/_/g,' ');
+    const date = formatDate(act.start_date_local);
+    const name = act.name || 'Hoạt động';
+    return `<div class="act-item">
+      <div class="act-header">
+        <span class="act-name" title="${name}">${icon} ${name}</span>
+        <span class="act-date">${date}</span>
+      </div>
+      <div class="act-type-badge">${type}</div>
+      <div class="act-stats">
+        <span class="act-stat"><span>${km}</span>km</span>
+        <span class="act-stat"><span>${dur}</span></span>
+        ${gain > 0 ? '<span class="act-stat act-elev"><span>+'+gain+'</span>m</span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Build week selector for analysis
+  renderWeekSelector(activities);
+}
+
+function renderWeekSelector(activities) {
+  const el = document.getElementById('aw-weeks');
+  if (!el) return;
+
+  // Find which weeks have activities
+  const weeksWithActs = new Set();
+  activities.forEach(act => {
+    const date = (act.start_date_local||'').split('T')[0];
+    const slot = dateToSlot(date);
+    if (slot) weeksWithActs.add(slot.weekNum);
+  });
+
+  if (weeksWithActs.size === 0) return;
+  const sorted = [...weeksWithActs].sort((a,b) => b-a).slice(0, 8);
+  el.innerHTML = sorted.map(w =>
+    `<button class="aw-btn ${w === _selectedAnalysisWeek ? 'active' : ''}"
+      onclick="selectAnalysisWeek(${w})">W${String(w).padStart(2,'0')}</button>`
+  ).join('');
+
+  // Auto-select latest week
+  if (!weeksWithActs.has(_selectedAnalysisWeek)) {
+    _selectedAnalysisWeek = sorted[0];
+  }
+  document.getElementById('aw-refresh-btn').style.display = 'block';
+  generateWeekAnalysis(_selectedAnalysisWeek);
+}
+
+function selectAnalysisWeek(weekNum) {
+  _selectedAnalysisWeek = weekNum;
+  document.querySelectorAll('.aw-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.aw-btn').forEach(b => {
+    if (b.textContent === 'W'+String(weekNum).padStart(2,'0')) b.classList.add('active');
+  });
+  generateWeekAnalysis(weekNum);
+}
+
+function generateWeekAnalysis(weekNum) {
+  const el = document.getElementById('aw-content');
+  if (!el) return;
+  el.innerHTML = '<div class="analysis-loading">⏳ Đang phân tích...</div>';
+
+  // Get week's activities
+  const weekActs = _stravaActivities.filter(act => {
+    const date = (act.start_date_local||'').split('T')[0];
+    const slot = dateToSlot(date);
+    return slot && slot.weekNum === weekNum;
+  });
+
+  // Get week info from plan
+  const planWeek = weeks.find(w => w.w === weekNum);
+  const done = loadDone();
+  const doneDays = Object.keys(done).filter(k => k.startsWith('w'+weekNum+'_')).length;
+  const totalDays = planWeek ? planWeek.days.length : 7;
+
+  // Calculate stats
+  const runs = weekActs.filter(a => (a.sport_type||a.type||'').toLowerCase().includes('run') || (a.sport_type||a.type||'').toLowerCase().includes('trail'));
+  const totalKm = weekActs.reduce((s,a) => s+(a.distance||0)/1000, 0);
+  const totalElev = weekActs.reduce((s,a) => s+(a.total_elevation_gain||0), 0);
+  const totalTime = weekActs.reduce((s,a) => s+(a.moving_time||0), 0);
+  const targetKm = planWeek ? parseInt(planWeek.km) : 0;
+  const targetGain = planWeek ? parseInt(planWeek.gain) : 0;
+
+  const kmPct = targetKm > 0 ? (totalKm/targetKm*100).toFixed(0) : 0;
+  const elevPct = targetGain > 0 ? (totalElev/targetGain*100).toFixed(0) : 0;
+  const completionPct = totalDays > 0 ? Math.round(doneDays/totalDays*100) : 0;
+
+  // Generate analysis HTML
+  const getStatus = (pct) => pct >= 90 ? 'an-good' : pct >= 70 ? '' : 'an-warn';
+  const getEmoji = (pct) => pct >= 90 ? '✅' : pct >= 70 ? '⚠️' : '❗';
+
+  // Phase context
+  const phase = weekNum <= 5 ? 'P1 · Tái thiết' : weekNum <= 12 ? 'P2 · Tích lũy' : weekNum <= 17 ? 'P3 · Peak' : 'P4 · Taper';
+  const phaseAdvice = {
+    'P1 · Tái thiết': 'Ưu tiên Z1-Z2, không vượt ngưỡng. Mục tiêu build base aerobic và phục hồi eccentric.',
+    'P2 · Tích lũy': 'Bắt đầu thêm ME workout và treadmill 15%. Chú ý không tăng volume quá 10%/tuần.',
+    'P3 · Peak': 'Peak training — chịu đựng high load. Monitor chấn thương và sleep quality.',
+    'P4 · Taper': 'Giảm volume nhưng giữ intensity. Ưu tiên sleep, nutrition và gear check.'
+  }[phase] || '';
+
+  // Recommendations based on data
+  const recs = [];
+  if (kmPct < 70) recs.push('Km thấp hơn kế hoạch — kiểm tra recovery và tăng dần.');
+  if (elevPct < 70 && weekNum > 4) recs.push('Elevation thiếu — thêm treadmill incline hoặc lên núi cuối tuần.');
+  if (weekActs.length === 0) recs.push('Chưa có activity nào — kiểm tra kết nối Strava.');
+  if (kmPct >= 110) recs.push('Km vượt kế hoạch — cân nhắc recovery tuần sau.');
+  if (completionPct >= 80) recs.push('Tuần tập luyện xuất sắc! Duy trì momentum.');
+  if (recs.length === 0) recs.push('Bám sát kế hoạch tốt — tiếp tục duy trì.');
+
+  el.innerHTML = `
+    <div class="an-label">Tuần ${weekNum} · ${phase}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
+        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">${totalKm.toFixed(1)}<small style="font-size:10px;opacity:.5">/${targetKm}km</small></div>
+        <div style="font-size:9px;color:var(--muted)">DISTANCE ${getEmoji(kmPct)}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
+        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">+${totalElev.toFixed(0)}<small style="font-size:10px;opacity:.5">m</small></div>
+        <div style="font-size:9px;color:var(--muted)">ELEVATION ${getEmoji(elevPct)}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
+        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">${(totalTime/3600).toFixed(1)}<small style="font-size:10px;opacity:.5">h</small></div>
+        <div style="font-size:9px;color:var(--muted)">THỜI GIAN</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
+        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">${doneDays}<small style="font-size:10px;opacity:.5">/${totalDays}</small></div>
+        <div style="font-size:9px;color:var(--muted)">BUỔI ✓ ${completionPct}%</div>
+      </div>
+    </div>
+    <div class="an-label">Hoạt động (${weekActs.length} buổi)</div>
+    ${weekActs.length > 0
+      ? weekActs.map(a => {
+          const km2 = ((a.distance||0)/1000).toFixed(1);
+          const elv = (a.total_elevation_gain||0).toFixed(0);
+          return `<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+            <span>${getActivityIcon(a.sport_type||a.type)} ${(a.name||'').substring(0,22)}</span>
+            <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace">${km2}km ${elv>0?'+'+elv:''}m</span>
+          </div>`;
+        }).join('')
+      : '<div style="font-size:11px;color:var(--muted);padding:4px 0">Chưa có activity nào được sync</div>'}
+    <div class="an-label" style="margin-top:10px">Khuyến nghị</div>
+    ${recs.map(r => `<div class="an-tip">${r}</div>`).join('')}
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6">${phaseAdvice}</div>
+  `;
+}
+
+function refreshAnalysis() {
+  generateWeekAnalysis(_selectedAnalysisWeek);
+}
+
+// Patch stravaSync to update sidebar
+const _origStravaSync = stravaSync;
+async function stravaSync() {
+  await _origStravaSync();
+  // After sync, activities are in done data - re-fetch to get full data
+  const a = getAthleteData();
+  if (a && _stravaActivities.length === 0) {
+    // Silently fetch activities to populate sidebar
+    callEdge({action:'activities', athlete_id: a.athlete_id})
+      .then(data => {
+        if (data.activities) renderSidebarActivities(data.activities);
+      }).catch(()=>{});
+  }
 }
 
 // Khởi tạo
