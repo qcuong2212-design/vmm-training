@@ -1586,20 +1586,7 @@ function refreshAnalysis() {
   generateWeekAnalysis(_selectedAnalysisWeek);
 }
 
-// Patch stravaSync to update sidebar
-const _origStravaSync = stravaSync;
-async function stravaSync() {
-  await _origStravaSync();
-  // After sync, activities are in done data - re-fetch to get full data
-  const a = getAthleteData();
-  if (a && _stravaActivities.length === 0) {
-    // Silently fetch activities to populate sidebar
-    callEdge({action:'activities', athlete_id: a.athlete_id})
-      .then(data => {
-        if (data.activities) renderSidebarActivities(data.activities);
-      }).catch(()=>{});
-  }
-}
+// Sidebar update handled inline
 
 // Khởi tạo
 updateTrailProgress();
