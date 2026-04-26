@@ -340,11 +340,12 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 /* Stats summary */
 .sb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.sb-stat-box { background: var(--surface2); border-radius: 6px; padding: 8px 10px; }
-.sb-stat-val { font-size: 16px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
-  color: #c8f0a0; }
-.sb-stat-label { font-size: 9px; color: var(--muted); text-transform: uppercase;
-  letter-spacing: .05em; margin-top: 2px; }
+.sb-stat-box { background: rgba(200,240,160,.08); border-radius: 6px; padding: 8px 10px;
+  border: 1px solid rgba(200,240,160,.15); }
+.sb-stat-val { font-size: 18px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+  color: #c8f0a0; line-height: 1.1; }
+.sb-stat-label { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase;
+  letter-spacing: .05em; margin-top: 3px; }
 
 @media (max-width: 900px) {
   .main-layout { grid-template-columns: 1fr; }
@@ -1297,6 +1298,18 @@ async function stravaSync(){
       if(actMatches(act,s.dayIdx)){
         const k=doneKey(s.weekNum,s.dayIdx);
         if(!done[k]){done[k]={strava:true,actId:act.id};marked++;}
+        // Add visual info to day card
+        const dayEl=document.querySelector('#wk'+s.weekNum+' .day[data-i="'+s.dayIdx+'"]');
+        if(dayEl&&!dayEl.querySelector('.strava-act-info')){
+          dayEl.classList.add('strava-matched','done','strava-done');
+          const km=((act.distance||0)/1000).toFixed(1);
+          const gain=Math.round(act.total_elevation_gain||0);
+          const dur=Math.round((act.moving_time||0)/60);
+          const info=document.createElement('div');
+          info.className='strava-act-info';
+          info.textContent='🔁 '+km+'km'+(gain>0?' +'+gain+'m':'')+' '+dur+'ph';
+          dayEl.appendChild(info);
+        }
       }
     });
     await cloudSaveDone(done);updateTrailProgress();
@@ -1329,6 +1342,7 @@ function initDayStates(weekNum){
       const val=done[doneKey(weekNum,i)];
       el.classList.toggle('done',!!val);
       el.classList.toggle('strava-done',!!(val&&val.strava));
+      if(val&&val.strava)el.classList.add('strava-matched');
     });
     updateWeekBadge(weekNum);
   });
