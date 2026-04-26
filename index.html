@@ -23,23 +23,23 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .header{background:var(--text);color:#f7f5f0;padding:20px 22px}  
 .htop{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}  
 .race-info h1{font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:2px}  
-.race-info p{font-size:11px;opacity:.6;font-family:'IBM Plex Mono',monospace}  
+.race-info p{font-size:11px;opacity:.6;font-family:monospace}  
 .countdown{text-align:right}  
-.countdown-num{font-size:28px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0}  
+.countdown-num{font-size:28px;font-weight:700;font-family:monospace;color:#c8f0a0}  
 .countdown-label{font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.1em}  
 .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;margin-top:16px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden}  
 .stat{background:rgba(255,255,255,.07);padding:10px 12px}  
-.stat-val{font-size:16px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0}  
+.stat-val{font-size:16px;font-weight:700;font-family:monospace;color:#c8f0a0}  
 .stat-label{font-size:9px;opacity:.5;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}  
   
 /* LEGEND */  
 .legend{display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;background:var(--surface);border-bottom:1px solid var(--border)}  
-.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace}  
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:monospace}  
 .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}  
   
 /* TABS */  
 .tabs{display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--surface);overflow-x:auto}  
-.tab{padding:10px 16px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}  
+.tab{padding:10px 16px;font-size:11px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}  
 .tab:hover{color:var(--text)}  
 .tab.active{color:var(--text);border-bottom-color:var(--text)}  
 .tab-special{color:var(--gym);border-left:1px solid var(--border);}  
@@ -50,10 +50,10 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 /* PHASE BANNER */  
 .phase-banner{padding:14px 22px;border-bottom:1px solid var(--border)}  
 .phase-title{font-size:14px;font-weight:700;margin-bottom:3px}  
-.phase-meta{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px}  
+.phase-meta{font-size:11px;color:var(--muted);font-family:monospace;margin-bottom:8px}  
 .phase-body{font-size:12px;color:var(--muted);line-height:1.7;max-width:680px}  
 .phase-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}  
-.ptag{font-size:10px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace}  
+.ptag{font-size:10px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:monospace}  
   
 /* WEEK LIST */  
 .weeks{padding:12px 22px;display:flex;flex-direction:column;gap:6px}  
@@ -66,11 +66,11 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   .wgain, .wloss{display:none;}  
   .wnote{font-size: 10px;}  
 }  
-.wnum{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;color:var(--muted2)}  
-.wdate{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace}  
-.wkm{font-weight:700;font-size:13px;font-family:'IBM Plex Mono',monospace}  
-.wgain{font-size:11px;color:var(--uphill);font-family:'IBM Plex Mono',monospace}  
-.wloss{font-size:11px;color:var(--downhill);font-family:'IBM Plex Mono',monospace}  
+.wnum{font-family:monospace;font-weight:600;font-size:12px;color:var(--muted2)}  
+.wdate{font-size:10px;color:var(--muted);font-family:monospace}  
+.wkm{font-weight:700;font-size:13px;font-family:monospace}  
+.wgain{font-size:11px;color:var(--uphill);font-family:monospace}  
+.wloss{font-size:11px;color:var(--downhill);font-family:monospace}  
 .wnote{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}  
 .wbar{height:3px;background:var(--surface2)}  
 .wbar-fill{height:3px;transition:width .4s}  
@@ -85,10 +85,10 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 }  
 .day{border:1px solid var(--border);border-radius:5px;padding:7px;min-height:110px}  
 .day-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}  
-.day-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);font-family:'IBM Plex Mono',monospace}  
+.day-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);font-family:monospace}  
 .day-dot{width:7px;height:7px;border-radius:50%}  
 .day-label{font-size:10px;font-weight:600;margin-bottom:3px}  
-.day-text{font-size:9px;color:var(--muted);line-height:1.5;font-family:'IBM Plex Mono',monospace}  
+.day-text{font-size:9px;color:var(--muted);line-height:1.5;font-family:monospace}  
   
 /* SESSION BLOCKS & TOOLTIPS */  
 .sblock{border-radius:3px;padding:3px 5px;margin-bottom:3px;font-size:10px;font-weight:500; line-height:1.3;}  
@@ -125,7 +125,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .focus-box{border-radius:5px;padding:10px 12px;border:1px solid}  
 .focus-up{background:#fdf5f2;border-color:#f0c4b0}  
 .focus-dn{background:#f2f7fd;border-color:#b0cdf0}  
-.focus-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'IBM Plex Mono',monospace}  
+.focus-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:monospace}  
 .focus-text{font-size:11px;line-height:1.6;color:var(--muted)}  
   
 /* NUTRITION & AI PANELS */  
@@ -136,7 +136,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .nutri-grid{display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;}  
 @media (max-width: 768px) { .nutri-grid{grid-template-columns: 1fr;} }  
 .nutri-card{background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px;}  
-.nutri-card h3{font-size: 13px; font-weight: 700; margin-bottom: 12px; display:flex; align-items:center; gap:6px; text-transform: uppercase; letter-spacing: 0.05em; font-family:'IBM Plex Mono',monospace;}  
+.nutri-card h3{font-size: 13px; font-weight: 700; margin-bottom: 12px; display:flex; align-items:center; gap:6px; text-transform: uppercase; letter-spacing: 0.05em; font-family:monospace;}  
 .nutri-card.before h3{color: var(--road);}  
 .nutri-card.during h3{color: var(--uphill);}  
 .nutri-card.after h3{color: var(--gym);}  
@@ -145,11 +145,11 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .nutri-list li::before{content: '•'; position: absolute; left: 0; color: var(--border2); font-weight: bold;}  
 .macro-box{display: flex; justify-content: space-between; background: var(--surface2); padding: 8px 10px; border-radius: 4px; margin-top: 10px;}  
 .macro-item{text-align: center;}  
-.macro-val{font-size: 14px; font-weight: 700; color: var(--text); font-family:'IBM Plex Mono',monospace;}  
+.macro-val{font-size: 14px; font-weight: 700; color: var(--text); font-family:monospace;}  
 .macro-lbl{font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;}  
   
 .gut-training{background: #fff8e1; border: 1px solid #f0e6c8; border-radius: 6px; padding: 16px; margin-top: 10px;}  
-.gut-training h4{font-size: 13px; font-weight: 700; color: #b08d1e; margin-bottom: 6px; font-family:'IBM Plex Mono',monospace; text-transform: uppercase;}  
+.gut-training h4{font-size: 13px; font-weight: 700; color: #b08d1e; margin-bottom: 6px; font-family:monospace; text-transform: uppercase;}  
 .gut-training p{font-size: 12px; color: var(--text); margin-bottom: 8px;}  
   
 /* AI COACH CHAT */  
@@ -188,7 +188,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .day:hover.done { opacity: .9; }
 
 /* week done-count badge */
-.w-done-badge { font-size: 10px; font-family:'IBM Plex Mono',monospace;
+.w-done-badge { font-size: 10px; font-family:monospace;
   color: var(--gym); margin-left: 8px; opacity: 0; transition: opacity .3s; }
 .w-done-badge.visible { opacity: 1; }
 .week.week-done .whead { background: #f6fdf8; }
@@ -201,7 +201,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 }
 .trail-label { display: flex; justify-content: space-between; align-items: baseline;
   margin-bottom: 8px; }
-.trail-km { font-size: 22px; font-weight: 700; font-family:'IBM Plex Mono',monospace;
+.trail-km { font-size: 22px; font-weight: 700; font-family:monospace;
   color: #c8f0a0; }
 .trail-total { font-size: 11px; color: rgba(255,255,255,.4); }
 .trail-subtitle { font-size: 10px; color: rgba(255,255,255,.5); margin-top: 1px; }
@@ -223,7 +223,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .cp-dot { width: 6px; height: 6px; border-radius: 50%;
   background: rgba(255,255,255,.2); transition: background .3s; }
 .cp.reached .cp-dot { background: #c8f0a0; box-shadow: 0 0 6px rgba(200,240,160,.5); }
-.cp-label { font-size: 9px; color: rgba(255,255,255,.3); font-family:'IBM Plex Mono',monospace;
+.cp-label { font-size: 9px; color: rgba(255,255,255,.3); font-family:monospace;
   transition: color .3s; white-space: nowrap; }
 .cp.reached .cp-label { color: rgba(200,240,160,.8); }
 
@@ -236,7 +236,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 /* done stats row */
 .done-stats { display: flex; gap: 16px; margin-top: 8px; }
-.done-stat { font-size: 10px; color: rgba(255,255,255,.4); font-family:'IBM Plex Mono',monospace; }
+.done-stat { font-size: 10px; color: rgba(255,255,255,.4); font-family:monospace; }
 .done-stat span { color: #c8f0a0; font-weight: 600; }
 
 
@@ -247,9 +247,9 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 #vmm-elevation { display: block; width: 100%; height: 100%; min-height: 120px; }
 #elev-runner, #elev-runner-glow { transition: cx .6s cubic-bezier(.4,0,.2,1), cy .6s cubic-bezier(.4,0,.2,1); }
 .prog-row { display: flex; align-items: baseline; gap: 10px; margin: 8px 0 3px; flex-wrap: wrap; }
-.prog-km { font-size: 24px; font-weight: 700; font-family:'IBM Plex Mono',monospace; color: #c8f0a0; line-height: 1; }
+.prog-km { font-size: 24px; font-weight: 700; font-family:monospace; color: #c8f0a0; line-height: 1; }
 .prog-of { font-size: 11px; color: rgba(255,255,255,.35); }
-.prog-sessions { font-size: 11px; color: rgba(255,255,255,.4); font-family:'IBM Plex Mono',monospace; }
+.prog-sessions { font-size: 11px; color: rgba(255,255,255,.4); font-family:monospace; }
 .prog-next { font-size: 10px; color: rgba(200,240,160,.55); margin-top: 2px; }
 .prog-bar-wrap { position: relative; height: 3px; background: rgba(255,255,255,.1); border-radius: 2px; margin-top: 7px; overflow: hidden; }
 .prog-bar-fill { height: 3px; background: linear-gradient(90deg, #3a7a20, #c8f0a0); border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1); min-width: 0; }
@@ -478,6 +478,60 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 }
 .pwa-dismiss { font-size: 16px; color: rgba(255,255,255,.3); cursor: pointer;
   background: none; border: none; padding: 0; }
+
+
+/* ═══ SIDEBAR ═══ */
+.main-layout { display:grid; grid-template-columns:1fr 320px; gap:0; align-items:start; }
+.weeks-col { min-width:0; }
+.sidebar {
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  border-left:1px solid var(--border); background:var(--surface);
+  display:flex; flex-direction:column;
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.sb-section { border-bottom:1px solid var(--border); padding:14px 16px; }
+.sb-title { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.sb-title-dot { width:6px; height:6px; border-radius:50%; background:#FC4C02; }
+.sb-stats { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.sb-stat-box { background:rgba(200,240,160,.08); border-radius:6px; padding:8px 10px;
+  border:1px solid rgba(200,240,160,.15); }
+.sb-stat-val { font-size:18px; font-weight:700; font-family:monospace;
+  color:#c8f0a0; line-height:1.1; }
+.sb-stat-label { font-size:9px; color:rgba(255,255,255,.5); text-transform:uppercase;
+  letter-spacing:.05em; margin-top:3px; }
+.act-item { padding:7px 0; border-bottom:1px solid var(--border); }
+.act-item:last-child{border-bottom:none;}
+.act-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.act-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:180px;}
+.act-date{font-size:10px;color:var(--muted);font-family:monospace;}
+.act-stats{display:flex;gap:8px;flex-wrap:wrap;}
+.act-stat{font-size:10px;color:var(--muted2);font-family:monospace;}
+.act-stat span{color:var(--text);font-weight:600;}
+.act-type-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;
+  background:rgba(252,76,2,.12);color:#FC4C02;font-family:monospace;margin-bottom:3px;}
+.no-acts{font-size:12px;color:var(--muted);text-align:center;padding:16px 0;line-height:1.6;}
+.aw-btn{font-size:9px;padding:3px 7px;border-radius:3px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--muted);cursor:pointer;font-family:monospace;
+  transition:all .15s;}
+.aw-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.analysis-week-sel{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.analysis-content{font-size:12px;line-height:1.7;color:var(--muted2);}
+.an-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted);margin-top:10px;margin-bottom:3px;}
+.an-tip{background:rgba(200,240,160,.07);border-left:2px solid #c8f0a0;
+  padding:6px 8px;border-radius:0 4px 4px 0;margin-top:6px;font-size:11px;
+  color:var(--text);line-height:1.6;}
+.analysis-btn{width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;
+  color:var(--text);font-family:inherit;transition:all .15s;margin-top:8px;}
+.analysis-btn:hover{border-color:#c8f0a0;color:#c8f0a0;}
+@media(max-width:900px){
+  .main-layout{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
+}
 
 </style>  
 </head>  
@@ -782,8 +836,37 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 </div>
 </div>
 
+<div class="main-layout">
+<div class="weeks-col">
 <div id="phase-banner" class="phase-banner" style="display:none"></div>  
-<div class="weeks" id="week-list"></div>  
+<div class="weeks" id="week-list"></div>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-section">
+    <div class="sb-title"><span class="sb-title-dot" style="background:#c8f0a0"></span>Tổng kết Strava</div>
+    <div class="sb-stats">
+      <div class="sb-stat-box"><div class="sb-stat-val" id="sb-total-km">0</div><div class="sb-stat-label">km Strava</div></div>
+      <div class="sb-stat-box"><div class="sb-stat-val" id="sb-total-acts">0</div><div class="sb-stat-label">buổi tập</div></div>
+      <div class="sb-stat-box"><div class="sb-stat-val" id="sb-total-elev">0</div><div class="sb-stat-label">m D+</div></div>
+      <div class="sb-stat-box"><div class="sb-stat-val" id="sb-total-time">0</div><div class="sb-stat-label">giờ</div></div>
+    </div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title"><span class="sb-title-dot"></span>Hoạt động gần đây</div>
+    <div id="sb-activities"><div class="no-acts">Đồng bộ Strava để xem<br>các buổi tập</div></div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title"><span class="sb-title-dot" style="background:#7ec8e3"></span>Nhận xét & Khuyến nghị</div>
+    <div class="analysis-week-sel" id="aw-weeks"></div>
+    <div class="analysis-content" id="aw-content">
+      <div class="no-acts">Sync Strava để nhận<br>phân tích tuần tập luyện</div>
+    </div>
+    <button class="analysis-btn" id="aw-refresh-btn" onclick="refreshAnalysis()" style="display:none">↻ Cập nhật phân tích</button>
+  </div>
+</div>
+
+</div>  
   
 <script>  
 // --- CORE DATA & UI ---  
@@ -1683,6 +1766,7 @@ async function stravaSync() {
     });
     const {activities, athlete_name} = await resp.json();
     if (athlete_name) document.getElementById('strava-name').textContent = athlete_name.split(' ')[0];
+    if (activities) renderSidebarActivities(activities);
     const done = loadDone(); let marked=0;
     activities.forEach(act => {
       const s = dateToSlot((act.start_date_local||'').split('T')[0]);
@@ -1937,7 +2021,7 @@ async function initSprint1() {
     if (stravaData?.athlete_id) {
       const last = localStorage.getItem('vmm_last_sync');
       if (!last || Date.now()-parseInt(last) > 3600000) {
-        setTimeout(stravaSync, 2000);
+        setTimeout(()=>stravaSync().then(()=>{}).catch(()=>{}), 2000);
       }
     }
   } else {
@@ -1953,6 +2037,131 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/vmm-training/sw.js').catch(err => console.log('SW:', err));
   });
 }
+
+
+// ═══ SIDEBAR: Activities + Weekly Analysis ═══
+let _stravaActivities = [];
+let _selectedAnalysisWeek = 1;
+
+function fmtDur(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?h+'g'+(m>0?m+'p':''):m+'ph';}
+function fmtDate(d){if(!d)return'';const x=new Date(d);return x.getDate()+'/'+(x.getMonth()+1);}
+function actIcon(t){const s=(t||'').toLowerCase();
+  if(s.includes('trail'))return'🏔';if(s.includes('run'))return'🏃';
+  if(s.includes('weight')||s.includes('workout')||s.includes('crossfit'))return'💪';
+  if(s.includes('hike')||s.includes('walk'))return'🥾';return'⚡';}
+
+function renderSidebarActivities(activities) {
+  _stravaActivities = activities || [];
+  const el = document.getElementById('sb-activities');
+  if (!el) return;
+  if (!activities || !activities.length) {
+    el.innerHTML = '<div class="no-acts">Chưa có buổi tập nào</div>'; return;
+  }
+  const sorted = [...activities].sort((a,b)=>new Date(b.start_date_local)-new Date(a.start_date_local)).slice(0,15);
+  const totalKm = activities.reduce((s,a)=>s+(a.distance||0)/1000,0);
+  const totalElev = activities.reduce((s,a)=>s+(a.total_elevation_gain||0),0);
+  const totalTime = activities.reduce((s,a)=>s+(a.moving_time||0),0);
+  document.getElementById('sb-total-km').textContent = totalKm.toFixed(0);
+  document.getElementById('sb-total-acts').textContent = activities.length;
+  document.getElementById('sb-total-elev').textContent = totalElev>=1000?(totalElev/1000).toFixed(1)+'k':totalElev.toFixed(0);
+  document.getElementById('sb-total-time').textContent = (totalTime/3600).toFixed(0);
+  el.innerHTML = sorted.map(act => {
+    const km=((act.distance||0)/1000).toFixed(1);
+    const gain=(act.total_elevation_gain||0).toFixed(0);
+    const dur=fmtDur(act.moving_time||0);
+    const icon=actIcon(act.sport_type||act.type);
+    const type=(act.sport_type||act.type||'').replace(/_/g,' ');
+    return '<div class="act-item">'+
+      '<div class="act-header"><span class="act-name" title="'+(act.name||'')+'">'+icon+' '+(act.name||'').substring(0,22)+'</span>'+
+      '<span class="act-date">'+fmtDate(act.start_date_local)+'</span></div>'+
+      '<div class="act-type-badge">'+type+'</div>'+
+      '<div class="act-stats"><span class="act-stat"><span>'+km+'</span>km</span>'+
+      '<span class="act-stat"><span>'+dur+'</span></span>'+
+      (gain>0?'<span class="act-stat" style="color:#c8f0a0"><span>+'+gain+'</span>m</span>':'')+
+      '</div></div>';
+  }).join('');
+  renderWeekSelector(activities);
+}
+
+function renderWeekSelector(activities) {
+  const el = document.getElementById('aw-weeks');
+  if (!el) return;
+  const weeksWithActs = new Set();
+  activities.forEach(act => {
+    const date = (act.start_date_local||'').split('T')[0];
+    const slot = dateToSlot(date);
+    if (slot) weeksWithActs.add(slot.weekNum);
+  });
+  if (!weeksWithActs.size) return;
+  const sorted = [...weeksWithActs].sort((a,b)=>b-a).slice(0,8);
+  el.innerHTML = sorted.map(w =>
+    '<button class="aw-btn '+(w===_selectedAnalysisWeek?'active':'')+'" onclick="selectAnalysisWeek('+w+')">W'+String(w).padStart(2,'0')+'</button>'
+  ).join('');
+  if (!weeksWithActs.has(_selectedAnalysisWeek)) _selectedAnalysisWeek = sorted[0];
+  document.getElementById('aw-refresh-btn').style.display = 'block';
+  generateWeekAnalysis(_selectedAnalysisWeek);
+}
+
+function selectAnalysisWeek(w) {
+  _selectedAnalysisWeek = w;
+  document.querySelectorAll('.aw-btn').forEach(b => b.classList.toggle('active', b.textContent==='W'+String(w).padStart(2,'0')));
+  generateWeekAnalysis(w);
+}
+
+function generateWeekAnalysis(weekNum) {
+  const el = document.getElementById('aw-content');
+  if (!el) return;
+  const weekActs = _stravaActivities.filter(act => {
+    const slot = dateToSlot((act.start_date_local||'').split('T')[0]);
+    return slot && slot.weekNum === weekNum;
+  });
+  const planWeek = weeks.find(w => w.w === weekNum);
+  const done = loadDone();
+  const doneDays = Object.keys(done).filter(k=>k.startsWith('w'+weekNum+'_')).length;
+  const totalDays = planWeek ? planWeek.days.length : 7;
+  const totalKm = weekActs.reduce((s,a)=>s+(a.distance||0)/1000,0);
+  const totalElev = weekActs.reduce((s,a)=>s+(a.total_elevation_gain||0),0);
+  const totalTime = weekActs.reduce((s,a)=>s+(a.moving_time||0),0);
+  const targetKm = planWeek ? parseInt(planWeek.km) : 0;
+  const targetGain = planWeek ? parseInt(planWeek.gain) : 0;
+  const kmPct = targetKm>0?(totalKm/targetKm*100).toFixed(0):0;
+  const completionPct = totalDays>0?Math.round(doneDays/totalDays*100):0;
+  const getEmoji = p => p>=90?'✅':p>=70?'⚠️':'❗';
+  const phase = weekNum<=5?'P1 · Tái thiết':weekNum<=12?'P2 · Tích lũy':weekNum<=17?'P3 · Peak':'P4 · Taper';
+  const phaseAdvice = {
+    'P1 · Tái thiết':'Ưu tiên Z1-Z2, không vượt ngưỡng. Mục tiêu build base aerobic.',
+    'P2 · Tích lũy':'Thêm ME workout và treadmill 15%. Không tăng volume >10%/tuần.',
+    'P3 · Peak':'Peak training — chịu high load. Monitor chấn thương và sleep.',
+    'P4 · Taper':'Giảm volume nhưng giữ intensity. Ưu tiên sleep và gear check.'
+  }[phase]||'';
+  const recs = [];
+  if (kmPct<70) recs.push('Km thấp hơn kế hoạch — kiểm tra recovery và tăng dần.');
+  if (totalElev<targetGain*0.7 && weekNum>4) recs.push('Elevation thiếu — thêm treadmill incline hoặc núi cuối tuần.');
+  if (!weekActs.length) recs.push('Chưa có activity nào — kiểm tra kết nối Strava.');
+  if (kmPct>=110) recs.push('Km vượt kế hoạch — cân nhắc recovery tuần sau.');
+  if (completionPct>=80) recs.push('Tuần tập luyện xuất sắc! Duy trì momentum.');
+  if (!recs.length) recs.push('Bám sát kế hoạch tốt — tiếp tục duy trì.');
+
+  el.innerHTML =
+    '<div class="an-label">Tuần '+weekNum+' · '+phase+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">'+
+      ['<div style="background:var(--surface2);border-radius:5px;padding:6px 8px"><div style="font-size:14px;font-weight:700;font-family:monospace;color:#c8f0a0">'+totalKm.toFixed(1)+'<small style="font-size:9px;opacity:.5">/'+targetKm+'km</small></div><div style="font-size:9px;color:var(--muted)">DISTANCE '+getEmoji(kmPct)+'</div></div>',
+       '<div style="background:var(--surface2);border-radius:5px;padding:6px 8px"><div style="font-size:14px;font-weight:700;font-family:monospace;color:#c8f0a0">+'+totalElev.toFixed(0)+'<small style="font-size:9px;opacity:.5">m</small></div><div style="font-size:9px;color:var(--muted)">D+ ELEVATION</div></div>',
+       '<div style="background:var(--surface2);border-radius:5px;padding:6px 8px"><div style="font-size:14px;font-weight:700;font-family:monospace;color:#c8f0a0">'+(totalTime/3600).toFixed(1)+'<small style="font-size:9px;opacity:.5">h</small></div><div style="font-size:9px;color:var(--muted)">THỜI GIAN</div></div>',
+       '<div style="background:var(--surface2);border-radius:5px;padding:6px 8px"><div style="font-size:14px;font-weight:700;font-family:monospace;color:#c8f0a0">'+doneDays+'<small style="font-size:9px;opacity:.5">/'+totalDays+'</small></div><div style="font-size:9px;color:var(--muted)">BUỔI ✓ '+completionPct+'%</div></div>'
+      ].join('')+
+    '</div>'+
+    '<div class="an-label">Hoạt động ('+weekActs.length+' buổi)</div>'+
+    (weekActs.length?weekActs.map(a=>'<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">'+
+      '<span>'+actIcon(a.sport_type||a.type)+' '+(a.name||'').substring(0,20)+'</span>'+
+      '<span style="color:var(--muted);font-family:monospace">'+((a.distance||0)/1000).toFixed(1)+'km</span></div>').join('')
+      :'<div style="font-size:11px;color:var(--muted);padding:4px 0">Chưa có activity</div>')+
+    '<div class="an-label" style="margin-top:8px">Khuyến nghị</div>'+
+    recs.map(r=>'<div class="an-tip">'+r+'</div>').join('')+
+    '<div style="margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5">'+phaseAdvice+'</div>';
+}
+
+function refreshAnalysis() { generateWeekAnalysis(_selectedAnalysisWeek); }
 
 // Khởi tạo
 updateTrailProgress();
