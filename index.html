@@ -1,6 +1,8 @@
 <!DOCTYPE html>  
 <html lang="vi">  
-<head>  
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d0d0d">  
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 <title>VMM 100M Training & AI Assistant</title>  
@@ -257,105 +259,395 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 }
 
 
-/* ═══ STRAVA BAR ═══ */
-.strava-bar{display:flex;align-items:center;gap:10px;padding:8px 22px;
-  background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);}
-.strava-btn{display:inline-flex;align-items:center;gap:6px;background:#FC4C02;color:#fff;
-  border:none;border-radius:4px;padding:6px 12px;font-size:11px;font-weight:700;
-  cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:opacity .15s;}
-.strava-btn:hover{opacity:.85;}
-.strava-status{font-size:11px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace;}
-.strava-status.connected{color:#c8f0a0;}
-.strava-sync-btn{background:rgba(200,240,160,.12);color:#c8f0a0;
-  border:1px solid rgba(200,240,160,.3);border-radius:4px;padding:5px 10px;
-  font-size:10px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
-.strava-sync-btn:disabled{opacity:.4;cursor:not-allowed;}
-.day.strava-done{background:#fff8f5;border-color:#FC4C02;}
-.day.strava-done::after{content:'🔁';position:absolute;top:5px;right:6px;font-size:11px;}
+/* ═══ SPRINT 1 — AUTH + HR ZONES + CHECK-IN + PWA ═══ */
 
-
-/* ═══ MAIN LAYOUT: weeks + sidebar ═══ */
-.main-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 0;
-  align-items: start;
+/* ── Auth Overlay ── */
+#auth-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
 }
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  border-left: 1px solid var(--border);
-  background: var(--surface);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.auth-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 40px 36px; max-width: 380px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,.4); text-align: center;
 }
-.sidebar::-webkit-scrollbar { width: 4px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Sidebar sections */
-.sb-section { border-bottom: 1px solid var(--border); padding: 14px 16px; }
-.sb-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-.sb-title-dot { width: 6px; height: 6px; border-radius: 50%; background: #FC4C02; }
-
-/* Activity list */
-.act-item { padding: 8px 0; border-bottom: 1px solid var(--border); cursor: default; }
-.act-item:last-child { border-bottom: none; }
-.act-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
-.act-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-.act-date { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
-.act-stats { display: flex; gap: 8px; flex-wrap: wrap; }
-.act-stat { font-size: 10px; color: var(--muted2); font-family: 'IBM Plex Mono', monospace; }
-.act-stat span { color: var(--text); font-weight: 600; }
-.act-type-badge { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 3px;
-  background: rgba(252,76,2,.12); color: #FC4C02; font-family: 'IBM Plex Mono', monospace;
-  margin-bottom: 4px; }
-.act-elev { color: #c8f0a0 !important; }
-.no-acts { font-size: 12px; color: var(--muted); text-align: center; padding: 20px 0;
-  line-height: 1.6; }
-
-/* Weekly analysis */
-.analysis-week-sel { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
-.aw-btn { font-size: 9px; padding: 3px 7px; border-radius: 3px; border: 1px solid var(--border);
-  background: var(--surface2); color: var(--muted); cursor: pointer; font-family: 'IBM Plex Mono', monospace;
-  transition: all .15s; }
-.aw-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-.analysis-content { font-size: 12px; line-height: 1.7; color: var(--muted2); }
-.analysis-content .an-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .05em; color: var(--muted); margin-top: 10px; margin-bottom: 3px; }
-.analysis-content .an-good { color: #6abf82; }
-.analysis-content .an-warn { color: #f0c070; }
-.analysis-content .an-tip { background: rgba(200,240,160,.07); border-left: 2px solid #c8f0a0;
-  padding: 6px 8px; border-radius: 0 4px 4px 0; margin-top: 6px; font-size: 11px;
-  color: var(--text); line-height: 1.6; }
-.analysis-loading { font-size: 11px; color: var(--muted); text-align: center; padding: 16px 0; }
-.analysis-btn { width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 8px; font-size: 11px; font-weight: 600; cursor: pointer;
-  color: var(--text); font-family: inherit; transition: all .15s; margin-top: 8px; }
-.analysis-btn:hover { border-color: #c8f0a0; color: #c8f0a0; }
-
-/* Stats summary */
-.sb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.sb-stat-box { background: rgba(200,240,160,.08); border-radius: 6px; padding: 8px 10px;
-  border: 1px solid rgba(200,240,160,.15); }
-.sb-stat-val { font-size: 18px; font-weight: 700; font-family: 'IBM Plex Mono', monospace;
-  color: #c8f0a0; line-height: 1.1; }
-.sb-stat-label { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase;
-  letter-spacing: .05em; margin-top: 3px; }
-
-@media (max-width: 900px) {
-  .main-layout { grid-template-columns: 1fr; }
-  .sidebar { position: relative; height: auto; border-left: none; border-top: 1px solid var(--border); }
+.auth-logo { font-size: 36px; margin-bottom: 12px; }
+.auth-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.auth-sub { font-size: 12px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+.auth-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 12px 20px; border-radius: 8px; border: none;
+  font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px;
+  font-family: inherit; transition: all .15s; letter-spacing: .01em;
 }
+.auth-btn-google { background: #fff; color: #1f1f1f; border: 1px solid #dadce0; }
+.auth-btn-google:hover { background: #f8f9fa; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.auth-btn-strava { background: #FC4C02; color: #fff; }
+.auth-btn-strava:hover { background: #e04400; }
+.auth-sep { display: flex; align-items: center; gap: 10px; margin: 6px 0 16px; }
+.auth-sep::before, .auth-sep::after { content:''; flex:1; height:1px; background:var(--border); }
+.auth-sep span { font-size: 11px; color: var(--muted); }
+.auth-note { font-size: 11px; color: var(--muted); margin-top: 16px; line-height: 1.5; }
+
+/* ── User bar (replaces auth overlay after login) ── */
+#user-bar {
+  display: none;
+  background: var(--text); padding: 6px 22px;
+  align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.user-info { display: flex; align-items: center; gap: 8px; }
+.user-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(200,240,160,.3); display: flex; align-items: center;
+  justify-content: center; font-size: 11px; font-weight: 700; color: #c8f0a0;
+}
+.user-name { font-size: 12px; color: rgba(255,255,255,.8); font-weight: 600; }
+.user-provider { font-size: 10px; color: rgba(255,255,255,.4); font-family: 'IBM Plex Mono', monospace; }
+.user-actions { display: flex; align-items: center; gap: 12px; }
+.user-action-btn {
+  font-size: 11px; color: rgba(255,255,255,.4); background: none;
+  border: none; cursor: pointer; font-family: inherit; padding: 0;
+  transition: color .15s;
+}
+.user-action-btn:hover { color: rgba(255,255,255,.8); }
+
+/* ── Strava connect bar ── */
+#strava-bar {
+  display: none;
+  background: rgba(255,255,255,.03); padding: 7px 22px;
+  align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.strava-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #FC4C02; color: #fff; border: none; border-radius: 4px;
+  padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; transition: opacity .15s;
+}
+.strava-btn:hover { opacity: .85; }
+.strava-status { font-size: 11px; color: rgba(255,255,255,.4); font-family: 'IBM Plex Mono', monospace; }
+.strava-status.ok { color: #c8f0a0; }
+.strava-sync-btn {
+  background: rgba(200,240,160,.1); color: #c8f0a0;
+  border: 1px solid rgba(200,240,160,.25); border-radius: 4px;
+  padding: 4px 9px; font-size: 10px; font-weight: 600; cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; transition: all .15s;
+}
+.strava-sync-btn:hover { background: rgba(200,240,160,.2); }
+.strava-sync-btn:disabled { opacity: .4; cursor: not-allowed; }
+.day.strava-done { background: #fff8f5; border-color: #FC4C02; }
+.day.strava-done::after { content: '🔁'; }
+.strava-act-badge {
+  font-size: 10px; color: #FC4C02; font-family: 'IBM Plex Mono', monospace;
+  padding: 2px 6px; background: rgba(252,76,2,.08);
+  border: 1px solid rgba(252,76,2,.2); border-radius: 3px; margin-top: 4px;
+}
+
+/* ── HR Zones panel ── */
+.hr-zones-bar {
+  background: var(--surface2); padding: 8px 22px;
+  border-bottom: 1px solid var(--border);
+  display: none; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.hrz-title { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); }
+.hrz-zone {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+}
+.hrz-dot { width: 8px; height: 8px; border-radius: 50%; }
+.hrz-label { color: var(--muted); }
+.hrz-val { color: var(--text); font-weight: 600; }
+.hrz-edit-btn {
+  font-size: 10px; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 3px; padding: 2px 7px; cursor: pointer; font-family: inherit;
+  transition: all .15s; margin-left: auto;
+}
+.hrz-edit-btn:hover { border-color: var(--border2); color: var(--text); }
+
+/* HR zones in day blocks */
+.sb-hr { background: rgba(100,160,255,.08); border-left: 2px solid #4a90d9; }
+.sb-hr-z1 { border-left-color: #64b5f6; }
+.sb-hr-z2 { border-left-color: #81c784; }
+.sb-hr-z3 { border-left-color: #ffb74d; }
+.sb-hr-z4 { border-left-color: #e57373; }
+.sb-hr-z5 { border-left-color: #ce93d8; }
+
+/* ── HR Zones setup modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,.65); display: flex;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 24px; max-width: 440px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.4);
+}
+.modal-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+.modal-field { margin-bottom: 14px; }
+.modal-label { font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+.modal-input {
+  width: 100%; padding: 9px 12px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 14px; font-family: inherit; color: var(--text); outline: none;
+  transition: border-color .15s;
+}
+.modal-input:focus { border-color: var(--border2); }
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+.modal-btn {
+  flex: 1; padding: 10px; border-radius: 6px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: inherit; border: none;
+  transition: all .15s;
+}
+.modal-btn-primary { background: var(--text); color: var(--bg); }
+.modal-btn-primary:hover { opacity: .85; }
+.modal-btn-secondary { background: var(--surface2); color: var(--muted);
+  border: 1px solid var(--border); }
+.modal-btn-secondary:hover { color: var(--text); }
+.hrz-preview {
+  display: grid; grid-template-columns: repeat(5,1fr); gap: 4px;
+  margin: 14px 0; padding: 12px; background: var(--surface2);
+  border-radius: 6px;
+}
+.hrz-prev-item { text-align: center; }
+.hrz-prev-bar { height: 6px; border-radius: 3px; margin-bottom: 4px; }
+.hrz-prev-lbl { font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.hrz-prev-val { font-size: 10px; font-weight: 600; color: var(--text); font-family: 'IBM Plex Mono', monospace; }
+
+/* ── Daily Check-in modal ── */
+.checkin-q { margin-bottom: 16px; }
+.checkin-qlabel { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.checkin-scale { display: flex; gap: 6px; }
+.checkin-score-btn {
+  flex: 1; padding: 8px 0; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .15s; text-align: center;
+}
+.checkin-score-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.checkin-soreness { display: flex; flex-wrap: wrap; gap: 6px; }
+.soreness-chip {
+  padding: 5px 10px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted); font-size: 11px;
+  cursor: pointer; transition: all .15s;
+}
+.soreness-chip.active { background: rgba(231,111,81,.15); border-color: #E76F51; color: #E76F51; }
+.readiness-result {
+  padding: 12px; border-radius: 8px; margin-top: 12px;
+  background: var(--surface2); border: 1px solid var(--border2);
+}
+.readiness-score-big { font-size: 32px; font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace; }
+.readiness-msg { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.swap-alert {
+  background: rgba(231,111,81,.1); border: 1px solid rgba(231,111,81,.3);
+  border-radius: 6px; padding: 10px 12px; margin-top: 10px;
+  font-size: 12px; color: #E76F51; line-height: 1.6;
+}
+
+/* ── Readiness badge in header ── */
+.readiness-badge {
+  display: none; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px; cursor: pointer;
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
+  border: 1px solid transparent; transition: all .15s;
+}
+.readiness-badge:hover { opacity: .8; }
+.readiness-badge.good { background: rgba(45,106,79,.2); border-color: rgba(45,106,79,.4); color: #6abf82; }
+.readiness-badge.warn { background: rgba(231,111,81,.15); border-color: rgba(231,111,81,.3); color: #E76F51; }
+.readiness-badge.bad { background: rgba(198,40,40,.15); border-color: rgba(198,40,40,.3); color: #ef9a9a; }
+
+/* ── PWA install banner ── */
+#pwa-banner {
+  display: none; background: rgba(200,240,160,.08);
+  padding: 8px 22px; border-bottom: 1px solid rgba(200,240,160,.15);
+  align-items: center; gap: 12px; justify-content: space-between;
+}
+.pwa-text { font-size: 12px; color: rgba(200,240,160,.8); }
+.pwa-install-btn {
+  background: rgba(200,240,160,.15); color: #c8f0a0;
+  border: 1px solid rgba(200,240,160,.3); border-radius: 4px;
+  padding: 5px 12px; font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: 'IBM Plex Mono', monospace;
+}
+.pwa-dismiss { font-size: 16px; color: rgba(255,255,255,.3); cursor: pointer;
+  background: none; border: none; padding: 0; }
 
 </style>  
 </head>  
-<body>  
-  
+<body>
+
+<!-- ═══ AUTH OVERLAY ═══ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">🏔</div>
+    <div class="auth-title">VMM 100M Training</div>
+    <div class="auth-sub">Đăng nhập để sync tiến độ, đồng bộ Strava<br>và không mất dữ liệu khi đổi thiết bị.</div>
+    <button class="auth-btn auth-btn-google" onclick="authGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Đăng nhập bằng Google
+    </button>
+    <div class="auth-sep"><span>hoặc</span></div>
+    <button class="auth-btn auth-btn-strava" onclick="authStrava()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.581-5.831l2.509 4.931h4.104L12.82 0 3 13.828h4.105"/></svg>
+      Đăng nhập bằng Strava
+    </button>
+    <div class="auth-note">Dữ liệu được lưu an toàn trên Supabase.<br>Không cần thêm tài khoản — dùng Google hoặc Strava là đủ.</div>
+  </div>
+</div>
+
+<!-- ═══ USER BAR ═══ -->
+<div id="user-bar">
+  <div class="user-info">
+    <div class="user-avatar" id="user-avatar">?</div>
+    <div>
+      <div class="user-name" id="user-name">Người dùng</div>
+      <div class="user-provider" id="user-provider">—</div>
+    </div>
+  </div>
+  <div class="user-actions">
+    <button class="readiness-badge" id="readiness-badge" onclick="openCheckin()">
+      <span id="readiness-icon">💚</span>
+      <span id="readiness-text">Sẵn sàng</span>
+    </button>
+    <button class="user-action-btn" onclick="openHRZones()">⚡ HR Zones</button>
+    <button class="user-action-btn" onclick="openCheckin()">📋 Check-in</button>
+    <button class="user-action-btn" onclick="authSignOut()">Đăng xuất</button>
+  </div>
+</div>
+
+<!-- ═══ STRAVA BAR ═══ -->
+<div id="strava-bar">
+  <div id="strava-connect-area">
+    <button class="strava-btn" onclick="stravaConnect()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.581-5.831l2.509 4.931h4.104L12.82 0 3 13.828h4.105"/></svg>
+      Kết nối Strava
+    </button>
+    <span class="strava-status" style="margin-left:8px">Kết nối để tự động tick buổi tập</span>
+  </div>
+  <div id="strava-connected-area" style="display:none;align-items:center;gap:10px">
+    <span class="strava-status ok">⚡ <span id="strava-name">Strava</span></span>
+    <button class="strava-sync-btn" onclick="stravaSync()" id="strava-sync-btn">↻ Đồng bộ</button>
+    <span class="strava-status" id="strava-sync-status"></span>
+    <button onclick="stravaDisconnect()" style="background:none;border:none;color:rgba(255,255,255,.2);font-size:10px;cursor:pointer;">Ngắt</button>
+  </div>
+</div>
+
+<!-- ═══ HR ZONES BAR ═══ -->
+<div class="hr-zones-bar" id="hr-zones-bar">
+  <span class="hrz-title">HR Zones</span>
+  <div class="hrz-zone"><span class="hrz-dot" style="background:#64b5f6"></span><span class="hrz-label">Z1</span><span class="hrz-val" id="hz1">—</span></div>
+  <div class="hrz-zone"><span class="hrz-dot" style="background:#81c784"></span><span class="hrz-label">Z2</span><span class="hrz-val" id="hz2">—</span></div>
+  <div class="hrz-zone"><span class="hrz-dot" style="background:#ffb74d"></span><span class="hrz-label">Z3</span><span class="hrz-val" id="hz3">—</span></div>
+  <div class="hrz-zone"><span class="hrz-dot" style="background:#e57373"></span><span class="hrz-label">Z4</span><span class="hrz-val" id="hz4">—</span></div>
+  <div class="hrz-zone"><span class="hrz-dot" style="background:#ce93d8"></span><span class="hrz-label">Z5</span><span class="hrz-val" id="hz5">—</span></div>
+  <button class="hrz-edit-btn" onclick="openHRZones()">✏ Chỉnh sửa</button>
+</div>
+
+<!-- ═══ PWA INSTALL BANNER ═══ -->
+<div id="pwa-banner">
+  <span class="pwa-text">📱 Thêm vào màn hình chính để dùng offline khi lên núi</span>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="pwa-install-btn" onclick="pwaInstall()">Thêm vào HS</button>
+    <button class="pwa-dismiss" onclick="pwaDismiss()">×</button>
+  </div>
+</div>
+
+
+<!-- ═══ HR ZONES MODAL ═══ -->
+<div class="modal-overlay" id="hr-modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">⚡ Thiết lập Heart Rate Zones</div>
+    <div class="modal-sub">Nhập Max HR của bạn để tính 5 zones chính xác. App sẽ hiển thị target HR/pace cho từng buổi tập.</div>
+    <div class="modal-field">
+      <div class="modal-label">Max Heart Rate (bpm)</div>
+      <input type="number" class="modal-input" id="hr-maxhr" placeholder="ví dụ: 185" min="140" max="220">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">LTHR — Lactate Threshold HR (tùy chọn)</div>
+      <input type="number" class="modal-input" id="hr-lthr" placeholder="Để trống nếu không biết">
+    </div>
+    <div id="hr-preview" style="display:none">
+      <div class="modal-label" style="margin-bottom:8px">Preview Zones của bạn:</div>
+      <div class="hrz-preview" id="hrz-preview-grid"></div>
+    </div>
+    <div id="hr-strava-hint" style="font-size:11px;color:var(--muted);padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:4px;display:none">
+      📊 Ước tính từ Strava: Max HR đề xuất = <strong id="hr-strava-val">—</strong> bpm (dựa trên lịch sử activity)
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeHRModal()">Hủy</button>
+      <button class="modal-btn modal-btn-primary" onclick="saveHRZones()">Lưu HR Zones</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ DAILY CHECK-IN MODAL ═══ -->
+<div class="modal-overlay" id="checkin-modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">📋 Check-in hôm nay</div>
+    <div class="modal-sub" id="checkin-date-label">Đánh giá trạng thái để điều chỉnh bài tập phù hợp</div>
+
+    <div class="checkin-q">
+      <div class="checkin-qlabel">😴 Giấc ngủ tối qua?</div>
+      <div class="checkin-scale" id="sleep-scale">
+        <button class="checkin-score-btn" data-v="1" onclick="setScore('sleep',1)">1<br><span style="font-size:9px">Rất tệ</span></button>
+        <button class="checkin-score-btn" data-v="2" onclick="setScore('sleep',2)">2</button>
+        <button class="checkin-score-btn" data-v="3" onclick="setScore('sleep',3)">3<br><span style="font-size:9px">Bình thường</span></button>
+        <button class="checkin-score-btn" data-v="4" onclick="setScore('sleep',4)">4</button>
+        <button class="checkin-score-btn" data-v="5" onclick="setScore('sleep',5)">5<br><span style="font-size:9px">Tuyệt</span></button>
+      </div>
+    </div>
+
+    <div class="checkin-q">
+      <div class="checkin-qlabel">💪 Đau/mỏi cơ nào bất thường?</div>
+      <div class="checkin-soreness" id="soreness-chips">
+        <button class="soreness-chip" data-area="none" onclick="toggleSoreness('none')">Không đau</button>
+        <button class="soreness-chip" data-area="knee" onclick="toggleSoreness('knee')">🦵 Gối</button>
+        <button class="soreness-chip" data-area="itband" onclick="toggleSoreness('itband')">IT Band</button>
+        <button class="soreness-chip" data-area="achilles" onclick="toggleSoreness('achilles')">Achilles</button>
+        <button class="soreness-chip" data-area="hip" onclick="toggleSoreness('hip')">Hông</button>
+        <button class="soreness-chip" data-area="back" onclick="toggleSoreness('back')">Lưng</button>
+        <button class="soreness-chip" data-area="foot" onclick="toggleSoreness('foot')">Bàn chân</button>
+        <button class="soreness-chip" data-area="calf" onclick="toggleSoreness('calf')">Bắp chân</button>
+      </div>
+    </div>
+
+    <div class="checkin-q">
+      <div class="checkin-qlabel">⚡ Năng lượng tổng thể?</div>
+      <div class="checkin-scale" id="energy-scale">
+        <button class="checkin-score-btn" data-v="1" onclick="setScore('energy',1)">1<br><span style="font-size:9px">Kiệt sức</span></button>
+        <button class="checkin-score-btn" data-v="2" onclick="setScore('energy',2)">2</button>
+        <button class="checkin-score-btn" data-v="3" onclick="setScore('energy',3)">3<br><span style="font-size:9px">OK</span></button>
+        <button class="checkin-score-btn" data-v="4" onclick="setScore('energy',4)">4</button>
+        <button class="checkin-score-btn" data-v="5" onclick="setScore('energy',5)">5<br><span style="font-size:9px">Bốc lửa</span></button>
+      </div>
+    </div>
+
+    <div id="readiness-result" class="readiness-result" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="readiness-score-big" id="readiness-num">—</div>
+        <div>
+          <div style="font-size:13px;font-weight:700" id="readiness-label">—</div>
+          <div class="readiness-msg" id="readiness-msg">—</div>
+        </div>
+      </div>
+      <div class="swap-alert" id="swap-alert" style="display:none"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeCheckin()">Bỏ qua</button>
+      <button class="modal-btn modal-btn-primary" id="checkin-save-btn" onclick="saveCheckin()" disabled>Lưu check-in</button>
+    </div>
+  </div>
+</div>
+
 <div class="header">
   <div class="header-inner">
     <div class="header-left">
@@ -428,23 +720,6 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   </div>
 </div>
 
-
-<div class="strava-bar" id="strava-bar">
-  <div id="strava-connect-area">
-    <button class="strava-btn" onclick="stravaConnect()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.581-5.831l2.509 4.931h4.104L12.82 0 3 13.828h4.105"/>
-      </svg>Kết nối Strava
-    </button>
-  </div>
-  <div id="strava-connected-area" style="display:none;align-items:center;gap:10px;">
-    <span class="strava-status connected">⚡ <span id="strava-athlete-name">Strava</span></span>
-    <button class="strava-sync-btn" onclick="stravaSync()" id="strava-sync-btn">↻ Đồng bộ ngay</button>
-    <span class="strava-status" id="strava-sync-status"></span>
-    <button onclick="stravaDisconnect()" style="background:none;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer;">Ngắt kết nối</button>
-  </div>
-</div>
-
 <div class="legend">  
   <div class="leg"><div class="leg-dot" style="background:var(--uphill)"></div>Uphill / Treadmill incline</div>  
   <div class="leg"><div class="leg-dot" style="background:var(--downhill)"></div>Downhill training</div>  
@@ -507,60 +782,8 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 </div>
 </div>
 
-<div class="main-layout">
-<div class="weeks-col">
-<div id="phase-banner" class="phase-banner" style="display:none"></div>
-<div class="weeks" id="week-list"></div>
-</div>
-
-<div class="sidebar" id="sidebar">
-
-  <!-- Stats summary -->
-  <div class="sb-section">
-    <div class="sb-title"><span class="sb-title-dot" style="background:#c8f0a0"></span>Tổng kết</div>
-    <div class="sb-stats">
-      <div class="sb-stat-box">
-        <div class="sb-stat-val" id="sb-total-km">0</div>
-        <div class="sb-stat-label">km Strava</div>
-      </div>
-      <div class="sb-stat-box">
-        <div class="sb-stat-val" id="sb-total-acts">0</div>
-        <div class="sb-stat-label">buổi tập</div>
-      </div>
-      <div class="sb-stat-box">
-        <div class="sb-stat-val" id="sb-total-elev">0</div>
-        <div class="sb-stat-label">m D+</div>
-      </div>
-      <div class="sb-stat-box">
-        <div class="sb-stat-val" id="sb-total-time">0</div>
-        <div class="sb-stat-label">giờ</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent activities -->
-  <div class="sb-section">
-    <div class="sb-title"><span class="sb-title-dot"></span>Hoạt động Strava gần đây</div>
-    <div id="sb-activities">
-      <div class="no-acts">Kết nối Strava để xem<br>các buổi tập đã đồng bộ</div>
-    </div>
-  </div>
-
-  <!-- Weekly analysis -->
-  <div class="sb-section">
-    <div class="sb-title"><span class="sb-title-dot" style="background:#7ec8e3"></span>Nhận xét & Khuyến nghị</div>
-    <div class="analysis-week-sel" id="aw-weeks"></div>
-    <div class="analysis-content" id="aw-content">
-      <div class="no-acts">Sync Strava để nhận<br>phân tích tuần tập luyện</div>
-    </div>
-    <button class="analysis-btn" id="aw-refresh-btn" onclick="refreshAnalysis()" style="display:none">
-      ↻ Cập nhật phân tích
-    </button>
-  </div>
-
-</div>
-
-</div>  
+<div id="phase-banner" class="phase-banner" style="display:none"></div>  
+<div class="weeks" id="week-list"></div>  
   
 <script>  
 // --- CORE DATA & UI ---  
@@ -645,7 +868,7 @@ const weeks = [
 // Mục tiêu: 85-90% Z1-Z2 | AeT test | Eccentric rebuild | 3:1 cycle
 // ═══════════════════════════════════════════════════════════════════
 
-{w:1,dates:'20/4–26/4',km:45,gain:900,loss:900,phase:1,
+{w:1,dates:'21/4–27/4',km:45,gain:900,loss:900,phase:1,
  note:'AeT test + phục hồi HMT · nền tảng Z1-Z2',
  up_focus:'[BASE] Uphill Z2: Leo dốc với cường độ bạn CÓ THỂ THỞ HOÀN TOÀN bằng mũi. Đây là đỉnh Zone 2 (AeT). Pace không quan trọng — HR điều khiển tất cả. Vert target 200–250m/h (thấp hơn pace thông thường). W01 ưu tiên AeT test: tìm pace mà thở mũi được liên tục 20 phút trên dốc.',
  dn_focus:'[DH Eccentric] Chạy xuống tự nhiên sau UH, không kìm. TEST heel-lock lacing ngay W01. Mục tiêu: cơ đùi học hấp thụ lực eccentric. Quan sát móng sau buổi — benchmark trước khi bắt đầu kế hoạch.',
@@ -659,7 +882,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Núi Z2 UH+DH',blocks:[uphillBlock('17km · +900m'),uphillBlock('UH: thở mũi = Z2'),uphillBlock('3×4ph uphill Z2'),downhillBlock('DH tự nhiên'),downhillBlock('Heel-lock + test')]},
  ]},
 
-{w:2,dates:'27/4–3/5',km:48,gain:1000,loss:1000,phase:1,
+{w:2,dates:'28/4–4/5',km:48,gain:1000,loss:1000,phase:1,
  note:'Tăng 7% · UH form + DH cadence',
  up_focus:'[BASE Z2] 4×4ph uphill Z2 (thở mũi). Học forward lean 5–10°, mắt nhìn 3m trước mặt, arm swing đẩy người lên. Vert rate target 230–280m/h — pace mà HR ở 145–155. Nếu HR vọt lên >155 = đi bộ power hike ngay.',
  dn_focus:'[DH Form] Bước ngắn, cadence 170–180spm, midfoot strike. Không ngả người ra sau — ngả ra sau = gót tiếp đất = lực va đập lớn = thâm móng. Thân thẳng góc với dốc.',
@@ -673,7 +896,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Núi 18km UH+DH',blocks:[uphillBlock('18km · +1000m'),uphillBlock('4×4ph UH Z2'),downhillBlock('DH: cadence 175+'),downhillBlock('Midfoot focus'),uphillBlock('Vert 250–300m/h')]},
  ]},
 
-{w:3,dates:'4/5–10/5',km:52,gain:1100,loss:1100,phase:1,
+{w:3,dates:'5/5–11/5',km:52,gain:1100,loss:1100,phase:1,
  note:'ME WORKOUT bắt đầu + DH intervals lần 1',
  up_focus:'[ME WORKOUT - cornerstone của sách] BÀI TẬP QUAN TRỌNG NHẤT. Tìm dốc 20–40% (cầu thang cao, đường núi dốc). Leo đến khi CHÂN MỎI (không phải tim). HR sẽ thấp hơn AeT nhưng cơ sẽ cháy. Đây là Muscular Endurance theo sách House/Johnston — khác hoàn toàn với gym strength.',
  dn_focus:'[DH Intervals lần 1] 3×10ph chạy xuống tích cực (không lao đầu, không kìm). Kích thích eccentric lớn đầu tiên. Cơ đùi sẽ DOMS T2-T3 sau. Bình thường — đây là adaptation. Gym T2 tuần sau: mobility only.',
@@ -687,7 +910,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Núi ME + DH INT.',blocks:[uphillBlock('20km · +1100m'),uphillBlock('ME WORKOUT:'),uphillBlock('Dốc 25%+, leo khi chân hết'),downhillBlock('DH INT: 3×10ph hard'),downhillBlock('Jog recovery lên')]},
  ]},
 
-{w:4,dates:'11/5–17/5',km:48,gain:1100,loss:1100,phase:1,
+{w:4,dates:'12/5–18/5',km:48,gain:1100,loss:1100,phase:1,
  note:'← RECOVERY tuần (3:1 cycle) · supercompensation',
  up_focus:'[RECOVERY] Theo sách: 3 tuần build + 1 tuần recovery = chu kỳ tối ưu. Tuần này GIẢM 10% volume. Uphill easy Z1-Z2, không intervals, không ME workout. Đây là khi cơ thể thực sự mạnh hơn (supercompensation xảy ra trong nghỉ ngơi, không phải khi tập).',
  dn_focus:'[DH Recovery] Không DH intervals. Chạy xuống kỹ thuật nhẹ trong long run. Kiểm tra: móng chân có thâm thêm không? Nếu không → heel-lock đang hoạt động.',
@@ -701,7 +924,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Núi Easy Z2',blocks:[uphillBlock('17km · +1100m'),uphillBlock('UH tự nhiên Z2'),downhillBlock('DH kỹ thuật easy'),restBlock('HR <150 toàn buổi')]},
  ]},
 
-{w:5,dates:'18/5–24/5',km:55,gain:1300,loss:1300,phase:1,
+{w:5,dates:'19/5–25/5',km:55,gain:1300,loss:1300,phase:1,
  note:'Kết thúc Base 1 · test AeT progress',
  up_focus:'[BASE Test] 5×5ph uphill Z2. So sánh: pace tương ứng AeT (thở mũi) W5 so với W1 có nhanh hơn không? Nếu nhanh hơn = AeT đang nâng = tốt. Nếu không đổi = cần thêm Z1-Z2 volume trước khi lên Z3.',
  dn_focus:'[DH Test] Sau uphill intervals, chạy 2×10ph DH với kỹ thuật tốt nhất có thể. Test: giữ được midfoot + cadence 175+ khi chân đã mỏi không? Chụp ảnh móng cuối buổi để so sánh.',
@@ -720,7 +943,7 @@ const weeks = [
 // Mục tiêu: ME weekly | Hill Sprints Z5 | 25–35km Sunday | 3:1 cycle
 // ═══════════════════════════════════════════════════════════════════
 
-{w:6,dates:'25/5–31/5',km:58,gain:1500,loss:1500,phase:2,
+{w:6,dates:'26/5–1/6',km:58,gain:1500,loss:1500,phase:2,
  note:'Bắt đầu Phase 2 · ME weekly + Hill Sprints',
  up_focus:'[ME + Hill Sprints] ME outdoor: leo dốc 20-40% cho đến khi chân hết (không phải tim). Sau đó Hill Sprints Z5: 6×8 giây TOÀN SỨC trên dốc, nghỉ 2–3ph, jog về. Sprints Z5 ngắn kích hoạt fast-twitch, KHÔNG gây mệt mỏi hệ aerobic. Theo sách: "hill sprints are free speed".',
  dn_focus:'[DH Volume] Volume DH tăng tự nhiên theo Sunday dài hơn. Focus: chạy xuống moderate — không kìm, không lao. Power hike trên đoạn >20% khi leo lên.',
@@ -734,7 +957,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Núi ME 22km',blocks:[uphillBlock('22km · +1500m'),uphillBlock('ME: dốc 25%+ sampai chân hết'),uphillBlock('Power hike nhịp điệu'),downhillBlock('DH natural pace'),downhillBlock('Midfoot + cadence')]},
  ]},
 
-{w:7,dates:'1/6–7/6',km:62,gain:1800,loss:1800,phase:2,
+{w:7,dates:'2/6–8/6',km:62,gain:1800,loss:1800,phase:2,
  note:'Back-to-back đầu tiên T7+CN · fatigue simulation',
  up_focus:'[Back-to-back UH] T7 road 20km (Z2, include hills) + CN trail 24km. Khi bạn leo dốc CN với chân đã mỏi từ T7 — đây chính xác là simulation race conditions. Uphill khi mệt là kỹ năng riêng biệt cần luyện.',
  dn_focus:'[DH khi mệt] DH form CN sau back-to-back: đây là quan trọng nhất. Cơ đùi mệt → nguy cơ ngả người ra sau tăng → thâm móng tăng. Chủ ý: step short, land midfoot, dùng tay balancing.',
@@ -748,7 +971,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'Núi 24km B2B',blocks:[uphillBlock('24km · +1800m'),uphillBlock('ME: leo cho đến chân hết'),downhillBlock('DH form khi mệt'),downhillBlock('Conscious midfoot')]},
  ]},
 
-{w:8,dates:'8/6–14/6',km:65,gain:2000,loss:2000,phase:2,
+{w:8,dates:'9/6–15/6',km:65,gain:2000,loss:2000,phase:2,
  note:'DH Intervals chu kỳ 2 + UH Tempo Z3',
  up_focus:'[UH Tempo Z3] Lần đầu tiên chạy Z3 có kiểm soát: 2×15ph uphill ở pace bạn có thể nói 3–4 từ nhưng khó chịu (HR 155–165). Theo sách: Z3 tối đa 10% weekly volume — tương đương 30ph trong tuần 65km. Chính xác. Không làm thêm Z3 trong tuần này.',
  dn_focus:'[DH Intervals chu kỳ 2] 4×10ph DH hard. Sau Sunday: gym T2 chỉ mobility (không Nordic curl, không eccentric nặng). DOMS ngày T3-T4 = bình thường và cần thiết cho adaptation.',
@@ -762,7 +985,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'Núi UH Z3 + DH INT',blocks:[uphillBlock('27km · +2000m'),uphillBlock('2×15ph UH Z3 (155–165)'),uphillBlock('ME sau Z3'),downhillBlock('DH INT: 4×10ph hard'),downhillBlock('Jog up recovery')]},
  ]},
 
-{w:9,dates:'15/6–21/6',km:58,gain:1500,loss:1500,phase:2,
+{w:9,dates:'16/6–22/6',km:58,gain:1500,loss:1500,phase:2,
  note:'← RECOVERY tuần · supercompensation P2',
  up_focus:'[RECOVERY] 3:1 cycle — tuần phục hồi sau W08 peak. Không ME, không intervals, không Z3. Chỉ Z1-Z2 nhẹ trong Sunday. Đây là khi adaptation từ W06-W08 được cố định vào cơ thể.',
  dn_focus:'[DH Recovery] DH kỹ thuật nhẹ trong Sunday. Không intervals. Lắng nghe cơ thể — nếu gối đau khác với mỏi thông thường → cần nghỉ thêm.',
@@ -776,7 +999,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Núi Easy 20km',blocks:[uphillBlock('20km · +1500m'),uphillBlock('UH Z1-Z2 tự nhiên'),downhillBlock('DH kỹ thuật easy'),restBlock('Không push')]},
  ]},
 
-{w:10,dates:'22/6–28/6',km:68,gain:2200,loss:2200,phase:2,
+{w:10,dates:'23/6–29/6',km:68,gain:2200,loss:2200,phase:2,
  note:'Sunday 30km đầu tiên · ME outdoor + nutrition test',
  up_focus:'[ME + 30km milestone] ME outdoor đầu tiên trong buổi dài: leo dốc 25%+ cho đến khi chân giới hạn, sau đó chạy tiếp. Bắt đầu tập Power Hike có nhịp điệu trên đoạn >20% — đếm 70–80 bước/phút, dùng tay đẩy lên đùi để giảm tải.',
  dn_focus:'[DH 30km] Volume downhill tăng tự nhiên. Ăn/uống trong khi chạy như race: gel mỗi 45ph, nước 400ml/h. Gut training từ W10.',
@@ -790,7 +1013,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'30km FIRST · ME',blocks:[uphillBlock('30km · +2200m'),uphillBlock('ME: cho đến chân hết'),uphillBlock('Power hike nhịp điệu'),downhillBlock('DH race nutrition'),roadBlock('Gel 45ph, nước 400ml/h')]},
  ]},
 
-{w:11,dates:'29/6–5/7',km:72,gain:2500,loss:2500,phase:2,
+{w:11,dates:'30/6–6/7',km:72,gain:2500,loss:2500,phase:2,
  note:'Peak Phase 2 · ME + DH Intervals chu kỳ 3',
  up_focus:'[ME + UH Intervals Peak] 4×8ph UH Z3 hard + ME trước đó. Tổng UH chất lượng cao nhất Phase 2. Back-to-back T7+CN: T7 road 22km (Z2) + CN trail 35km (ME + DH intervals). Đây là tuần khó nhất Phase 2.',
  dn_focus:'[DH Intervals chu kỳ 3] 4×12ph DH hard sau 35km trail. Khi cơ đùi đã mệt + DH intervals = simulation gần nhất với race conditions thực tế.',
@@ -804,7 +1027,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'35km · ME+DH INT',blocks:[uphillBlock('35km · +2500m'),uphillBlock('ME + 4×8ph UH Z3'),downhillBlock('DH INT chu kỳ 3:'),downhillBlock('4×12ph DH hard'),downhillBlock('Total ~48ph DH')]},
  ]},
 
-{w:12,dates:'6/7–12/7',km:62,gain:1800,loss:1800,phase:2,
+{w:12,dates:'7/7–13/7',km:62,gain:1800,loss:1800,phase:2,
  note:'← RECOVERY · chuẩn bị Phase 3 PRECOMP',
  up_focus:'[RECOVERY + Transition check] Sau W11 peak: đánh giá AeT progress. Nếu pace AeT (thở mũi) nhanh hơn W1 ≥5% → aerobic base đang nâng tốt. Nếu không đổi → cần thêm Z1-Z2 trong Phase 3.',
  dn_focus:'[DH Easy] Không intervals. Chạy DH kỹ thuật easy trong Sunday 22km. Chuẩn bị thể lực tươi cho Phase 3 PRECOMP.',
@@ -823,7 +1046,7 @@ const weeks = [
 // 80% Z1-Z2 + 12-14% Z4 | Back-to-back | Race simulation | Night
 // ═══════════════════════════════════════════════════════════════════
 
-{w:13,dates:'13/7–19/7',km:80,gain:2800,loss:2800,phase:3,
+{w:13,dates:'14/7–20/7',km:80,gain:2800,loss:2800,phase:3,
  note:'Bắt đầu PRECOMP · 40km Sunday đầu tiên',
  up_focus:'[PRECOMP UH Power Z4] 3×12ph UH Z4 (165–175bpm, cố gắng). Theo sách: Precomp = thêm Z4 work có mục tiêu. Nhưng 80% volume vẫn Z1-Z2. 40km Sunday: mang full race gear, ăn uống đúng protocol, chạy đêm nếu VMM có phần đêm.',
  dn_focus:'[DH Night Sim] Nếu VMM có đoạn đêm → tập chạy DH với đèn head-lamp. Night DH khác: mắt điều chỉnh chậm, cần cadence cao hơn, nhìn gần hơn. Cần ít nhất 2-3 lần tập đêm trước race.',
@@ -837,7 +1060,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'40km FIRST · Race Sim',blocks:[uphillBlock('40km · +2800m'),uphillBlock('3×12ph UH Z4'),downhillBlock('DH Natural fast'),roadBlock('Night sim'),roadBlock('Full race gear + nutrition')]},
  ]},
 
-{w:14,dates:'20/7–26/7',km:88,gain:3000,loss:3000,phase:3,
+{w:14,dates:'21/7–27/7',km:88,gain:3000,loss:3000,phase:3,
  note:'Volume lên · 45km + DH Intervals Z4',
  up_focus:'[UH Power Peak] 4×10ph UH Z4. Power hike nhịp điệu trên đoạn >20%: đếm bước 70–80/phút, poles nếu có. Efficient power hike quyết định 30-40% thời gian trong 100M. Mỗi giây/bước leo dốc nhân 9000m = hàng giờ tiết kiệm.',
  dn_focus:'[DH Intervals chu kỳ 4] 5×10ph DH hard. Sau 45km + DH intervals = cơ đùi trải qua kích thích eccentric cao nhất từ trước đến nay. Đây là "inoculation" trước race — theo Johnston: "be as close to impervious as possible".',
@@ -851,7 +1074,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'45km · UH Z4 + DH INT',blocks:[uphillBlock('45km · +3000m'),uphillBlock('4×10ph UH Z4'),uphillBlock('Power hike nhịp điệu'),downhillBlock('DH INT chu kỳ 4:'),downhillBlock('5×10ph hard down')]},
  ]},
 
-{w:15,dates:'27/7–2/8',km:100,gain:3500,loss:3500,phase:3,
+{w:15,dates:'28/7–3/8',km:100,gain:3500,loss:3500,phase:3,
  note:'★ BIG WEEK · T7 20km + CN 50km+ · Gym nhẹ',
  up_focus:'[BIG WEEK UH Race Sim] CN 50km+: chạy uphill ở "sustainable uncomfortable" pace — pace bạn có thể duy trì 20+ giờ. Không sprint lên đỉnh. Power hike khi dốc >20%. Vert rate target 260–300m/h. Theo sách: race sim là trải nghiệm đầy đủ nhất để biết mình đang ở đâu.',
  dn_focus:'[BIG WEEK DH Race Speed] Chạy DH ở race speed — không kìm, không lao. Full nutrition on course. Night running nếu có. Gym tuần này chỉ mobility (tiết kiệm cho weekend).',
@@ -865,7 +1088,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'★ 50km+ RACE SIM',blocks:[uphillBlock('50km+ · +3500m'),uphillBlock('UH sustainable hard'),downhillBlock('DH race speed'),roadBlock('Night running'),roadBlock('Full nutrition plan')]},
  ]},
 
-{w:16,dates:'3/8–9/8',km:78,gain:2500,loss:2500,phase:3,
+{w:16,dates:'4/8–10/8',km:78,gain:2500,loss:2500,phase:3,
  note:'Recovery sau big week · supercompensation',
  up_focus:'[RECOVERY] Không ME, không Z3-Z4. Chạy UH Z1-Z2 nhẹ trong Sunday 35km. Cơ thể đang supercompensate sau W15. Đây là tuần quan trọng nhất về adaptation — đừng cản trở.',
  dn_focus:'[DH Recovery] DH kỹ thuật easy. Không intervals. Lắng nghe: đau gối ≠ DOMS thông thường. Nếu đau khớp → nghỉ thêm 1-2 ngày.',
@@ -879,7 +1102,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'35km Recovery',blocks:[uphillBlock('35km · +2500m'),uphillBlock('UH Z1-Z2 easy'),downhillBlock('DH kỹ thuật'),restBlock('Không push')]},
  ]},
 
-{w:17,dates:'10/8–16/8',km:90,gain:3000,loss:3000,phase:3,
+{w:17,dates:'11/8–17/8',km:90,gain:3000,loss:3000,phase:3,
  note:'Final Peak · Last Race Sim trước Taper',
  up_focus:'[FINAL PEAK UH] 3×15ph UH Z4 — set dài nhất toàn kế hoạch. Sau đây không bao giờ tập Z4 nữa trước race. 50km CN: chạy như race thật — gear, nutrition, pace, mental. Evaluate: ở km 40+ bạn còn giữ được UH form không?',
  dn_focus:'[FINAL DH RACE SIM] DH ở race speed trong 50km. Kiểm tra tổng hợp: heel-lock, midfoot, cadence, ngón chân. Đây là lần cuối cùng đánh giá DH form trước taper.',
@@ -898,7 +1121,7 @@ const weeks = [
 // Category 2: 3 tuần taper | Giảm 40-60% volume | Giữ cường độ
 // ═══════════════════════════════════════════════════════════════════
 
-{w:18,dates:'17/8–23/8',km:55,gain:1200,loss:1200,phase:4,
+{w:18,dates:'18/8–24/8',km:55,gain:1200,loss:1200,phase:4,
  note:'Taper bắt đầu · Last ME + DH Intervals',
  up_focus:'[LAST ME WORKOUT] Buổi ME cuối cùng trong Sunday 20km. Ngắn hơn nhưng chất lượng. Theo sách: kích thích ME cần thiết 2-3 tuần trước race để duy trì adaptation. Không cần UH intervals nặng nữa.',
  dn_focus:'[LAST DH INTERVALS] 3×10ph DH hard — lần cuối cùng. Sau tuần này: không DH intervals nữa. CẮT MÓNG VUÔNG ngay tuần này. Kiểm tra heel-lock lacing.',
@@ -912,7 +1135,7 @@ const weeks = [
   {n:'CN',dot:'var(--downhill)',label:'Last ME + DH INT',blocks:[uphillBlock('20km · +1200m'),uphillBlock('ME: last time'),downhillBlock('DH INT: 3×10ph'),downhillBlock('Last DH intervals ever')]},
  ]},
 
-{w:19,dates:'24/8–30/8',km:40,gain:800,loss:800,phase:4,
+{w:19,dates:'25/8–31/8',km:40,gain:800,loss:800,phase:4,
  note:'Deep taper · kiểm tra gear + shoes',
  up_focus:'[TAPER Z1-Z2] Chạy UH easy Z1-Z2. Mục tiêu duy trì cảm giác chân, không fitness building. Legs sẽ cảm thấy nặng (taper legs) — bình thường hoàn toàn. Đây không phải mất thể lực.',
  dn_focus:'[DH Gear Test] DH nhẹ trong Sunday. Test giày race day với heel-lock: kiểm tra khoảng cách 1 ngón tay ở mũi khi đứng thẳng. Test tất race day. Không thay giày mới lạ tại đây.',
@@ -926,7 +1149,7 @@ const weeks = [
   {n:'CN',dot:'var(--uphill)',label:'Short Trail 12km',blocks:[uphillBlock('12km · +800m'),uphillBlock('Z1-Z2 easy'),downhillBlock('Test giày + heel-lock'),downhillBlock('Check tất race day')]},
  ]},
 
-{w:20,dates:'31/8–6/9',km:28,gain:500,loss:500,phase:4,
+{w:20,dates:'1/9–7/9',km:28,gain:500,loss:500,phase:4,
  note:'Taper sâu · chân nghỉ ngơi',
  up_focus:'[DEEP TAPER] Tối thiểu UH. 1 đoạn ngắn Sunday để duy trì cảm giác. Taper legs sẽ đỉnh điểm tuần này — cảm thấy chậm và nặng. Đây là dấu hiệu TỐT — glycogen đang tích đầy. Theo sách: đừng bao giờ "panic train" trong taper.',
  dn_focus:'[DH Easy] 1 đoạn ngắn DH easy. Không intervals. Không push. Mental preparation: visualize race day, uphill pace, DH form, nutrition timing.',
@@ -1205,407 +1428,536 @@ function initDayStates(weekNum) {
 }
 
 
-// ═══ STRAVA + SUPABASE ═══
-const STRAVA_CLIENT_ID = '226321';
-const STRAVA_REDIRECT  = 'https://qcuong2212-design.github.io/vmm-training/';
-const EDGE_FN          = 'https://vmm-strava.qcuong2212.workers.dev';
-const PLAN_START       = new Date('2026-04-20T00:00:00');
-const LOCAL_KEY        = 'vmm_strava_athlete';
+// ═══════════════════════════════════════════════════════════════════
+// SPRINT 1: AUTH + HR ZONES + DAILY CHECK-IN + PWA + STRAVA
+// ═══════════════════════════════════════════════════════════════════
 
-function getAthleteData(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');}catch(e){return null;}}
-function saveAthleteData(d){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(d));}catch(e){}}
-function clearAthleteData(){try{localStorage.removeItem(LOCAL_KEY);}catch(e){}}
+const SB_URL  = 'https://irbtnmiifivmurfxboqv.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlyYnRubWlpZml2bXVyZnhib3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODE3OTksImV4cCI6MjA5MjQ1Nzc5OX0.5YexjUwobhybOjZyqbe0-D8C8834UDr8WxYsa49rsaI';
+const CF_WORKER = 'https://vmm-strava.qcuong2212.workers.dev';
+const PLAN_START = new Date('2026-04-20T00:00:00');
+const AUTH_KEY   = 'vmm_auth_v1';
+const HRZ_KEY    = 'vmm_hr_zones_v1';
+const CHECKIN_KEY = 'vmm_checkin_v1';
+const STRAVA_KEY  = 'vmm_strava_athlete';
+const PWA_DISMISS_KEY = 'vmm_pwa_dismissed';
 
-async function callEdge(payload){
-  const resp=await fetch(EDGE_FN,{
+// ── AUTH STATE ────────────────────────────────────────────────────
+let _authUser = null;
+let _pwaPrompt = null;
+
+function getAuth() {
+  try { return JSON.parse(localStorage.getItem(AUTH_KEY)||'null'); }
+  catch(e) { return null; }
+}
+function setAuth(data) {
+  try { localStorage.setItem(AUTH_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function clearAuth() {
+  try { localStorage.removeItem(AUTH_KEY); } catch(e) {}
+}
+
+// ── SUPABASE REST helpers ────────────────────────────────────────
+async function sbGet(table, filter) {
+  const auth = getAuth();
+  const headers = {'apikey': SB_ANON, 'Authorization': 'Bearer ' + (auth?.access_token || SB_ANON)};
+  const r = await fetch(SB_URL + '/rest/v1/' + table + '?' + filter + '&select=*', {headers});
+  if (!r.ok) return null;
+  const rows = await r.json();
+  return rows[0] || null;
+}
+async function sbUpsert(table, data) {
+  const auth = getAuth();
+  const headers = {
+    'apikey': SB_ANON,
+    'Authorization': 'Bearer ' + (auth?.access_token || SB_ANON),
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates'
+  };
+  await fetch(SB_URL + '/rest/v1/' + table, {method:'POST', headers, body:JSON.stringify(data)});
+}
+async function sbRefreshToken(refreshToken) {
+  const r = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
+    headers:{'Content-Type':'application/json','apikey':SB_ANON},
+    body:JSON.stringify({refresh_token:refreshToken})
   });
-  const data=await resp.json();
-  if(!resp.ok)throw new Error(data.error||'Edge error '+resp.status);
-  return data;
+  if (!r.ok) return null;
+  const d = await r.json();
+  return {access_token:d.access_token, refresh_token:d.refresh_token,
+    expires_at: Math.floor(Date.now()/1000)+(d.expires_in||3600), user:d.user};
 }
 
-function dateToSlot(s){
-  const d=new Date(s+'T12:00:00');
-  const diff=Math.floor((d-PLAN_START)/86400000);
-  if(diff<0||diff>=147)return null;
-  return{weekNum:Math.floor(diff/7)+1,dayIdx:diff%7};
+// ── GOOGLE AUTH ──────────────────────────────────────────────────
+function authGoogle() {
+  const redirectTo = encodeURIComponent('https://qcuong2212-design.github.io/vmm-training/');
+  window.location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo;
 }
 
-function actMatches(act,di){
+// ── STRAVA AUTH ──────────────────────────────────────────────────
+function authStrava() {
+  // Strava OAuth → Cloudflare Worker exchange → save to localStorage
+  const redirectUri = encodeURIComponent('https://qcuong2212-design.github.io/vmm-training/');
+  window.location.href = 'https://www.strava.com/oauth/authorize?client_id=226321' +
+    '&redirect_uri=' + redirectUri + '&response_type=code&approval_prompt=auto&scope=read,activity:read_all';
+}
+
+// ── SIGN OUT ─────────────────────────────────────────────────────
+async function authSignOut() {
+  const auth = getAuth();
+  if (auth?.access_token) {
+    await fetch(SB_URL + '/auth/v1/logout', {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+auth.access_token,'apikey':SB_ANON}
+    }).catch(()=>{});
+  }
+  clearAuth();
+  localStorage.removeItem(STRAVA_KEY);
+  showAuthOverlay();
+}
+
+// ── AUTH UI ──────────────────────────────────────────────────────
+function showAuthOverlay() {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('user-bar').style.display = 'none';
+  document.getElementById('strava-bar').style.display = 'none';
+}
+
+function showLoggedIn(name, provider, stravaData) {
+  document.getElementById('auth-overlay').style.display = 'none';
+  const ub = document.getElementById('user-bar');
+  ub.style.display = 'flex';
+  document.getElementById('strava-bar').style.display = 'flex';
+
+  // User bar
+  const initials = (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-name').textContent = name || 'Người dùng';
+  document.getElementById('user-provider').textContent = provider === 'google' ? '🔑 Google' :
+    provider === 'strava' ? '🚴 Strava' : provider;
+
+  // Strava bar
+  if (stravaData) {
+    document.getElementById('strava-connect-area').style.display = 'none';
+    document.getElementById('strava-connected-area').style.display = 'flex';
+    document.getElementById('strava-name').textContent = stravaData.athlete_name?.split(' ')[0] || 'Strava';
+  } else {
+    document.getElementById('strava-connect-area').style.display = 'block';
+    document.getElementById('strava-connected-area').style.display = 'none';
+  }
+
+  // Readiness badge
+  const today = new Date().toISOString().split('T')[0];
+  const lastCheckin = JSON.parse(localStorage.getItem(CHECKIN_KEY)||'null');
+  if (lastCheckin?.date === today) {
+    updateReadinessBadge(lastCheckin.readiness);
+  } else {
+    document.getElementById('readiness-badge').style.display = 'flex';
+  }
+}
+
+// ── HANDLE OAUTH CALLBACKS ───────────────────────────────────────
+async function handleOAuthCallback() {
+  // Handle Supabase (Google) OAuth callback from URL hash
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.replace('#',''));
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    const expires_in = parseInt(params.get('expires_in')||'3600');
+    if (access_token) {
+      const userResp = await fetch(SB_URL+'/auth/v1/user', {
+        headers:{'Authorization':'Bearer '+access_token,'apikey':SB_ANON}
+      });
+      const user = await userResp.json();
+      const authData = {
+        access_token, refresh_token,
+        expires_at: Math.floor(Date.now()/1000)+expires_in,
+        user, provider:'google'
+      };
+      setAuth(authData);
+      window.history.replaceState({},'',window.location.pathname);
+      await onLoginSuccess(authData);
+      return true;
+    }
+  }
+
+  // Handle Strava OAuth callback from URL search params (?code=...)
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+  if (error) { window.history.replaceState({},'',window.location.pathname); return false; }
+  if (code) {
+    window.history.replaceState({},'',window.location.pathname);
+    try {
+      const resp = await fetch(CF_WORKER, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'exchange',code})
+      });
+      const data = await resp.json();
+      if (data.athlete_id) {
+        const stravaAuth = {
+          athlete_id: data.athlete_id,
+          athlete_name: data.athlete_name,
+          provider:'strava',
+          access_token: null, // no Supabase token for Strava-only
+        };
+        localStorage.setItem(STRAVA_KEY, JSON.stringify(stravaAuth));
+        // Set minimal auth for UI
+        const authData = {provider:'strava', user:{email:data.athlete_name, id:'strava_'+data.athlete_id}};
+        setAuth(authData);
+        await onLoginSuccess(authData, stravaAuth);
+        return true;
+      }
+    } catch(e) { console.error('Strava exchange failed:', e); }
+  }
+  return false;
+}
+
+async function onLoginSuccess(authData, stravaData) {
+  _authUser = authData;
+  const name = authData.user?.user_metadata?.full_name ||
+    authData.user?.email?.split('@')[0] ||
+    stravaData?.athlete_name || 'Người dùng';
+  const provider = authData.provider || 'google';
+
+  // Migrate localStorage done_data → Supabase if first login
+  const localDone = loadDone();
+  if (Object.keys(localDone).length > 0 && authData.access_token) {
+    const athleteId = stravaData?.athlete_id || ('g_'+authData.user?.id?.slice(0,8));
+    await sbUpsert('training_progress', {athlete_id:athleteId, done_data:localDone}).catch(()=>{});
+  }
+
+  showLoggedIn(name, provider, stravaData);
+  loadHRZones();
+  checkAndShowPWA();
+
+  // Auto-trigger check-in if not done today
+  const today = new Date().toISOString().split('T')[0];
+  const lastCheckin = JSON.parse(localStorage.getItem(CHECKIN_KEY)||'null');
+  if (!lastCheckin || lastCheckin.date !== today) {
+    setTimeout(() => openCheckin(), 1500);
+  }
+}
+
+// ── STRAVA CONNECT (when already logged in via Google) ──────────
+function stravaConnect() {
+  const redirectUri = encodeURIComponent('https://qcuong2212-design.github.io/vmm-training/');
+  window.location.href = 'https://www.strava.com/oauth/authorize?client_id=226321' +
+    '&redirect_uri=' + redirectUri + '&response_type=code&approval_prompt=auto&scope=read,activity:read_all';
+}
+function stravaDisconnect() {
+  localStorage.removeItem(STRAVA_KEY);
+  document.getElementById('strava-connect-area').style.display = 'block';
+  document.getElementById('strava-connected-area').style.display = 'none';
+}
+
+// ── STRAVA SYNC ──────────────────────────────────────────────────
+function dateToSlot(dateStr) {
+  const d = new Date(dateStr+'T12:00:00');
+  const diff = Math.floor((d - PLAN_START)/86400000);
+  if (diff<0||diff>=147) return null;
+  return {weekNum:Math.floor(diff/7)+1, dayIdx:diff%7};
+}
+function actMatches(act, di) {
   const t=(act.sport_type||act.type||'').toLowerCase();
-  const g=act.total_elevation_gain||0,dist=(act.distance||0)/1000,mt=act.moving_time||0;
-  if(di===6)return(t.includes('run')||t.includes('trail'))&&(g>200||dist>10);
-  if(di===5)return t.includes('run')&&dist>8;
-  if(di===0||di===2)return t.includes('weight')||t.includes('crossfit')||t.includes('workout')||
-    t.includes('elliptical')||t.includes('stairstepper')||(t.includes('run')&&mt>=900&&mt<=5400);
-  if(di===1||di===3)return t.includes('run')&&dist>=5;
+  const g=act.total_elevation_gain||0, dist=(act.distance||0)/1000, mt=act.moving_time||0;
+  if(di===6) return (t.includes('run')||t.includes('trail'))&&(g>200||dist>10);
+  if(di===5) return t.includes('run')&&dist>8;
+  if(di===0||di===2) return t.includes('weight')||t.includes('crossfit')||
+    t.includes('workout')||t.includes('elliptical')||(t.includes('run')&&mt>=900&&mt<=5400);
+  if(di===1||di===3) return t.includes('run')&&dist>=5;
   return dist>3||mt>600;
 }
-
-async function cloudSaveDone(done){
-  saveDone(done);
-  const a=getAthleteData();if(!a)return;
-  callEdge({action:'save_progress',athlete_id:a.athlete_id,done_data:done}).catch(()=>{});
-}
-
-async function cloudLoadDone(){
-  const a=getAthleteData();if(!a)return loadDone();
-  try{
-    const r=await callEdge({action:'load_progress',athlete_id:a.athlete_id});
-    if(r.done_data&&Object.keys(r.done_data).length>0){saveDone(r.done_data);return r.done_data;}
-  }catch(e){}
-  return loadDone();
-}
-
-function stravaConnect(){
-  window.location.href='https://www.strava.com/oauth/authorize?client_id='+STRAVA_CLIENT_ID+
-    '&redirect_uri='+encodeURIComponent(STRAVA_REDIRECT)+
-    '&response_type=code&approval_prompt=auto&scope=read,activity:read_all';
-}
-
-function stravaDisconnect(){
-  clearAthleteData();stravaShowConnect();
-  document.getElementById('strava-sync-status').textContent='';
-  showMilestoneToast('Đã ngắt kết nối Strava');
-}
-
-function stravaShowConnect(){
-  document.getElementById('strava-connect-area').style.display='block';
-  document.getElementById('strava-connected-area').style.display='none';
-}
-
-function stravaShowConnected(name){
-  document.getElementById('strava-connect-area').style.display='none';
-  document.getElementById('strava-connected-area').style.display='flex';
-  document.getElementById('strava-athlete-name').textContent=name||'Connected';
-}
-
-async function stravaSync(){
+async function stravaSync() {
   const btn=document.getElementById('strava-sync-btn');
   const status=document.getElementById('strava-sync-status');
-  const a=getAthleteData();if(!a){stravaShowConnect();return;}
-  btn.disabled=true;btn.textContent='↻ Đang sync...';
-  try{
-    const{activities,athlete_name}=await callEdge({action:'activities',athlete_id:a.athlete_id});
-    if(athlete_name)stravaShowConnected(athlete_name.split(' ')[0]);
-    if(activities)renderSidebarActivities(activities);
-    const done=await cloudLoadDone();let marked=0;
-    activities.forEach(act=>{
-      const s=dateToSlot((act.start_date_local||'').split('T')[0]);if(!s)return;
-      if(actMatches(act,s.dayIdx)){
-        const k=doneKey(s.weekNum,s.dayIdx);
-        if(!done[k]){done[k]={strava:true,actId:act.id};marked++;}
-        // Add visual info to day card
-        const dayEl=document.querySelector('#wk'+s.weekNum+' .day[data-i="'+s.dayIdx+'"]');
-        if(dayEl&&!dayEl.querySelector('.strava-act-info')){
-          dayEl.classList.add('strava-matched','done','strava-done');
-          const km=((act.distance||0)/1000).toFixed(1);
-          const gain=Math.round(act.total_elevation_gain||0);
-          const dur=Math.round((act.moving_time||0)/60);
-          const info=document.createElement('div');
-          info.className='strava-act-info';
-          info.textContent='🔁 '+km+'km'+(gain>0?' +'+gain+'m':'')+' '+dur+'ph';
-          dayEl.appendChild(info);
+  const stravaData = JSON.parse(localStorage.getItem(STRAVA_KEY)||'null');
+  if (!stravaData?.athlete_id) { return; }
+  btn.disabled=true; btn.textContent='↻ Đang sync...';
+  try {
+    const resp = await fetch(CF_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'activities', athlete_id:stravaData.athlete_id})
+    });
+    const {activities, athlete_name} = await resp.json();
+    if (athlete_name) document.getElementById('strava-name').textContent = athlete_name.split(' ')[0];
+    const done = loadDone(); let marked=0;
+    activities.forEach(act => {
+      const s = dateToSlot((act.start_date_local||'').split('T')[0]);
+      if (!s) return;
+      if (actMatches(act, s.dayIdx)) {
+        const k = doneKey(s.weekNum, s.dayIdx);
+        if (!done[k]) {
+          done[k] = {strava:true, actId:act.id,
+            km:((act.distance||0)/1000).toFixed(1),
+            elev:Math.round(act.total_elevation_gain||0)};
+          marked++;
+          // Add visual badge to open week
+          const el = document.querySelector('#wk'+s.weekNum+' .day[data-i="'+s.dayIdx+'"]');
+          if (el && !el.querySelector('.strava-act-badge')) {
+            el.classList.add('done','strava-done');
+            const b=document.createElement('div'); b.className='strava-act-badge';
+            b.textContent='🔁 '+done[k].km+'km'+(done[k].elev>0?' +'+done[k].elev+'m':'');
+            el.appendChild(b);
+          }
         }
       }
     });
-    await cloudSaveDone(done);updateTrailProgress();
+    saveDone(done); updateTrailProgress();
     weeks.forEach(w=>updateWeekBadge(w.w));
-    document.querySelectorAll('.week.open').forEach(el=>initDayStates(parseInt(el.id.replace('wk',''))));
-    const now=new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-    status.textContent=now+' · +'+marked+' buổi';
-    localStorage.setItem('vmm_last_sync',Date.now().toString());
-    if(marked>0)showMilestoneToast('🔄 Strava: +'+marked+' buổi tập!');
-  }catch(err){status.textContent='Lỗi: '+err.message;}
-  finally{btn.disabled=false;btn.textContent='↻ Đồng bộ ngay';}
+    const now = new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+    status.textContent = now+' · +'+marked+' buổi';
+    localStorage.setItem('vmm_last_sync', Date.now().toString());
+    if (marked>0) showToast('🔄 Strava: tự động tick '+marked+' buổi tập!');
+  } catch(e) { status.textContent='Lỗi: '+e.message; }
+  finally { btn.disabled=false; btn.textContent='↻ Đồng bộ'; }
 }
 
-function toggleDayDone(weekNum,dayIdx,el,event){
-  if(event)event.stopPropagation();
-  const done=loadDone();const key=doneKey(weekNum,dayIdx);
-  const prev=Object.keys(done).length;
-  if(done[key]){delete done[key];el.classList.remove('done','strava-done');}
-  else{done[key]=1;el.classList.add('done');}
-  cloudSaveDone(done);
-  updateTrailProgress(done[key]?prev:undefined);
-  updateWeekBadge(weekNum);
+// ── HR ZONES ─────────────────────────────────────────────────────
+function calcZones(maxHR) {
+  return {
+    z1: [0, Math.round(maxHR*0.60)],
+    z2: [Math.round(maxHR*0.60)+1, Math.round(maxHR*0.70)],
+    z3: [Math.round(maxHR*0.70)+1, Math.round(maxHR*0.80)],
+    z4: [Math.round(maxHR*0.80)+1, Math.round(maxHR*0.90)],
+    z5: [Math.round(maxHR*0.90)+1, maxHR],
+    maxHR
+  };
 }
-
-function initDayStates(weekNum){
-  const done=loadDone();
-  weeks.filter(w=>w.w===weekNum).forEach(w=>{
-    w.days.forEach((_,i)=>{
-      const el=document.querySelector('#wk'+weekNum+' .day[data-i="'+i+'"]');if(!el)return;
-      const val=done[doneKey(weekNum,i)];
-      el.classList.toggle('done',!!val);
-      el.classList.toggle('strava-done',!!(val&&val.strava));
-      if(val&&val.strava)el.classList.add('strava-matched');
-    });
-    updateWeekBadge(weekNum);
-  });
+function loadHRZones() {
+  const stored = JSON.parse(localStorage.getItem(HRZ_KEY)||'null');
+  if (!stored) return;
+  renderHRBar(stored);
 }
-
-async function handleStravaCallback(){
-  const params=new URLSearchParams(window.location.search);
-  const code=params.get('code');
-  const error=params.get('error');
-  if(error){console.log('Strava auth error:',error);window.history.replaceState({},'',window.location.pathname);stravaShowConnect();return;}
-  if(!code){stravaShowConnect();return;}
-  console.log('Strava callback: exchanging code...');
-  window.history.replaceState({},'',window.location.pathname);
-  // Show status in the strava bar
-  stravaShowConnect();
-  document.getElementById('strava-sync-status') && (document.getElementById('strava-sync-status').textContent='Đang kết nối...');
-  try{
-    const data=await callEdge({action:'exchange',code});
-    console.log('Exchange success:',data);
-    if(!data.athlete_id)throw new Error('No athlete_id in response');
-    saveAthleteData({athlete_id:data.athlete_id,athlete_name:data.athlete_name});
-    stravaShowConnected(data.athlete_name?.split(' ')[0]);
-    await stravaSync();
-  }catch(e){
-    console.error('Strava callback error:',e);
-    const s=document.getElementById('strava-sync-status');
-    if(s)s.textContent='Lỗi kết nối: '+e.message;
-    stravaShowConnect();
+function renderHRBar(zones) {
+  if (!zones?.maxHR) return;
+  const bar = document.getElementById('hr-zones-bar');
+  bar.style.display = 'flex';
+  document.getElementById('hz1').textContent = '<'+zones.z1[1]+'bpm';
+  document.getElementById('hz2').textContent = zones.z2[0]+'-'+zones.z2[1]+'bpm';
+  document.getElementById('hz3').textContent = zones.z3[0]+'-'+zones.z3[1]+'bpm';
+  document.getElementById('hz4').textContent = zones.z4[0]+'-'+zones.z4[1]+'bpm';
+  document.getElementById('hz5').textContent = '>'+zones.z5[0]+'bpm';
+}
+function openHRZones() {
+  const stored = JSON.parse(localStorage.getItem(HRZ_KEY)||'null');
+  if (stored?.maxHR) {
+    document.getElementById('hr-maxhr').value = stored.maxHR;
+    document.getElementById('hr-lthr').value = stored.lthr||'';
+    updateHRPreview(stored.maxHR);
   }
+  document.getElementById('hr-modal').style.display = 'flex';
+  document.getElementById('hr-maxhr').oninput = function() {
+    const v = parseInt(this.value);
+    if (v >= 140 && v <= 220) updateHRPreview(v);
+  };
 }
-
-async function initStrava(){
-  // Step 1: handle OAuth callback FIRST (before anything else)
-  const params=new URLSearchParams(window.location.search);
-  if(params.get('code')){
-    await handleStravaCallback();
-    return; // handleStravaCallback will call stravaSync after success
-  }
-  // Step 2: restore existing session
-  const a=getAthleteData();
-  if(a){
-    stravaShowConnected(a.athlete_name?.split(' ')[0]);
-    try{
-      const done=await cloudLoadDone();
-      updateTrailProgress();weeks.forEach(w=>updateWeekBadge(w.w));
-    }catch(e){console.warn('Load progress failed:',e);}
-    const last=localStorage.getItem('vmm_last_sync');
-    if(!last||Date.now()-parseInt(last)>3600000){
-      stravaSync().catch(e=>console.warn('Auto sync failed:',e));
-    }
-  }else{stravaShowConnect();}
-}
-
-
-// ═══ SIDEBAR: Activities + Weekly Analysis ═══
-let _stravaActivities = [];
-let _selectedAnalysisWeek = 1;
-
-function formatDuration(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return h > 0 ? h + 'g' + (m > 0 ? m + 'p' : '') : m + 'ph';
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.getDate() + '/' + (d.getMonth()+1);
-}
-
-function getActivityIcon(type) {
-  const t = (type || '').toLowerCase();
-  if (t.includes('trail')) return '🏔';
-  if (t.includes('run')) return '🏃';
-  if (t.includes('weight') || t.includes('workout') || t.includes('crossfit')) return '💪';
-  if (t.includes('hike') || t.includes('walk')) return '🥾';
-  if (t.includes('elliptical') || t.includes('stair')) return '📈';
-  return '⚡';
-}
-
-function renderSidebarActivities(activities) {
-  _stravaActivities = activities || [];
-  const el = document.getElementById('sb-activities');
-  if (!el) return;
-
-  if (!activities || activities.length === 0) {
-    el.innerHTML = '<div class="no-acts">Chưa có buổi tập nào<br>trong khoảng thời gian này</div>';
-    return;
-  }
-
-  // Sort by date desc, show last 15
-  const sorted = [...activities].sort((a,b) => new Date(b.start_date_local) - new Date(a.start_date_local)).slice(0, 15);
-
-  // Stats
-  const totalKm = activities.reduce((s,a) => s + (a.distance||0)/1000, 0);
-  const totalElev = activities.reduce((s,a) => s + (a.total_elevation_gain||0), 0);
-  const totalTime = activities.reduce((s,a) => s + (a.moving_time||0), 0);
-  document.getElementById('sb-total-km').textContent = totalKm.toFixed(0);
-  document.getElementById('sb-total-acts').textContent = activities.length;
-  document.getElementById('sb-total-elev').textContent = totalElev >= 1000 ? (totalElev/1000).toFixed(1)+'k' : totalElev.toFixed(0);
-  document.getElementById('sb-total-time').textContent = (totalTime/3600).toFixed(0);
-
-  el.innerHTML = sorted.map(act => {
-    const km = ((act.distance||0)/1000).toFixed(1);
-    const gain = (act.total_elevation_gain||0).toFixed(0);
-    const dur = formatDuration(act.moving_time||0);
-    const icon = getActivityIcon(act.sport_type||act.type);
-    const type = (act.sport_type||act.type||'').replace(/_/g,' ');
-    const date = formatDate(act.start_date_local);
-    const name = act.name || 'Hoạt động';
-    return `<div class="act-item">
-      <div class="act-header">
-        <span class="act-name" title="${name}">${icon} ${name}</span>
-        <span class="act-date">${date}</span>
-      </div>
-      <div class="act-type-badge">${type}</div>
-      <div class="act-stats">
-        <span class="act-stat"><span>${km}</span>km</span>
-        <span class="act-stat"><span>${dur}</span></span>
-        ${gain > 0 ? '<span class="act-stat act-elev"><span>+'+gain+'</span>m</span>' : ''}
-      </div>
-    </div>`;
-  }).join('');
-
-  // Build week selector for analysis
-  renderWeekSelector(activities);
-}
-
-function renderWeekSelector(activities) {
-  const el = document.getElementById('aw-weeks');
-  if (!el) return;
-
-  // Find which weeks have activities
-  const weeksWithActs = new Set();
-  activities.forEach(act => {
-    const date = (act.start_date_local||'').split('T')[0];
-    const slot = dateToSlot(date);
-    if (slot) weeksWithActs.add(slot.weekNum);
-  });
-
-  if (weeksWithActs.size === 0) return;
-  const sorted = [...weeksWithActs].sort((a,b) => b-a).slice(0, 8);
-  el.innerHTML = sorted.map(w =>
-    `<button class="aw-btn ${w === _selectedAnalysisWeek ? 'active' : ''}"
-      onclick="selectAnalysisWeek(${w})">W${String(w).padStart(2,'0')}</button>`
+function closeHRModal() { document.getElementById('hr-modal').style.display='none'; }
+function updateHRPreview(maxHR) {
+  const z = calcZones(maxHR);
+  const colors = ['#64b5f6','#81c784','#ffb74d','#e57373','#ce93d8'];
+  const labels = ['Z1','Z2','Z3','Z4','Z5'];
+  const vals = ['<'+z.z1[1], z.z2[0]+'-'+z.z2[1], z.z3[0]+'-'+z.z3[1], z.z4[0]+'-'+z.z4[1], '>'+z.z5[0]];
+  const grid = document.getElementById('hrz-preview-grid');
+  grid.innerHTML = labels.map((l,i) =>
+    '<div class="hrz-prev-item"><div class="hrz-prev-bar" style="background:'+colors[i]+'"></div>'+
+    '<div class="hrz-prev-lbl">'+l+'</div><div class="hrz-prev-val">'+vals[i]+'</div></div>'
   ).join('');
+  document.getElementById('hr-preview').style.display = 'block';
+}
+function saveHRZones() {
+  const maxHR = parseInt(document.getElementById('hr-maxhr').value);
+  const lthr = parseInt(document.getElementById('hr-lthr').value)||null;
+  if (!maxHR || maxHR<140 || maxHR>220) { alert('Nhập Max HR hợp lệ (140-220 bpm)'); return; }
+  const zones = calcZones(maxHR);
+  if (lthr) zones.lthr = lthr;
+  localStorage.setItem(HRZ_KEY, JSON.stringify(zones));
+  renderHRBar(zones);
+  closeHRModal();
+  showToast('✅ Đã lưu HR Zones! App sẽ hiển thị target HR cho từng bài tập.');
+}
 
-  // Auto-select latest week
-  if (!weeksWithActs.has(_selectedAnalysisWeek)) {
-    _selectedAnalysisWeek = sorted[0];
+// ── DAILY CHECK-IN ───────────────────────────────────────────────
+let _checkinState = { sleep:0, energy:0, soreness:[] };
+function setScore(field, val) {
+  _checkinState[field] = val;
+  document.querySelectorAll('#'+field+'-scale .checkin-score-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.v)===val);
+  });
+  updateReadiness();
+}
+function toggleSoreness(area) {
+  if (area==='none') {
+    _checkinState.soreness = [];
+    document.querySelectorAll('.soreness-chip').forEach(c=>c.classList.remove('active'));
+    document.querySelector('[data-area="none"]').classList.add('active');
+  } else {
+    const idx = _checkinState.soreness.indexOf(area);
+    if (idx>=0) _checkinState.soreness.splice(idx,1);
+    else _checkinState.soreness.push(area);
+    document.querySelector('[data-area="none"]').classList.remove('active');
+    document.querySelectorAll('.soreness-chip:not([data-area="none"])').forEach(c=>{
+      c.classList.toggle('active', _checkinState.soreness.includes(c.dataset.area));
+    });
   }
-  document.getElementById('aw-refresh-btn').style.display = 'block';
-  generateWeekAnalysis(_selectedAnalysisWeek);
+  updateReadiness();
+}
+function updateReadiness() {
+  const {sleep, energy, soreness} = _checkinState;
+  if (!sleep || !energy) return;
+  document.getElementById('checkin-save-btn').disabled = false;
+
+  // Calculate readiness (0-100)
+  let score = Math.round(((sleep+energy)/10)*100);
+  const hasSevere = soreness.includes('knee')||soreness.includes('itband')||soreness.includes('achilles');
+  const hasMinor = soreness.length>0 && !hasSevere;
+  if (hasSevere) score = Math.min(score, 60);
+  if (hasMinor) score = Math.min(score, 75);
+
+  let label, msg, color, swapMsg = '';
+  if (score>=80) { label='Sẵn sàng tốt 💪'; msg='Thực hiện đầy đủ bài tập theo kế hoạch.'; color='#6abf82'; }
+  else if (score>=60) { label='Bình thường ⚡'; msg='Có thể tập nhưng chú ý lắng nghe cơ thể.'; color='#ffb74d'; }
+  else { label='Cần nghỉ ngơi 🔴'; msg='Cân nhắc giảm cường độ hoặc nghỉ hoàn toàn.'; color='#ef9a9a'; }
+
+  // Generate swap recommendations
+  if (soreness.includes('knee')||soreness.includes('itband')) {
+    swapMsg = '⚠️ Phát hiện đau gối/IT Band: Bài Downhill Intervals hôm nay nên đổi thành 30ph đạp xe hoặc bơi lội. Tránh chạy xuống dốc.';
+  } else if (soreness.includes('achilles')) {
+    swapMsg = '⚠️ Đau Achilles: Bỏ qua Hill Sprints và treadmill incline. Thay bằng Z1 flat run hoặc nghỉ ngơi.';
+  } else if (score < 60) {
+    swapMsg = '💡 Năng lượng thấp: Đổi bài tập chính thành Z1 easy 30ph. Ưu tiên phục hồi hôm nay.';
+  }
+
+  const result = document.getElementById('readiness-result');
+  result.style.display = 'block';
+  document.getElementById('readiness-num').textContent = score;
+  document.getElementById('readiness-num').style.color = color;
+  document.getElementById('readiness-label').textContent = label;
+  document.getElementById('readiness-msg').textContent = msg;
+  const swapEl = document.getElementById('swap-alert');
+  if (swapMsg) { swapEl.style.display='block'; swapEl.textContent=swapMsg; }
+  else { swapEl.style.display='none'; }
+
+  _checkinState.readiness = score;
+  _checkinState.label = label;
+  _checkinState.swapMsg = swapMsg;
+}
+function openCheckin() {
+  _checkinState = { sleep:0, energy:0, soreness:[] };
+  document.querySelectorAll('.checkin-score-btn, .soreness-chip').forEach(b=>b.classList.remove('active'));
+  document.getElementById('readiness-result').style.display='none';
+  document.getElementById('checkin-save-btn').disabled=true;
+  document.getElementById('checkin-modal').style.display='flex';
+  const today = new Date().toLocaleDateString('vi-VN');
+  document.getElementById('checkin-date-label').textContent = 'Đánh giá trạng thái hôm nay · '+today;
+}
+function closeCheckin() { document.getElementById('checkin-modal').style.display='none'; }
+function saveCheckin() {
+  const today = new Date().toISOString().split('T')[0];
+  const data = {..._checkinState, date:today};
+  localStorage.setItem(CHECKIN_KEY, JSON.stringify(data));
+  updateReadinessBadge(data.readiness);
+  closeCheckin();
+  if (data.swapMsg) showToast('📋 Check-in lưu! '+data.swapMsg.substring(0,80)+'...');
+  else showToast('✅ Check-in hôm nay đã lưu. Chúc tập luyện tốt!');
+}
+function updateReadinessBadge(score) {
+  const badge = document.getElementById('readiness-badge');
+  badge.style.display = 'flex';
+  badge.className = 'readiness-badge';
+  if (score>=80) { badge.classList.add('good'); document.getElementById('readiness-icon').textContent='💚';
+    document.getElementById('readiness-text').textContent = score+'% Sẵn sàng'; }
+  else if (score>=60) { badge.classList.add('warn'); document.getElementById('readiness-icon').textContent='🟡';
+    document.getElementById('readiness-text').textContent = score+'% Thận trọng'; }
+  else { badge.classList.add('bad'); document.getElementById('readiness-icon').textContent='🔴';
+    document.getElementById('readiness-text').textContent = score+'% Cần nghỉ'; }
 }
 
-function selectAnalysisWeek(weekNum) {
-  _selectedAnalysisWeek = weekNum;
-  document.querySelectorAll('.aw-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.aw-btn').forEach(b => {
-    if (b.textContent === 'W'+String(weekNum).padStart(2,'0')) b.classList.add('active');
+// ── PWA ───────────────────────────────────────────────────────────
+function checkAndShowPWA() {
+  if (localStorage.getItem(PWA_DISMISS_KEY)) return;
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
+  if (!isInstalled && _pwaPrompt) {
+    document.getElementById('pwa-banner').style.display = 'flex';
+  } else if (!isInstalled && /iphone|ipad|ipod/i.test(navigator.userAgent)) {
+    // iOS: show manual install instruction
+    document.getElementById('pwa-banner').style.display = 'flex';
+    document.querySelector('.pwa-text').textContent =
+      '📱 iOS: Nhấn nút Chia sẻ → "Thêm vào Màn hình Chính" để dùng offline';
+    document.querySelector('.pwa-install-btn').style.display = 'none';
+  }
+}
+async function pwaInstall() {
+  if (_pwaPrompt) {
+    _pwaPrompt.prompt();
+    const result = await _pwaPrompt.userChoice;
+    if (result.outcome==='accepted') { pwaDismiss(); showToast('✅ Đã thêm vào màn hình chính!'); }
+  }
+}
+function pwaDismiss() {
+  localStorage.setItem(PWA_DISMISS_KEY,'1');
+  document.getElementById('pwa-banner').style.display='none';
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _pwaPrompt=e; });
+
+// ── TOAST HELPER ─────────────────────────────────────────────────
+function showToast(msg) {
+  // Reuse existing showMilestoneToast if available, else create
+  if (typeof showMilestoneToast === 'function') { showMilestoneToast(msg); return; }
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);'+
+    'background:var(--text);color:#c8f0a0;padding:12px 20px;border-radius:8px;'+
+    'font-size:13px;font-weight:600;z-index:9999;max-width:340px;text-align:center;'+
+    'box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .3s;';
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},4000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+async function initSprint1() {
+  // Handle OAuth callbacks first
+  const handled = await handleOAuthCallback();
+  if (handled) return;
+
+  // Restore session
+  let auth = getAuth();
+  if (auth) {
+    // Refresh if expired
+    if (auth.expires_at && Date.now()/1000 > auth.expires_at - 300 && auth.refresh_token) {
+      const refreshed = await sbRefreshToken(auth.refresh_token).catch(()=>null);
+      if (refreshed) { setAuth({...auth,...refreshed}); auth = getAuth(); }
+      else { clearAuth(); showAuthOverlay(); return; }
+    }
+    const stravaData = JSON.parse(localStorage.getItem(STRAVA_KEY)||'null');
+    await onLoginSuccess(auth, stravaData);
+
+    // Auto-sync Strava if > 1 hour
+    if (stravaData?.athlete_id) {
+      const last = localStorage.getItem('vmm_last_sync');
+      if (!last || Date.now()-parseInt(last) > 3600000) {
+        setTimeout(stravaSync, 2000);
+      }
+    }
+  } else {
+    showAuthOverlay();
+  }
+  loadHRZones();
+}
+
+
+// Register PWA Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/vmm-training/sw.js').catch(err => console.log('SW:', err));
   });
-  generateWeekAnalysis(weekNum);
 }
-
-function generateWeekAnalysis(weekNum) {
-  const el = document.getElementById('aw-content');
-  if (!el) return;
-  el.innerHTML = '<div class="analysis-loading">⏳ Đang phân tích...</div>';
-
-  // Get week's activities
-  const weekActs = _stravaActivities.filter(act => {
-    const date = (act.start_date_local||'').split('T')[0];
-    const slot = dateToSlot(date);
-    return slot && slot.weekNum === weekNum;
-  });
-
-  // Get week info from plan
-  const planWeek = weeks.find(w => w.w === weekNum);
-  const done = loadDone();
-  const doneDays = Object.keys(done).filter(k => k.startsWith('w'+weekNum+'_')).length;
-  const totalDays = planWeek ? planWeek.days.length : 7;
-
-  // Calculate stats
-  const runs = weekActs.filter(a => (a.sport_type||a.type||'').toLowerCase().includes('run') || (a.sport_type||a.type||'').toLowerCase().includes('trail'));
-  const totalKm = weekActs.reduce((s,a) => s+(a.distance||0)/1000, 0);
-  const totalElev = weekActs.reduce((s,a) => s+(a.total_elevation_gain||0), 0);
-  const totalTime = weekActs.reduce((s,a) => s+(a.moving_time||0), 0);
-  const targetKm = planWeek ? parseInt(planWeek.km) : 0;
-  const targetGain = planWeek ? parseInt(planWeek.gain) : 0;
-
-  const kmPct = targetKm > 0 ? (totalKm/targetKm*100).toFixed(0) : 0;
-  const elevPct = targetGain > 0 ? (totalElev/targetGain*100).toFixed(0) : 0;
-  const completionPct = totalDays > 0 ? Math.round(doneDays/totalDays*100) : 0;
-
-  // Generate analysis HTML
-  const getStatus = (pct) => pct >= 90 ? 'an-good' : pct >= 70 ? '' : 'an-warn';
-  const getEmoji = (pct) => pct >= 90 ? '✅' : pct >= 70 ? '⚠️' : '❗';
-
-  // Phase context
-  const phase = weekNum <= 5 ? 'P1 · Tái thiết' : weekNum <= 12 ? 'P2 · Tích lũy' : weekNum <= 17 ? 'P3 · Peak' : 'P4 · Taper';
-  const phaseAdvice = {
-    'P1 · Tái thiết': 'Ưu tiên Z1-Z2, không vượt ngưỡng. Mục tiêu build base aerobic và phục hồi eccentric.',
-    'P2 · Tích lũy': 'Bắt đầu thêm ME workout và treadmill 15%. Chú ý không tăng volume quá 10%/tuần.',
-    'P3 · Peak': 'Peak training — chịu đựng high load. Monitor chấn thương và sleep quality.',
-    'P4 · Taper': 'Giảm volume nhưng giữ intensity. Ưu tiên sleep, nutrition và gear check.'
-  }[phase] || '';
-
-  // Recommendations based on data
-  const recs = [];
-  if (kmPct < 70) recs.push('Km thấp hơn kế hoạch — kiểm tra recovery và tăng dần.');
-  if (elevPct < 70 && weekNum > 4) recs.push('Elevation thiếu — thêm treadmill incline hoặc lên núi cuối tuần.');
-  if (weekActs.length === 0) recs.push('Chưa có activity nào — kiểm tra kết nối Strava.');
-  if (kmPct >= 110) recs.push('Km vượt kế hoạch — cân nhắc recovery tuần sau.');
-  if (completionPct >= 80) recs.push('Tuần tập luyện xuất sắc! Duy trì momentum.');
-  if (recs.length === 0) recs.push('Bám sát kế hoạch tốt — tiếp tục duy trì.');
-
-  el.innerHTML = `
-    <div class="an-label">Tuần ${weekNum} · ${phase}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
-      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
-        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">${totalKm.toFixed(1)}<small style="font-size:10px;opacity:.5">/${targetKm}km</small></div>
-        <div style="font-size:9px;color:var(--muted)">DISTANCE ${getEmoji(kmPct)}</div>
-      </div>
-      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
-        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">+${totalElev.toFixed(0)}<small style="font-size:10px;opacity:.5">m</small></div>
-        <div style="font-size:9px;color:var(--muted)">ELEVATION ${getEmoji(elevPct)}</div>
-      </div>
-      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
-        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">${(totalTime/3600).toFixed(1)}<small style="font-size:10px;opacity:.5">h</small></div>
-        <div style="font-size:9px;color:var(--muted)">THỜI GIAN</div>
-      </div>
-      <div style="background:var(--surface2);border-radius:5px;padding:7px 9px;">
-        <div style="font-size:15px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#c8f0a0">${doneDays}<small style="font-size:10px;opacity:.5">/${totalDays}</small></div>
-        <div style="font-size:9px;color:var(--muted)">BUỔI ✓ ${completionPct}%</div>
-      </div>
-    </div>
-    <div class="an-label">Hoạt động (${weekActs.length} buổi)</div>
-    ${weekActs.length > 0
-      ? weekActs.map(a => {
-          const km2 = ((a.distance||0)/1000).toFixed(1);
-          const elv = (a.total_elevation_gain||0).toFixed(0);
-          return `<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
-            <span>${getActivityIcon(a.sport_type||a.type)} ${(a.name||'').substring(0,22)}</span>
-            <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace">${km2}km ${elv>0?'+'+elv:''}m</span>
-          </div>`;
-        }).join('')
-      : '<div style="font-size:11px;color:var(--muted);padding:4px 0">Chưa có activity nào được sync</div>'}
-    <div class="an-label" style="margin-top:10px">Khuyến nghị</div>
-    ${recs.map(r => `<div class="an-tip">${r}</div>`).join('')}
-    <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6">${phaseAdvice}</div>
-  `;
-}
-
-function refreshAnalysis() {
-  generateWeekAnalysis(_selectedAnalysisWeek);
-}
-
-// Sidebar update handled inline
 
 // Khởi tạo
 updateTrailProgress();
 showPhase(0);
-initStrava();
+initSprint1();
 </script>
 </body>
 </html>
