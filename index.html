@@ -1727,6 +1727,7 @@ function renderWeeks() {
 function toggle(n) { 
   document.getElementById('wk'+n).classList.toggle('open');
   initDayStates(n);
+  addTimeCrunchButtons(n);
 }  
 document.getElementById('week-list').addEventListener('click', e => { if (e.target.closest('.sblock')) e.stopPropagation(); });  
   
@@ -1971,7 +1972,12 @@ async function sbRefreshToken(refreshToken) {
 // ── GOOGLE AUTH ──────────────────────────────────────────────────
 function authGoogle() {
   const redirectTo = encodeURIComponent('https://qcuong2212-design.github.io/vmm-training/');
-  window.location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo;
+  // Note: requires Google provider enabled in Supabase Auth settings
+  // and https://qcuong2212-design.github.io/vmm-training/ in Supabase Redirect URLs
+  const url = SB_URL + '/auth/v1/authorize?provider=google' +
+    '&redirect_to=' + redirectTo +
+    '&skip_http_redirect=false';
+  window.location.href = url;
 }
 
 // ── STRAVA AUTH ──────────────────────────────────────────────────
@@ -2839,7 +2845,7 @@ function highlightToday() {
 const GEMINI_WORKER = 'https://vmm-strava.qcuong2212.workers.dev';
 
 async function callGemini(prompt, model) {
-  model = model || 'gemini-2.5-flash-preview-05-20';
+  model = model || 'gemini-1.5-flash';
   const resp = await fetch(GEMINI_WORKER, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -2954,7 +2960,7 @@ Trả lời ngắn gọn bằng tiếng Việt, format:
 **Lưu ý:** [1 câu quan trọng nhất]`;
 
   try {
-    const result = await callGemini(prompt, 'gemini-2.5-flash-preview-05-20');
+    const result = await callGemini(prompt, 'gemini-1.5-flash');
     document.getElementById('recal-loading').style.display = 'none';
     document.getElementById('recal-result').style.display = 'block';
     document.getElementById('recal-result').textContent = result;
@@ -3055,7 +3061,7 @@ Trả lời ngắn bằng tiếng Việt:
 **Mất đi:** [gì không thể bù trong ${minutes}ph]`;
 
   try {
-    const result = await callGemini(prompt, 'gemini-2.0-flash-lite');
+    const result = await callGemini(prompt, 'gemini-1.5-flash-8b');
     document.getElementById('tc-loading').style.display = 'none';
     document.getElementById('tc-result').style.display = 'block';
     document.getElementById('tc-result').textContent = result;
@@ -3140,7 +3146,7 @@ async function runStravaProfile() {
 3. **Ưu tiên tập luyện:** [1 lời khuyên cụ thể nhất]`;
 
   try {
-    const result = await callGemini(prompt, 'gemini-2.0-flash-lite');
+    const result = await callGemini(prompt, 'gemini-1.5-flash-8b');
     document.getElementById('prof-loading').style.display = 'none';
     document.getElementById('prof-result').style.display = 'block';
     document.getElementById('prof-result').textContent = result;
@@ -3315,10 +3321,7 @@ function closeAIPanel(id) {
 // Patch applied via event delegation to avoid recursive override
 
 // ── Add time-crunch button to day cards on open ──────────────────
-const _origToggle = toggle;
-function toggle(n) {
-  _origToggle(n);
-  // After opening, add time-crunch buttons
+function addTimeCrunchButtons(n) {
   setTimeout(() => {
     const wk = document.getElementById('wk'+n);
     if (!wk || !wk.classList.contains('open')) return;
