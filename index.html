@@ -689,6 +689,182 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   box-shadow: 0 0 0 3px rgba(200,240,160,.08);
 }
 
+
+/* ═══ SPRINT 2: AI + Dashboard ═══ */
+
+/* ── Gemini AI panels ── */
+.ai-panel {
+  position: fixed; inset: 0; z-index: 8500;
+  background: rgba(0,0,0,.7); display: flex;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.ai-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; padding: 24px; max-width: 480px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5);
+}
+.ai-card-title {
+  font-size: 16px; font-weight: 700; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ai-badge {
+  font-size: 9px; padding: 2px 6px; border-radius: 3px;
+  background: rgba(200,240,160,.15); color: #c8f0a0;
+  font-family: 'IBM Plex Mono', monospace; font-weight: 700;
+  letter-spacing: .05em;
+}
+.ai-card-sub { font-size: 12px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+.ai-loading {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--muted); padding: 16px 0;
+}
+.ai-spinner {
+  width: 18px; height: 18px; border: 2px solid var(--border);
+  border-top-color: #c8f0a0; border-radius: 50%;
+  animation: spin .8s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-result {
+  background: var(--surface2); border-radius: 8px;
+  padding: 14px; font-size: 12px; line-height: 1.8;
+  color: var(--text); border: 1px solid var(--border);
+  margin: 12px 0; white-space: pre-wrap;
+}
+.ai-result h4 { color: #c8f0a0; font-size: 12px; margin: 10px 0 4px; }
+.ai-actions { display: flex; gap: 8px; margin-top: 14px; }
+.ai-btn {
+  flex: 1; padding: 10px; border-radius: 7px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: inherit; border: none;
+  transition: all .15s;
+}
+.ai-btn-primary { background: #c8f0a0; color: #0a1f0f; }
+.ai-btn-primary:hover { background: #b5e08a; }
+.ai-btn-secondary { background: var(--surface2); color: var(--muted);
+  border: 1px solid var(--border); }
+.ai-btn-secondary:hover { color: var(--text); }
+
+/* Recalibrate trigger button */
+.recalibrate-banner {
+  display: none; background: rgba(231,111,81,.1);
+  border: 1px solid rgba(231,111,81,.3); border-radius: 8px;
+  padding: 12px 16px; margin: 8px 22px;
+  align-items: center; justify-content: space-between; gap: 12px;
+}
+.recalibrate-banner.visible { display: flex; }
+.recalibrate-text { font-size: 12px; color: #E76F51; line-height: 1.5; }
+.recalibrate-btn {
+  background: #E76F51; color: #fff; border: none; border-radius: 6px;
+  padding: 8px 14px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit; white-space: nowrap;
+  transition: opacity .15s;
+}
+.recalibrate-btn:hover { opacity: .85; }
+
+/* Time-crunch button on day cards */
+.time-crunch-btn {
+  display: none; width: 100%; margin-top: 6px; padding: 5px;
+  border-radius: 4px; border: 1px dashed rgba(255,255,255,.2);
+  background: transparent; color: var(--muted); font-size: 10px;
+  cursor: pointer; font-family: 'IBM Plex Mono', monospace;
+  transition: all .15s; text-align: center;
+}
+.day:hover .time-crunch-btn { display: block; }
+.time-crunch-btn:hover { border-color: #ffb74d; color: #ffb74d; }
+
+/* Preset buttons */
+.preset-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
+.preset-btn {
+  padding: 12px 8px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); cursor: pointer; text-align: center;
+  transition: all .15s; font-family: inherit;
+}
+.preset-btn:hover { border-color: #c8f0a0; background: rgba(200,240,160,.05); }
+.preset-btn.selected { border-color: #c8f0a0; background: rgba(200,240,160,.1); }
+.preset-time { font-size: 20px; font-weight: 700; color: #c8f0a0;
+  font-family: 'IBM Plex Mono', monospace; }
+.preset-label { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+/* Strava profile result */
+.profile-stat {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.profile-stat:last-child { border-bottom: none; }
+.profile-stat-icon { font-size: 18px; width: 24px; text-align: center; }
+.profile-stat-label { color: var(--muted); flex: 1; }
+.profile-stat-val { font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+  color: #c8f0a0; }
+.profile-type-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 700; margin: 6px 0;
+}
+.profile-type-mountain { background: rgba(200,240,160,.15); color: #c8f0a0; }
+.profile-type-base     { background: rgba(33,150,243,.15);  color: #64b5f6; }
+.profile-type-speed    { background: rgba(231,111,81,.15);  color: #E76F51; }
+
+/* ── Dashboard ── */
+#dashboard-panel {
+  display: none; padding: 20px 22px; max-width: 100%;
+}
+.dash-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px; margin-bottom: 14px;
+}
+@media (max-width: 700px) { .dash-grid { grid-template-columns: 1fr; } }
+.dash-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+}
+.dash-card-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dash-card-title-dot { width: 6px; height: 6px; border-radius: 50%; }
+.dash-chart { height: 180px; position: relative; }
+.chart-bar-wrap { display: flex; align-items: flex-end; gap: 3px;
+  height: 100%; padding-bottom: 20px; }
+.chart-bar-group { flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 1px; height: 100%; justify-content: flex-end; }
+.chart-bar {
+  width: 100%; border-radius: 2px 2px 0 0; min-height: 2px;
+  transition: height .4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.chart-bar:hover::after {
+  content: attr(data-val);
+  position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: var(--text); white-space: nowrap;
+  background: var(--surface2); padding: 1px 4px; border-radius: 3px;
+}
+.chart-bar-label { font-size: 8px; color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace; margin-top: 3px; }
+.chart-line-svg { width: 100%; height: 100%; }
+.dash-stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.dash-stat { text-align: center; padding: 12px 8px;
+  background: var(--surface2); border-radius: 8px; }
+.dash-stat-val { font-size: 22px; font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace; color: #c8f0a0; }
+.dash-stat-label { font-size: 9px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+.dash-legend { display: flex; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.dash-legend-item { display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--muted); }
+.dash-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* AI Strava profile trigger */
+.sb-profile-btn {
+  width: 100%; padding: 8px; border-radius: 6px;
+  border: 1px dashed rgba(200,240,160,.3);
+  background: rgba(200,240,160,.03); color: rgba(200,240,160,.6);
+  font-size: 11px; cursor: pointer; font-family: inherit;
+  transition: all .15s; text-align: center; margin-top: 8px;
+}
+.sb-profile-btn:hover { border-color: #c8f0a0; color: #c8f0a0;
+  background: rgba(200,240,160,.07); }
+
 </style>  
 </head>  
 <body>
@@ -797,6 +973,16 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   </div>
 </div>
 
+
+
+<!-- ═══ RECALIBRATE BANNER ═══ -->
+<div class="recalibrate-banner" id="recalibrate-banner">
+  <div class="recalibrate-text">
+    ⚠️ Phát hiện <span id="recalibrate-missed">0</span> buổi tập bị bỏ lỡ liên tiếp.
+    AI có thể tự động điều chỉnh lịch để bù lại an toàn.
+  </div>
+  <button class="recalibrate-btn" onclick="openRecalibrate()">🤖 Recalibrate</button>
+</div>
 
 <!-- ═══ DAILY CHECK-IN MODAL ═══ -->
 <div class="modal-overlay" id="checkin-modal" style="display:none">
@@ -945,9 +1131,54 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   <button id="tab-2" class="tab" onclick="showPhase(2)">P2 · Tích lũy</button>  
   <button id="tab-3" class="tab" onclick="showPhase(3)">P3 · Peak</button>  
   <button id="tab-4" class="tab" onclick="showPhase(4)">P4 · Taper</button>  
+  <button id="tab-dashboard" class="tab" onclick="showDashboard()">📊 Dashboard</button>
   <button id="tab-nutri" class="tab tab-special" onclick="showNutrition()">⚡ Dinh dưỡng & Bù giải</button>
 </div>  
   
+
+<!-- ═══ DASHBOARD PANEL ═══ -->
+<div id="dashboard-panel">
+  <div class="dash-stat-row" id="dash-stats-row" style="margin-bottom:16px">
+    <div class="dash-stat"><div class="dash-stat-val" id="dash-total-km">0</div><div class="dash-stat-label">Tổng km</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="dash-total-elev">0</div><div class="dash-stat-label">Tổng D+</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="dash-total-acts">0</div><div class="dash-stat-label">Buổi tập</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="dash-completion">0%</div><div class="dash-stat-label">Hoàn thành</div></div>
+  </div>
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="dash-card-title">
+        <span class="dash-card-title-dot" style="background:#4caf50"></span>
+        Km thực tế vs Kế hoạch (8 tuần gần nhất)
+      </div>
+      <div class="dash-chart" id="dash-km-chart"></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-title">
+        <span class="dash-card-title-dot" style="background:#c8f0a0"></span>
+        Elevation Gain D+ theo tuần
+      </div>
+      <div class="dash-chart" id="dash-elev-chart"></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-title">
+        <span class="dash-card-title-dot" style="background:#7ec8e3"></span>
+        Phân loại buổi tập
+      </div>
+      <div id="dash-type-chart" style="height:180px;display:flex;align-items:center;justify-content:center"></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-title">
+        <span class="dash-card-title-dot" style="background:#ffb74d"></span>
+        Tỷ lệ hoàn thành theo tuần
+      </div>
+      <div class="dash-chart" id="dash-completion-chart"></div>
+    </div>
+  </div>
+  <div style="text-align:center;font-size:11px;color:var(--muted);padding:8px 0">
+    📊 Dữ liệu từ Strava sync · <button onclick="stravaSync()" style="background:none;border:none;color:#c8f0a0;cursor:pointer;font-size:11px">↻ Cập nhật</button>
+  </div>
+</div>
+
 <!-- NUTRITION PANEL -->  
 <div id="nutri-panel">  
   <div class="nutri-header">  
@@ -1445,7 +1676,10 @@ function showPhase(p) {
   renderWeeks();  
 }  
   
-function showNutrition() {  
+function showNutrition() {
+  const dash = document.getElementById('dashboard-panel');
+  if (dash) dash.style.display = 'none';
+  document.getElementById('tab-dashboard')?.classList.remove('active');  
   resetTabs();  
   document.getElementById('tab-nutri').classList.add('active');  
   document.getElementById('nutri-panel').style.display = 'block';  
@@ -2569,10 +2803,552 @@ function highlightToday() {
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// SPRINT 2: AI AUTO-ADAPTATION + TIME-CRUNCH + PROFILING + DASHBOARD
+// ═══════════════════════════════════════════════════════════════════
+
+// Gemini API via Cloudflare Worker (keeps API key server-side)
+const GEMINI_WORKER = 'https://vmm-strava.qcuong2212.workers.dev';
+
+async function callGemini(prompt, model) {
+  model = model || 'gemini-2.5-flash-preview-05-20';
+  const resp = await fetch(GEMINI_WORKER, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action: 'gemini', model: model, prompt: prompt})
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error);
+  return data.text || data.result || '';
+}
+
+// ── B: AI AUTO-ADAPTATION ────────────────────────────────────────
+let _missedStreak = 0;
+
+function checkMissedStreak() {
+  const done = loadDone();
+  const today = new Date();
+  const planStart = new Date('2026-04-20T00:00:00');
+  let missed = 0;
+  let maxStreak = 0;
+  // Check last 7 days
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const diff = Math.floor((d - planStart) / 86400000);
+    if (diff < 0 || diff >= 147) continue;
+    const weekNum = Math.floor(diff/7)+1;
+    const dayIdx = diff%7;
+    const planWeek = weeks.find(w => w.w === weekNum);
+    if (!planWeek) continue;
+    const day = planWeek.days[dayIdx];
+    // Skip rest days
+    if (!day || day.label.includes('Nghỉ') || day.label.includes('Rest')) continue;
+    const key = doneKey(weekNum, dayIdx);
+    if (!done[key]) { missed++; maxStreak = Math.max(maxStreak, missed); }
+    else { missed = 0; }
+  }
+  _missedStreak = maxStreak;
+  const banner = document.getElementById('recalibrate-banner');
+  if (banner) {
+    if (maxStreak >= 3) {
+      banner.classList.add('visible');
+      document.getElementById('recalibrate-missed').textContent = maxStreak;
+    } else {
+      banner.classList.remove('visible');
+    }
+  }
+}
+
+function openRecalibrate() {
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'recalibrate-panel';
+  panel.innerHTML = `
+    <div class="ai-card">
+      <div class="ai-card-title">🤖 AI Recalibrate <span class="ai-badge">Gemini Flash</span></div>
+      <div class="ai-card-sub">Phát hiện ${_missedStreak} buổi tập bị bỏ lỡ. AI sẽ phân tích và đề xuất điều chỉnh lịch các tuần tiếp theo để bù lại an toàn — không vượt 10%/tuần và giữ nguyên tuần taper.</div>
+      <div class="ai-loading" id="recal-loading">
+        <div class="ai-spinner"></div>
+        Đang phân tích lịch tập và tính toán...
+      </div>
+      <div class="ai-result" id="recal-result" style="display:none"></div>
+      <div class="ai-actions" id="recal-actions" style="display:none">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('recalibrate-panel')">Bỏ qua</button>
+        <button class="ai-btn ai-btn-primary" onclick="applyRecalibrate()">✅ Áp dụng kế hoạch mới</button>
+      </div>
+      <div class="ai-actions" id="recal-close" style="margin-top:8px">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('recalibrate-panel')">Đóng</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+  runRecalibrate();
+}
+
+async function runRecalibrate() {
+  const done = loadDone();
+  const today = new Date();
+  const planStart = new Date('2026-04-20T00:00:00');
+  const currentDiff = Math.floor((today - planStart) / 86400000);
+  const currentWeek = Math.floor(currentDiff/7)+1;
+
+  // Build context for Gemini
+  const doneSessions = Object.keys(done).length;
+  const totalSessions = 147;
+  const pctDone = (doneSessions/totalSessions*100).toFixed(0);
+
+  // Get next 4 weeks plan summary
+  const nextWeeks = weeks.filter(w => w.w >= currentWeek && w.w <= currentWeek+4);
+  const weeksSummary = nextWeeks.map(w =>
+    'W'+w.w+': '+w.km+'km, +'+w.gain+'m, Phase '+w.phase
+  ).join(' | ');
+
+  const prompt = `Bạn là HLV trail running chuyên nghiệp. Runner đã bỏ ${_missedStreak} buổi tập liên tiếp.
+
+Trạng thái hiện tại:
+- Tuần hiện tại: W${currentWeek}/21
+- Đã hoàn thành: ${doneSessions}/${totalSessions} buổi (${pctDone}%)
+- Kế hoạch 4 tuần tới: ${weeksSummary}
+- Race day: VMM 100M, 20/9/2026
+
+Yêu cầu: Đề xuất điều chỉnh volume cho 3 tuần tiếp theo để bù deficit an toàn.
+Nguyên tắc bắt buộc từ sách "Training for the Uphill Athlete":
+1. Không tăng volume quá 10% so với tuần trước
+2. Ưu tiên duy trì elevation gain, có thể cắt bớt km flat
+3. Không thay đổi tuần taper (W19-W21)
+4. Đảm bảo ít nhất 1 ngày nghỉ/tuần
+
+Trả lời ngắn gọn bằng tiếng Việt, format:
+**Đánh giá:** [1-2 câu]
+**W${currentWeek+1}:** [km] km, +[gain]m — [lý do ngắn]
+**W${currentWeek+2}:** [km] km, +[gain]m — [lý do ngắn]
+**W${currentWeek+3}:** [km] km, +[gain]m — [lý do ngắn]
+**Lưu ý:** [1 câu quan trọng nhất]`;
+
+  try {
+    const result = await callGemini(prompt, 'gemini-2.5-flash-preview-05-20');
+    document.getElementById('recal-loading').style.display = 'none';
+    document.getElementById('recal-result').style.display = 'block';
+    document.getElementById('recal-result').textContent = result;
+    document.getElementById('recal-actions').style.display = 'flex';
+    document.getElementById('recal-close').style.display = 'none';
+    window._recalibrateResult = result;
+  } catch(e) {
+    document.getElementById('recal-loading').innerHTML =
+      '<span style="color:#ef5350">❌ Lỗi: '+e.message+'<br><small>Đảm bảo Gemini API đã được cấu hình trong Cloudflare Worker.</small></span>';
+  }
+}
+
+function applyRecalibrate() {
+  // Mark as recalibrated in localStorage
+  localStorage.setItem('vmm_recalibrated', JSON.stringify({
+    date: new Date().toISOString(),
+    result: window._recalibrateResult
+  }));
+  closeAIPanel('recalibrate-panel');
+  document.getElementById('recalibrate-banner').classList.remove('visible');
+  if (typeof showMilestoneToast === 'function')
+    showMilestoneToast('✅ Kế hoạch đã được điều chỉnh! Xem lại lịch tuần tới.');
+}
+
+// ── C: TIME-CRUNCH NEGOTIATION ───────────────────────────────────
+function openTimeCrunch(weekNum, dayIdx, dayLabel) {
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'timecrunch-panel';
+  panel.innerHTML = `
+    <div class="ai-card">
+      <div class="ai-card-title">⏱ Ít thời gian? <span class="ai-badge">Gemini Lite</span></div>
+      <div class="ai-card-sub">W${weekNum} · ${['T2','T3','T4','T5','T6','T7','CN'][dayIdx]} · ${dayLabel}<br>
+      Chọn thời gian bạn có — AI sẽ điều chỉnh bài tập để giữ adaptation tối đa.</div>
+      <div class="preset-grid" id="tc-presets">
+        <div class="preset-btn" onclick="selectPreset(this, 30)">
+          <div class="preset-time">30</div>
+          <div style="font-size:9px;color:var(--muted)">phút</div>
+          <div class="preset-label">Z1 Easy<br>Giữ aerobic base</div>
+        </div>
+        <div class="preset-btn" onclick="selectPreset(this, 90)">
+          <div class="preset-time">90</div>
+          <div style="font-size:9px;color:var(--muted)">phút</div>
+          <div class="preset-label">Treadmill ME<br>15% incline</div>
+        </div>
+        <div class="preset-btn" onclick="selectPreset(this, 180)">
+          <div class="preset-time">3h</div>
+          <div style="font-size:9px;color:var(--muted)"></div>
+          <div class="preset-label">Short Long Run<br>Giữ elevation</div>
+        </div>
+      </div>
+      <div class="ai-loading" id="tc-loading" style="display:none">
+        <div class="ai-spinner"></div>Đang tối ưu bài tập...
+      </div>
+      <div class="ai-result" id="tc-result" style="display:none"></div>
+      <div class="ai-actions">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('timecrunch-panel')">Hủy</button>
+        <button class="ai-btn ai-btn-primary" id="tc-apply-btn" onclick="applyTimeCrunch(${weekNum},${dayIdx})" style="display:none">✅ Áp dụng bài rút ngắn</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+  window._tcContext = {weekNum, dayIdx, dayLabel};
+}
+
+let _selectedPreset = 0;
+function selectPreset(el, minutes) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  _selectedPreset = minutes;
+  runTimeCrunch(minutes);
+}
+
+async function runTimeCrunch(minutes) {
+  const ctx = window._tcContext;
+  const planWeek = weeks.find(w => w.w === ctx.weekNum);
+  const day = planWeek?.days[ctx.dayIdx];
+  const blocks = day?.blocks?.join(', ').replace(/<[^>]+>/g,'').replace(/gymBlock|uphillBlock|roadBlock/g,'').trim() || '';
+
+  document.getElementById('tc-loading').style.display = 'flex';
+  document.getElementById('tc-result').style.display = 'none';
+  document.getElementById('tc-apply-btn').style.display = 'none';
+
+  const prompt = `Bạn là HLV trail running. Runner chỉ có ${minutes} phút tập hôm nay.
+
+Bài gốc: ${ctx.dayLabel} — ${blocks}
+Tuần W${ctx.weekNum}, Phase ${planWeek?.phase || 1}
+
+Nguyên tắc physiology bắt buộc:
+- KHÔNG đổi long run/Z2 sang HIIT/high intensity (sai adaptation)
+- 30ph: chỉ Z1 easy, ưu tiên không chấn thương
+- 90ph: treadmill 15% ME walk hoặc Z2 steady
+- 180ph: rút ngắn distance nhưng giữ elevation/D+
+
+Trả lời ngắn bằng tiếng Việt:
+**Bài ${minutes}ph:** [tên bài ngắn gọn]
+**Nội dung:** [2-3 dòng cụ thể: pace, HR zone, địa điểm]
+**Giữ được:** [adaptation nào được giữ lại]
+**Mất đi:** [gì không thể bù trong ${minutes}ph]`;
+
+  try {
+    const result = await callGemini(prompt, 'gemini-2.0-flash-lite');
+    document.getElementById('tc-loading').style.display = 'none';
+    document.getElementById('tc-result').style.display = 'block';
+    document.getElementById('tc-result').textContent = result;
+    document.getElementById('tc-apply-btn').style.display = 'block';
+    window._tcResult = {minutes, result};
+  } catch(e) {
+    document.getElementById('tc-loading').innerHTML =
+      '<span style="color:#ef5350">❌ ' + e.message + '</span>';
+  }
+}
+
+function applyTimeCrunch(weekNum, dayIdx) {
+  const key = 'vmm_tc_' + weekNum + '_' + dayIdx;
+  localStorage.setItem(key, JSON.stringify(window._tcResult));
+  closeAIPanel('timecrunch-panel');
+  if (typeof showMilestoneToast === 'function')
+    showMilestoneToast('⏱ Bài tập rút ngắn đã lưu! Tick done khi hoàn thành nhé.');
+}
+
+// ── D: STRAVA PROFILING ──────────────────────────────────────────
+async function runStravaProfile() {
+  if (!_stravaActivities.length) {
+    alert('Cần sync Strava trước để có dữ liệu phân tích.'); return;
+  }
+
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'profile-panel';
+  panel.innerHTML = `
+    <div class="ai-card">
+      <div class="ai-card-title">📊 Phân tích fitness <span class="ai-badge">Gemini Lite</span></div>
+      <div class="ai-card-sub">Đọc ${_stravaActivities.length} activities Strava để đánh giá baseline fitness và điểm mạnh/yếu của bạn.</div>
+      <div class="ai-loading" id="prof-loading">
+        <div class="ai-spinner"></div>Đang phân tích ${_stravaActivities.length} buổi tập...
+      </div>
+      <div id="prof-stats" style="display:none"></div>
+      <div class="ai-result" id="prof-result" style="display:none"></div>
+      <div class="ai-actions" style="margin-top:12px">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('profile-panel')">Đóng</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+
+  // Calculate stats
+  const acts = _stravaActivities;
+  const runs = acts.filter(a => (a.sport_type||a.type||'').toLowerCase().includes('run'));
+  const totalKm = runs.reduce((s,a)=>s+(a.distance||0)/1000,0);
+  const totalElev = runs.reduce((s,a)=>s+(a.total_elevation_gain||0),0);
+  const avgWeeklyKm = totalKm / Math.max(acts.length/5, 1);
+  const elevPerKm = totalKm > 0 ? totalElev/totalKm : 0;
+  const maxRunKm = runs.length > 0 ? Math.max(...runs.map(a=>(a.distance||0)/1000)) : 0;
+  const runnerType = elevPerKm > 30 ? 'mountain' : elevPerKm > 15 ? 'trail' : 'base';
+  const typeLabel = {mountain:'🏔 Mountain Runner', trail:'🌲 Trail Runner', base:'🏃 Base Runner'}[runnerType];
+  const typeClass = {mountain:'profile-type-mountain', trail:'profile-type-base', speed:'profile-type-speed'}[runnerType] || 'profile-type-base';
+
+  // Show stats immediately
+  const statsEl = document.getElementById('prof-stats');
+  statsEl.style.display = 'block';
+  statsEl.innerHTML =
+    '<div class="profile-type-badge '+typeClass+'">'+typeLabel+'</div>' +
+    [['🏃', 'Tổng km', totalKm.toFixed(0)+'km'],
+     ['⛰️', 'D+/km', elevPerKm.toFixed(0)+'m/km'],
+     ['🎯', 'Long run max', maxRunKm.toFixed(0)+'km'],
+     ['📅', 'Activities', acts.length+' buổi']
+    ].map(([icon,label,val]) =>
+      '<div class="profile-stat"><span class="profile-stat-icon">'+icon+'</span>' +
+      '<span class="profile-stat-label">'+label+'</span>' +
+      '<span class="profile-stat-val">'+val+'</span></div>'
+    ).join('');
+
+  // Call Gemini for deep analysis
+  const prompt = `Phân tích runner dựa trên data Strava:
+- Tổng km: ${totalKm.toFixed(0)}km (${acts.length} activities)
+- D+/km trung bình: ${elevPerKm.toFixed(0)}m/km
+- Long run dài nhất: ${maxRunKm.toFixed(0)}km
+- Loại runner: ${typeLabel}
+- Target race: VMM 100M, 161km, 8800m D+, tháng 9/2026
+
+Đánh giá ngắn gọn bằng tiếng Việt (tối đa 150 từ):
+1. **Điểm mạnh:** [2 điểm]
+2. **Điểm cần cải thiện:** [2 điểm quan trọng nhất cho VMM 100M]
+3. **Ưu tiên tập luyện:** [1 lời khuyên cụ thể nhất]`;
+
+  try {
+    const result = await callGemini(prompt, 'gemini-2.0-flash-lite');
+    document.getElementById('prof-loading').style.display = 'none';
+    document.getElementById('prof-result').style.display = 'block';
+    document.getElementById('prof-result').textContent = result;
+    // Save profile
+    localStorage.setItem('vmm_strava_profile', JSON.stringify({
+      date: new Date().toISOString(), type: runnerType, stats: {totalKm, elevPerKm, maxRunKm}, analysis: result
+    }));
+  } catch(e) {
+    document.getElementById('prof-loading').innerHTML =
+      '<span style="color:#ef5350">❌ ' + e.message + '</span>';
+  }
+}
+
+// ── G: DASHBOARD ─────────────────────────────────────────────────
+function showDashboard() {
+  // Update tab state
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-dashboard').classList.add('active');
+
+  // Hide other panels
+  document.getElementById('week-list').style.display = 'none';
+  document.getElementById('phase-banner').style.display = 'none';
+  const nutri = document.getElementById('nutri-panel');
+  if (nutri) nutri.style.display = 'none';
+  const dash = document.getElementById('dashboard-panel');
+  dash.style.display = 'block';
+
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const acts = _stravaActivities;
+  const done = loadDone();
+
+  // Overall stats
+  const totalKm = acts.reduce((s,a)=>s+(a.distance||0)/1000,0);
+  const totalElev = acts.reduce((s,a)=>s+(a.total_elevation_gain||0),0);
+  const totalActs = acts.length;
+  const completionPct = Math.round(Object.keys(done).length/147*100);
+
+  document.getElementById('dash-total-km').textContent = totalKm.toFixed(0);
+  document.getElementById('dash-total-elev').textContent = totalElev>=1000?(totalElev/1000).toFixed(1)+'k':totalElev.toFixed(0);
+  document.getElementById('dash-total-acts').textContent = totalActs;
+  document.getElementById('dash-completion').textContent = completionPct+'%';
+
+  // Build per-week data
+  const weekData = {};
+  acts.forEach(act => {
+    const slot = dateToSlot((act.start_date_local||'').split('T')[0]);
+    if (!slot) return;
+    const w = slot.weekNum;
+    if (!weekData[w]) weekData[w] = {km:0, elev:0, acts:[], types:{}};
+    weekData[w].km += (act.distance||0)/1000;
+    weekData[w].elev += act.total_elevation_gain||0;
+    weekData[w].acts.push(act);
+    const t = (act.sport_type||act.type||'other').toLowerCase();
+    const cat = t.includes('trail')||t.includes('run')?'run':t.includes('weight')||t.includes('workout')||t.includes('crossfit')?'gym':'other';
+    weekData[w].types[cat] = (weekData[w].types[cat]||0)+1;
+  });
+
+  // Get current week and render last 8 weeks
+  const today = new Date();
+  const planStart = new Date('2026-04-20T00:00:00');
+  const currentWeek = Math.floor((today-planStart)/86400000/7)+1;
+  const weekNums = [];
+  for (let w=Math.max(1,currentWeek-7); w<=currentWeek; w++) weekNums.push(w);
+
+  // Chart 1: KM planned vs actual
+  renderBarChart('dash-km-chart', weekNums, weekNums.map(w => {
+    const plan = weeks.find(x=>x.w===w);
+    const actual = weekData[w]?.km || 0;
+    return {target: plan?.km||0, actual: actual, label:'W'+w};
+  }), 'km');
+
+  // Chart 2: Elevation
+  renderBarChart('dash-elev-chart', weekNums, weekNums.map(w => {
+    const plan = weeks.find(x=>x.w===w);
+    const actual = weekData[w]?.elev || 0;
+    return {target: plan?.gain||0, actual: actual, label:'W'+w};
+  }), 'elev');
+
+  // Chart 3: Activity type donut
+  const typeCount = {};
+  acts.forEach(a => {
+    const t = (a.sport_type||a.type||'').toLowerCase();
+    const cat = t.includes('trail')?'Trail Run':t.includes('run')?'Road Run':t.includes('weight')||t.includes('workout')?'Gym/Strength':'Khác';
+    typeCount[cat] = (typeCount[cat]||0)+1;
+  });
+  renderDonut('dash-type-chart', typeCount);
+
+  // Chart 4: Completion rate
+  const compData = weekNums.map(w => {
+    const weekDays = weeks.find(x=>x.w===w)?.days.length||7;
+    const doneDays = Object.keys(done).filter(k=>k.startsWith('w'+w+'_')).length;
+    return {actual: Math.round(doneDays/weekDays*100), target:100, label:'W'+w};
+  });
+  renderBarChart('dash-completion-chart', weekNums, compData, '%');
+}
+
+function renderBarChart(containerId, weekNums, data, unit) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const maxVal = Math.max(...data.map(d=>Math.max(d.target||0, d.actual||0)), 1);
+
+  el.innerHTML = '<div class="chart-bar-wrap">' +
+    data.map(d => {
+      const targetH = Math.round((d.target/maxVal)*140);
+      const actualH = Math.round((d.actual/maxVal)*140);
+      const pct = d.target>0 ? Math.round(d.actual/d.target*100) : 0;
+      const color = pct>=90?'#4caf50':pct>=70?'#ffb74d':'#ef5350';
+      return '<div class="chart-bar-group" style="justify-content:flex-end">' +
+        '<div style="position:relative;width:100%;display:flex;gap:1px;align-items:flex-end;height:145px">' +
+        '<div class="chart-bar" style="flex:1;height:'+targetH+'px;background:rgba(255,255,255,.12)" data-val="Target: '+d.target+unit+'"></div>' +
+        '<div class="chart-bar" style="flex:1;height:'+actualH+'px;background:'+color+'" data-val="Actual: '+d.actual.toFixed(unit==='%'?0:1)+unit+'"></div>' +
+        '</div><div class="chart-bar-label">'+d.label+'</div></div>';
+    }).join('') +
+    '</div>' +
+    '<div class="dash-legend" style="margin-top:6px">' +
+    '<div class="dash-legend-item"><div class="dash-legend-dot" style="background:rgba(255,255,255,.12)"></div>Kế hoạch</div>' +
+    '<div class="dash-legend-item"><div class="dash-legend-dot" style="background:#4caf50"></div>Hoàn thành</div>' +
+    '</div>';
+}
+
+function renderDonut(containerId, typeCount) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const total = Object.values(typeCount).reduce((s,v)=>s+v,0);
+  if (!total) { el.innerHTML='<div style="color:var(--muted);font-size:12px">Chưa có dữ liệu</div>'; return; }
+  const colors = {'Trail Run':'#c8f0a0','Road Run':'#7ec8e3','Gym/Strength':'#E76F51','Khác':'#888'};
+  const entries = Object.entries(typeCount);
+
+  // Simple CSS-based donut
+  const segments = entries.map(([type, count]) => {
+    const pct = Math.round(count/total*100);
+    return {type, count, pct, color: colors[type]||'#888'};
+  });
+
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;gap:16px;width:100%">' +
+    '<svg viewBox="0 0 36 36" style="width:100px;height:100px;flex-shrink:0">' +
+    (() => {
+      let offset = 25;
+      return segments.map(s => {
+        const dasharray = s.pct + ' ' + (100-s.pct);
+        const el2 = '<circle cx="18" cy="18" r="15.91" fill="none" stroke="'+s.color+'" stroke-width="4" stroke-dasharray="'+dasharray+'" stroke-dashoffset="'+(100-offset)+'" style="transition:stroke-dasharray .5s"/>';
+        offset += s.pct;
+        return el2;
+      }).join('');
+    })() +
+    '<text x="18" y="20" text-anchor="middle" font-size="6" fill="#c8f0a0" font-weight="bold">'+total+'</text>' +
+    '</svg>' +
+    '<div style="flex:1">' +
+    segments.map(s =>
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
+      '<div style="width:8px;height:8px;border-radius:2px;background:'+s.color+';flex-shrink:0"></div>' +
+      '<span style="font-size:11px;color:var(--muted);flex:1">'+s.type+'</span>' +
+      '<span style="font-size:11px;font-weight:700;color:var(--text)">'+s.count+'</span>' +
+      '<span style="font-size:10px;color:var(--muted)">'+s.pct+'%</span></div>'
+    ).join('') +
+    '</div></div>';
+}
+
+// ── Panel close helper ────────────────────────────────────────────
+function closeAIPanel(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ── Hook into showPhase to hide dashboard ────────────────────────
+const _origShowPhase = showPhase;
+function showPhase(p) {
+  const dash = document.getElementById('dashboard-panel');
+  if (dash) dash.style.display = 'none';
+  _origShowPhase(p);
+  document.getElementById('tab-dashboard')?.classList.remove('active');
+}
+
+// ── Add time-crunch button to day cards on open ──────────────────
+const _origToggle = toggle;
+function toggle(n) {
+  _origToggle(n);
+  // After opening, add time-crunch buttons
+  setTimeout(() => {
+    const wk = document.getElementById('wk'+n);
+    if (!wk || !wk.classList.contains('open')) return;
+    const planWeek = weeks.find(w=>w.w===n);
+    if (!planWeek) return;
+    wk.querySelectorAll('.day').forEach((el, i) => {
+      if (!el.querySelector('.time-crunch-btn')) {
+        const day = planWeek.days[i];
+        if (!day || day.label.includes('Nghỉ')) return;
+        const btn = document.createElement('button');
+        btn.className = 'time-crunch-btn';
+        btn.textContent = '⏱ Ít thời gian?';
+        btn.onclick = (e) => { e.stopPropagation(); openTimeCrunch(n, i, day.label); };
+        el.appendChild(btn);
+      }
+    });
+  }, 100);
+}
+
+// ── Add Strava profile button to sidebar ─────────────────────────
+function addProfileButtonToSidebar() {
+  const sbActs = document.getElementById('sb-activities');
+  if (!sbActs || document.getElementById('sb-profile-trigger')) return;
+  const btn = document.createElement('button');
+  btn.id = 'sb-profile-trigger';
+  btn.className = 'sb-profile-btn';
+  btn.textContent = '🤖 Phân tích Fitness với AI';
+  btn.onclick = runStravaProfile;
+  sbActs.parentElement.appendChild(btn);
+}
+
+// ── Init Sprint 2 ────────────────────────────────────────────────
+function initSprint2() {
+  setTimeout(() => {
+    checkMissedStreak();
+    addProfileButtonToSidebar();
+    // Show profile button after Strava sync
+    const origRender = window.renderSidebarActivities;
+    if (origRender) {
+      window.renderSidebarActivities = function(acts) {
+        origRender(acts);
+        setTimeout(addProfileButtonToSidebar, 100);
+        updateAllWeeksProgress && updateAllWeeksProgress(acts);
+      };
+    }
+  }, 1000);
+}
+
 // Khởi tạo
 updateTrailProgress();
 showPhase(0);
 initSprint1();
+initSprint2();
 setTimeout(()=>{highlightToday();initElevTooltip();},500);
 </script>
 </body>
