@@ -1658,6 +1658,8 @@ function resetTabs() {
 }  
   
 function showPhase(p) {  
+  const dash=document.getElementById('dashboard-panel');if(dash)dash.style.display='none';
+  document.getElementById('tab-dashboard')?.classList?.remove('active');
   activePhase = p;  
   resetTabs();  
   document.getElementById('tab-' + p).classList.add('active');  
@@ -1676,10 +1678,7 @@ function showPhase(p) {
   renderWeeks();  
 }  
   
-function showNutrition() {
-  const dash = document.getElementById('dashboard-panel');
-  if (dash) dash.style.display = 'none';
-  document.getElementById('tab-dashboard')?.classList.remove('active');  
+function showNutrition() {  
   resetTabs();  
   document.getElementById('tab-nutri').classList.add('active');  
   document.getElementById('nutri-panel').style.display = 'block';  
@@ -1926,8 +1925,10 @@ let _authUser = null;
 let _pwaPrompt = null;
 
 function getAuth() {
-  try { return JSON.parse(localStorage.getItem(AUTH_KEY)||'null'); }
-  catch(e) { return null; }
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_KEY)||'null') ||
+           JSON.parse(sessionStorage.getItem(AUTH_KEY)||'null');
+  } catch(e) { return null; }
 }
 function setAuth(data) {
   try { localStorage.setItem(AUTH_KEY, JSON.stringify(data)); } catch(e) {}
@@ -2068,6 +2069,15 @@ async function handleOAuthCallback() {
   if (error) { window.history.replaceState({},'',window.location.pathname); return false; }
   if (code) {
     window.history.replaceState({},'',window.location.pathname);
+    // Show loading state while exchanging code
+    const overlay = document.getElementById('auth-overlay');
+    if (overlay) {
+      overlay.querySelector('.auth-card').innerHTML =
+        '<div class="auth-logo">⏳</div>' +
+        '<div class="auth-title">Đang kết nối Strava...</div>' +
+        '<div class="auth-sub">Vui lòng chờ trong giây lát</div>' +
+        '<div style="margin:20px auto;width:32px;height:32px;border:3px solid #eee;border-top-color:#FC4C02;border-radius:50%;animation:spin .8s linear infinite"></div>';
+    }
     try {
       const resp = await fetch(CF_WORKER, {
         method:'POST',
@@ -2080,16 +2090,33 @@ async function handleOAuthCallback() {
           athlete_id: data.athlete_id,
           athlete_name: data.athlete_name,
           provider:'strava',
-          access_token: null, // no Supabase token for Strava-only
+          access_token: null,
         };
-        localStorage.setItem(STRAVA_KEY, JSON.stringify(stravaAuth));
-        // Set minimal auth for UI
+        // Try both localStorage and sessionStorage for resilience
+        try { localStorage.setItem(STRAVA_KEY, JSON.stringify(stravaAuth)); } catch(e) {}
+        try { sessionStorage.setItem(STRAVA_KEY, JSON.stringify(stravaAuth)); } catch(e) {}
         const authData = {provider:'strava', user:{email:data.athlete_name, id:'strava_'+data.athlete_id}};
-        setAuth(authData);
+        try { localStorage.setItem(AUTH_KEY, JSON.stringify(authData)); } catch(e) {}
+        try { sessionStorage.setItem(AUTH_KEY, JSON.stringify(authData)); } catch(e) {}
         await onLoginSuccess(authData, stravaAuth);
         return true;
+      } else {
+        throw new Error(data.error || 'Không nhận được athlete_id từ Strava');
       }
-    } catch(e) { console.error('Strava exchange failed:', e); }
+    } catch(e) {
+      console.error('Strava exchange failed:', e);
+      // Show error with retry
+      const card = document.getElementById('auth-overlay')?.querySelector('.auth-card');
+      if (card) {
+        card.innerHTML =
+          '<div class="auth-logo">❌</div>' +
+          '<div class="auth-title">Kết nối thất bại</div>' +
+          '<div class="auth-sub" style="color:#ef5350">' + e.message + '</div>' +
+          '<button class="auth-btn auth-btn-strava" onclick="authStrava()" style="margin-top:16px">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.581-5.831l2.509 4.931h4.104L12.82 0 3 13.828h4.105"/></svg>' +
+          ' Thử lại</button>';
+      }
+    }
   }
   return false;
 }
@@ -3138,6 +3165,8 @@ function showDashboard() {
   document.getElementById('phase-banner').style.display = 'none';
   const nutri = document.getElementById('nutri-panel');
   if (nutri) nutri.style.display = 'none';
+  // Deactivate phase tabs
+  document.querySelectorAll('.tab:not(#tab-dashboard)').forEach(t => t.classList.remove('active'));
   const dash = document.getElementById('dashboard-panel');
   dash.style.display = 'block';
 
@@ -3282,14 +3311,8 @@ function closeAIPanel(id) {
   if (el) el.remove();
 }
 
-// ── Hook into showPhase to hide dashboard ────────────────────────
-const _origShowPhase = showPhase;
-function showPhase(p) {
-  const dash = document.getElementById('dashboard-panel');
-  if (dash) dash.style.display = 'none';
-  _origShowPhase(p);
-  document.getElementById('tab-dashboard')?.classList.remove('active');
-}
+// ── Hook: hide dashboard when switching phase tabs ───────────────
+// Patch applied via event delegation to avoid recursive override
 
 // ── Add time-crunch button to day cards on open ──────────────────
 const _origToggle = toggle;
