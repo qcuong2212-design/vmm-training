@@ -2845,7 +2845,7 @@ function highlightToday() {
 const GEMINI_WORKER = 'https://vmm-strava.qcuong2212.workers.dev';
 
 async function callGemini(prompt, model) {
-  model = model || 'gemini-1.5-flash';
+  model = model || 'gemini-2.5-flash';
   const resp = await fetch(GEMINI_WORKER, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -2960,7 +2960,7 @@ Trả lời ngắn gọn bằng tiếng Việt, format:
 **Lưu ý:** [1 câu quan trọng nhất]`;
 
   try {
-    const result = await callGemini(prompt, 'gemini-1.5-flash');
+    const result = await callGemini(prompt, 'gemini-2.5-flash');
     document.getElementById('recal-loading').style.display = 'none';
     document.getElementById('recal-result').style.display = 'block';
     document.getElementById('recal-result').textContent = result;
@@ -3061,7 +3061,7 @@ Trả lời ngắn bằng tiếng Việt:
 **Mất đi:** [gì không thể bù trong ${minutes}ph]`;
 
   try {
-    const result = await callGemini(prompt, 'gemini-1.5-flash-8b');
+    const result = await callGemini(prompt, 'gemini-2.5-flash-lite');
     document.getElementById('tc-loading').style.display = 'none';
     document.getElementById('tc-result').style.display = 'block';
     document.getElementById('tc-result').textContent = result;
@@ -3146,7 +3146,7 @@ async function runStravaProfile() {
 3. **Ưu tiên tập luyện:** [1 lời khuyên cụ thể nhất]`;
 
   try {
-    const result = await callGemini(prompt, 'gemini-1.5-flash-8b');
+    const result = await callGemini(prompt, 'gemini-2.5-flash-lite');
     document.getElementById('prof-loading').style.display = 'none';
     document.getElementById('prof-result').style.display = 'block';
     document.getElementById('prof-result').textContent = result;
