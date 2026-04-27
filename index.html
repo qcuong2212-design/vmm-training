@@ -533,6 +533,162 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   .sidebar{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
 }
 
+
+/* ═══ UI IMPROVEMENTS v2 ═══ */
+
+/* ── 1a. Contrast boost for outdoor readability ── */
+.sb-uphill { background:#c8330a; color:#fff; border-left:2px solid #ff5722; }
+.sb-gym    { background:#1b5e20; color:#fff; border-left:2px solid var(--gym); }
+.sb-road   { background:#1a237e; color:#e8e8ff; border-left:2px solid #7c4dff; }
+.sb-downhill { background:#4a148c; color:#f3e5f5; border-left:2px solid var(--downhill); }
+.sb-rest   { background:#263238; color:rgba(255,255,255,.6); border-left:2px solid var(--muted); }
+.sblock    { border-radius:3px; padding:4px 6px; margin-bottom:3px; font-size:10px;
+  font-weight:600; line-height:1.35; letter-spacing:.01em; }
+
+/* ── 1b. Mobile: horizontal snap scroll instead of 2-col ── */
+@media (max-width: 640px) {
+  .day-grid {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 8px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .day-grid .day {
+    flex: 0 0 72vw;
+    scroll-snap-align: start;
+    min-height: 130px;
+  }
+  .day-grid .day.today-card {
+    flex: 0 0 78vw;
+    border: 2px solid #c8f0a0;
+    box-shadow: 0 0 12px rgba(200,240,160,.2);
+  }
+  .day-grid .day:last-child { grid-column: unset; }
+}
+
+/* ── 1c. Stronger done state — satisfying streak visual ── */
+.day.done {
+  background: #0a1f0f !important;
+  border-color: #2e7d3e !important;
+  opacity: 1;
+}
+.day.done .day-name { color: #4caf50; }
+.day.done .day-label { color: rgba(200,240,160,.9); }
+.day.done .sblock { filter: brightness(0.7); }
+.day.done::after {
+  content: '✓';
+  position: absolute; top: 6px; right: 7px;
+  font-size: 14px; font-weight: 900; color: #4caf50;
+  text-shadow: 0 0 8px rgba(76,175,80,.5);
+}
+.day.strava-done { border-color: #FC4C02 !important; }
+.day.strava-done::after { content: '🔁'; font-size: 11px; }
+
+/* Streak counter on week row */
+.week-streak-dots {
+  display: flex; gap: 3px; align-items: center; margin-left: 6px;
+}
+.streak-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,.15); transition: background .2s;
+}
+.streak-dot.done { background: #4caf50; box-shadow: 0 0 4px rgba(76,175,80,.4); }
+.streak-dot.strava { background: #FC4C02; }
+
+/* ── 1d. Planned vs Actual progress bar in week header ── */
+.whead-progress {
+  grid-column: 1 / -1;
+  height: 3px;
+  background: rgba(255,255,255,.06);
+  border-radius: 2px;
+  margin: 4px 0 0;
+  overflow: hidden;
+  position: relative;
+}
+.whead-progress-target {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: rgba(255,255,255,.12); border-radius: 2px;
+  transition: width .4s;
+}
+.whead-progress-actual {
+  position: absolute; top: 0; left: 0; height: 100%;
+  border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.wkm-actual {
+  font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+  color: #c8f0a0; margin-left: 4px; font-weight: 600;
+}
+
+/* ── 2. Exercise tooltip: video/gif hint button ── */
+.ex-hint-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: rgba(255,255,255,.15); color: rgba(255,255,255,.6);
+  font-size: 8px; font-weight: 700; cursor: pointer;
+  vertical-align: middle; margin-left: 3px; flex-shrink: 0;
+  border: none; font-family: inherit; transition: all .15s;
+  position: relative;
+}
+.ex-hint-btn:hover { background: rgba(255,255,255,.35); color: #fff; }
+.ex-hint-popup {
+  position: fixed; z-index: 7000;
+  background: var(--text); border-radius: 10px;
+  padding: 14px 16px; max-width: 280px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.ex-hint-title { font-size: 13px; font-weight: 700; color: #c8f0a0; margin-bottom: 6px; }
+.ex-hint-desc { font-size: 12px; color: rgba(255,255,255,.75); line-height: 1.6; margin-bottom: 10px; }
+.ex-hint-steps { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.8; }
+.ex-hint-steps li { margin-left: 14px; }
+.ex-hint-close {
+  float: right; background: none; border: none; color: rgba(255,255,255,.4);
+  font-size: 16px; cursor: pointer; padding: 0; margin: -4px -4px 0 0;
+}
+
+/* ── 3. Elevation tooltip on SVG ── */
+.elev-cp-group { cursor: pointer; }
+.elev-cp-group circle { transition: r .15s, opacity .15s; }
+.elev-cp-group:hover circle { r: 5; opacity: 1 !important; }
+#elev-tooltip {
+  position: absolute; pointer-events: none;
+  background: rgba(15,52,96,.95); border: 1px solid rgba(200,240,160,.3);
+  border-radius: 6px; padding: 8px 11px; font-size: 11px;
+  color: #c8f0a0; font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap; z-index: 100;
+  opacity: 0; transition: opacity .15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+}
+#elev-tooltip.visible { opacity: 1; }
+.elev-tooltip-km { font-size: 14px; font-weight: 700; }
+.elev-tooltip-detail { font-size: 10px; color: rgba(200,240,160,.6); margin-top: 2px; }
+
+/* ── 4. Readiness breakdown panel ── */
+.readiness-breakdown {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 16px; margin-top: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+}
+.rb-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.rb-factor {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+}
+.rb-factor:last-child { border-bottom: none; }
+.rb-factor-name { color: var(--muted); }
+.rb-factor-val { font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
+.rb-bar-wrap { width: 60px; height: 4px; background: rgba(255,255,255,.1);
+  border-radius: 2px; overflow: hidden; margin: 0 8px; }
+.rb-bar { height: 4px; border-radius: 2px; transition: width .4s; }
+
+
+.day.today-card {
+  border: 2px solid rgba(200,240,160,.5) !important;
+  box-shadow: 0 0 0 3px rgba(200,240,160,.08);
+}
+
 </style>  
 </head>  
 <body>
@@ -730,7 +886,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
       <div class="prog-next" id="tp-next">Đánh dấu buổi tập đầu tiên để bắt đầu hành trình →</div>
       <div class="prog-bar-wrap"><div class="prog-bar-fill" id="tp-fill" style="width:0%"></div></div>
     </div>
-    <div class="header-right">
+    <div class="header-right" id="header-right" style="position:relative">
       <svg id="vmm-elevation" viewBox="0 0 300 90" preserveAspectRatio="none"
            xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -1309,7 +1465,13 @@ function renderWeeks() {
         <span class="wkm" style="color:${phCol[w.phase]}">${w.km}km</span>  
         <span class="wgain">+${w.gain}m</span>  
         <span class="wloss">−${w.loss}m</span>  
-        <span class="wnote">${w.note}</span><span class="w-done-badge" id="badge-w${w.w}"></span>  
+        <span class="wnote">${w.note}</span>
+        <span class="wkm-actual" id="wkm-actual-${w.w}"></span>
+        <span class="w-done-badge" id="badge-w${w.w}"></span>  
+      </div>
+      <div class="whead-progress" id="wprog-${w.w}">
+        <div class="whead-progress-target" style="width:100%"></div>
+        <div class="whead-progress-actual" id="wprog-fill-${w.w}" style="width:0%;background:${phCol[w.phase]}"></div>
       </div>  
       <div class="wbar"><div class="wbar-fill" style="width:${(w.km/maxKm*100).toFixed(0)}%;background:${phCol[w.phase]}"></div></div>  
       <div class="wdetail">  
@@ -1942,7 +2104,7 @@ function saveCheckin() {
   const today = new Date().toISOString().split('T')[0];
   const data = {..._checkinState, date:today};
   localStorage.setItem(CHECKIN_KEY, JSON.stringify(data));
-  updateReadinessBadge(data.readiness);
+  updateReadinessBadgeWithBreakdown(data.readiness);
   closeCheckin();
   if (data.swapMsg) showToast('📋 Check-in lưu! '+data.swapMsg.substring(0,80)+'...');
   else showToast('✅ Check-in hôm nay đã lưu. Chúc tập luyện tốt!');
@@ -2081,6 +2243,7 @@ function renderSidebarActivities(activities) {
       '</div></div>';
   }).join('');
   renderWeekSelector(activities);
+updateAllWeeksProgress(activities);
 }
 
 function renderWeekSelector(activities) {
@@ -2163,10 +2326,254 @@ function generateWeekAnalysis(weekNum) {
 
 function refreshAnalysis() { generateWeekAnalysis(_selectedAnalysisWeek); }
 
+
+// ═══ EXERCISE HINT SYSTEM ═══
+const EX_HINTS = {"step-down": ("Step-Down Eccentric", "Bài tập lệch tâm cho gối — quan trọng nhất để chạy xuống dốc. Đứng trên bậc, chân tập duỗi thẳng gối, hạ từ từ đến khi gót chạm đất.", ["Đứng 1 chân trên bậc cao 15-20cm", "Từ từ gập gối chân tập, hạ gót về phía sàn", "Kiểm soát 3-4 giây khi hạ xuống", "Đứng dậy bằng cả 2 chân"]), "nordic curl": ("Nordic Curl", "Bài tập hamstring cực mạnh — giảm chấn thương gân kheo khi chạy xuống dốc. Kéo người về phía trước bằng hamstring, không để lưng cong.", ["Quỳ gối, nhờ người giữ hoặc kẹp chân vào tủ", "Chậm rãi để người ngã về phía trước", "Kiểm soát bằng hamstring (không bằng tay)", "Dùng tay đỡ khi không còn giữ được"]), "sl squat": ("Single-Leg Squat", "Squat 1 chân — test và build balance + strength cho trail. Tập trung giữ gối thẳng hàng với ngón chân, không để gối đổ vào trong.", ["Đứng 1 chân, tay dang ngang", "Từ từ ngồi xuống như ngồi ghế", "Gối không vượt quá ngón chân", "Giữ hông thăng bằng, không nghiêng"]), "sl deadlift": ("Single-Leg Deadlift", "Deadlift 1 chân — strengthen glute và hamstring cho uphill. Giữ lưng phẳng trong suốt chuyển động.", ["Đứng 1 chân, tay giữ tạ nhẹ", "Nghiêng người ra trước, chân sau nâng cao", "Lưng phẳng, không cong", "Kéo về bằng glute, không bằng lưng"]), "step-up": ("Step-Up", "Bài tập cơ bản cho uphill. Bước lên bậc cao, đẩy qua gót để kích hoạt glute tối đa.", ["Đặt 1 chân lên bậc cao 30-40cm", "Đẩy qua gót, không đẩy ngón chân", "Đứng thẳng trên bậc, gối mở ra", "Hạ chân sau từ từ, kiểm soát"]), "box jump": ("Box Jump Plyometric", "Plyometric cho sức bật và reaction time. Tiếp đất bằng mũi chân, gập gối nhẹ để hấp thụ lực.", ["Đứng trước hộp, khoảng 30cm", "Vung tay và nhảy lên hộp", "Tiếp đất nhẹ nhàng bằng mũi chân", "Bước xuống (không nhảy xuống) để tập eccentric"]), "lateral bound": ("Lateral Bound", "Nhảy ngang để build hip stability — quan trọng cho chạy trail không bằng phẳng.", ["Đứng trên 1 chân", "Nhảy sang ngang, tiếp đất 1 chân", "Giữ thăng bằng 1-2 giây trước khi nhảy lại", "Tập trung vào landing ổn định"]), "calf raise": ("Calf Raise", "Tăng sức mạnh bắp chân — giảm chấn thương Achilles và tăng propulsion khi chạy.", ["Đứng mép bậc, gót thả xuống", "Kiễng lên cao nhất có thể", "Giữ 1 giây trên đỉnh", "Hạ xuống từ từ qua 3 giây"]), "hip circle": ("Hip Circle / Hip Mobility", "Khởi động khớp háng — giảm IT Band và đau gối khi chạy trail.", ["Đứng thẳng, tay chống hông", "Xoay háng theo vòng tròn rộng", "Làm chậm, cảm nhận range of motion", "10 vòng mỗi chiều"]), "glute bridge": ("Glute Bridge", "Kích hoạt glute — muscle quan trọng nhất cho uphill và bảo vệ lưng khi chạy.", ["Nằm ngửa, gối gập 90 độ", "Đẩy hông lên cao bằng glute", "Giữ 2 giây trên đỉnh, siết chặt glute", "Hạ xuống từ từ"])};
+
+let _hintPopup = null;
+
+function showExHint(e, exerciseKey) {
+  e.stopPropagation();
+  e.preventDefault();
+  const hint = Object.entries(EX_HINTS).find(([k]) => exerciseKey.toLowerCase().includes(k));
+  if (!hint) return;
+  const [key, [title, desc, steps]] = hint;
+
+  if (_hintPopup) { _hintPopup.remove(); _hintPopup = null; }
+
+  const popup = document.createElement('div');
+  popup.className = 'ex-hint-popup';
+  popup.innerHTML =
+    '<button class="ex-hint-close" onclick="this.parentElement.remove()">×</button>' +
+    '<div class="ex-hint-title">💪 ' + title + '</div>' +
+    '<div class="ex-hint-desc">' + desc + '</div>' +
+    '<div class="ex-hint-steps"><ol style="margin:0;padding-left:16px">' +
+    steps.map(s => '<li>' + s + '</li>').join('') +
+    '</ol></div>';
+  document.body.appendChild(popup);
+  _hintPopup = popup;
+
+  // Position near click
+  const rect = e.target.getBoundingClientRect();
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 200);
+  const left = Math.min(rect.left, window.innerWidth - 290);
+  popup.style.cssText += ';position:fixed;top:' + top + 'px;left:' + left + 'px';
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function dismissHint(ev) {
+      if (!popup.contains(ev.target)) { popup.remove(); _hintPopup = null; document.removeEventListener('click', dismissHint); }
+    });
+  }, 100);
+}
+
+// Patch sb() to add hint button for known exercises
+const _origSb = window.sb;
+function sbWithHint(cls, text) {
+  const base = '<div class="sblock ' + cls + '">';
+  const exerciseKey = text.toLowerCase();
+  const hasHint = Object.keys(EX_HINTS).some(k => exerciseKey.includes(k));
+  const hintBtn = hasHint
+    ? '<button class="ex-hint-btn" onclick="showExHint(event,' + JSON.stringify(exerciseKey) + ')" title="Hướng dẫn bài tập">?</button>'
+    : '';
+  return base + text + hintBtn + '</div>';
+}
+// Override after DOM ready
+
+
+// ═══ ELEVATION TOOLTIP ═══
+const CP_DATA = [
+  {cx:33.5, cy:55, km:18, name:'CP M1', elev:1650},
+  {cx:65.2, cy:64, km:35, name:'CP Sapa', elev:1550},
+  {cx:152.8, cy:45, km:82, name:'Topas Ecolodge', elev:1800},
+  {cx:186.3, cy:86, km:100, name:'CP1 Lao Chai', elev:1350},
+  {cx:214.2, cy:17, km:115, name:'O Quy Ho — Đỉnh cao nhất', elev:2300},
+  {cx:223.5, cy:92, km:120, name:'CP4 Ta Phin', elev:1200},
+  {cx:248.3, cy:52, km:133, name:'CP5', elev:1300},
+  {cx:295.0, cy:39, km:155, name:'CP7', elev:1400},
+  {cx:300.0, cy:45, km:161, name:'🏆 Finish — Topas Ecolodge', elev:1800},
+];
+
+function initElevTooltip() {
+  const svg = document.getElementById('vmm-elevation');
+  if (!svg) return;
+
+  // Create tooltip element
+  const tt = document.createElement('div');
+  tt.id = 'elev-tooltip';
+  tt.innerHTML = '<div class="elev-tooltip-km"></div><div class="elev-tooltip-detail"></div>';
+  document.getElementById('header-right') ? document.getElementById('header-right').appendChild(tt)
+    : svg.parentElement.appendChild(tt);
+
+  // Add CP groups with hover
+  const svgNS = 'http://www.w3.org/2000/svg';
+
+  // Get current runner position for ETA calc
+  function getRunnerKm() {
+    const done = loadDone ? loadDone() : {};
+    const n = Object.keys(done).length;
+    return (n / 147) * 161;
+  }
+  function estimateETA(targetKm) {
+    const currentKm = getRunnerKm();
+    if (targetKm <= currentKm) return 'Đã qua';
+    const remaining = targetKm - currentKm;
+    // Assume avg pace ~10 min/km for trail ultra
+    const avgMinPerKm = 10;
+    const hours = Math.floor(remaining * avgMinPerKm / 60);
+    const mins = Math.round((remaining * avgMinPerKm) % 60);
+    return remaining.toFixed(1) + 'km · ETA ~' + hours + 'h' + (mins>0?mins+'p':'');
+  }
+
+  CP_DATA.forEach(cp => {
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('class', 'elev-cp-group');
+
+    const outer = document.createElementNS(svgNS, 'circle');
+    outer.setAttribute('cx', cp.cx); outer.setAttribute('cy', cp.cy);
+    outer.setAttribute('r', '8'); outer.setAttribute('fill', 'rgba(200,240,160,0)');
+    g.appendChild(outer);
+
+    const inner = document.createElementNS(svgNS, 'circle');
+    inner.setAttribute('cx', cp.cx); inner.setAttribute('cy', cp.cy);
+    inner.setAttribute('r', cp.name.includes('Đỉnh') || cp.name.includes('Finish') ? '3' : '2');
+    inner.setAttribute('fill', cp.name.includes('Đỉnh') ? '#c8f0a0' : 'rgba(200,240,160,0.6)');
+    g.appendChild(inner);
+
+    g.addEventListener('mouseenter', (e) => {
+      const svgRect = svg.getBoundingClientRect();
+      // Convert SVG coords to screen coords
+      const scaleX = svgRect.width / 300;
+      const scaleY = svgRect.height / 90;
+      const screenX = svgRect.left + cp.cx * scaleX;
+      const screenY = svgRect.top + cp.cy * scaleY;
+
+      tt.querySelector('.elev-tooltip-km').textContent = 'km ' + cp.km + ' · ' + cp.name;
+      tt.querySelector('.elev-tooltip-detail').textContent =
+        cp.elev + 'm elev · ' + estimateETA(cp.km);
+      tt.style.left = Math.min(screenX - 60, window.innerWidth - 200) + 'px';
+      tt.style.top = (screenY - 60) + 'px';
+      tt.classList.add('visible');
+    });
+    g.addEventListener('mouseleave', () => tt.classList.remove('visible'));
+    svg.appendChild(g);
+  });
+}
+
+// ═══ READINESS BREAKDOWN ═══
+function openReadinessBreakdown() {
+  const last = JSON.parse(localStorage.getItem('vmm_checkin_v1') || 'null');
+  if (!last) { openCheckin(); return; }
+
+  const factors = [
+    { name: 'Giấc ngủ', val: last.sleep, max: 5, unit: '/5',
+      bar: last.sleep/5*100, color: last.sleep>=4?'#4caf50':last.sleep>=3?'#ffb74d':'#ef5350' },
+    { name: 'Năng lượng', val: last.energy, max: 5, unit: '/5',
+      bar: last.energy/5*100, color: last.energy>=4?'#4caf50':last.energy>=3?'#ffb74d':'#ef5350' },
+    { name: 'Đau/Mỏi', val: last.soreness?.length ? 'Có: '+last.soreness.join(', ') : 'Không',
+      max: null, bar: last.soreness?.length ? 30 : 100,
+      color: last.soreness?.length ? '#ef5350' : '#4caf50' },
+    { name: 'Readiness', val: last.readiness + '%', max: null,
+      bar: last.readiness, color: last.readiness>=80?'#4caf50':last.readiness>=60?'#ffb74d':'#ef5350' },
+  ];
+  const today = new Date(last.date).toLocaleDateString('vi-VN');
+
+  let panel = document.getElementById('readiness-panel');
+  if (panel) { panel.remove(); return; }
+
+  panel = document.createElement('div');
+  panel.id = 'readiness-panel';
+  panel.className = 'readiness-breakdown';
+  panel.style.cssText = 'position:fixed;top:50px;right:20px;z-index:8000;width:260px';
+  panel.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+    '<div class="rb-title">📋 Check-in · ' + today + '</div>' +
+    '<button onclick="var p=document.getElementById(\'readiness-panel\');if(p)p.remove()" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">×</button></div>' +
+    factors.map(f =>
+      '<div class="rb-factor">' +
+      '<span class="rb-factor-name">' + f.name + '</span>' +
+      '<div class="rb-bar-wrap"><div class="rb-bar" style="width:' + f.bar + '%;background:' + f.color + '"></div></div>' +
+      '<span class="rb-factor-val" style="color:' + f.color + '">' + f.val + '</span></div>'
+    ).join('') +
+    (last.swapMsg ? '<div style="margin-top:10px;font-size:11px;color:#ffb74d;line-height:1.5;padding:8px;background:rgba(255,183,77,.08);border-radius:4px">' + last.swapMsg + '</div>' : '') +
+    '<button onclick="openCheckin()" style="width:100%;margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:11px;cursor:pointer;color:var(--muted)">↻ Cập nhật check-in</button>';
+
+  document.body.appendChild(panel);
+  setTimeout(() => { document.addEventListener('click', function closePanel(e) {
+    if (!panel.contains(e.target) && !e.target.closest('#readiness-badge')) {
+      panel.remove(); document.removeEventListener('click', closePanel);
+    }
+  }); }, 100);
+}
+
+// Patch readiness badge to open breakdown
+function updateReadinessBadgeWithBreakdown(score) {
+  updateReadinessBadge(score);
+  const badge = document.getElementById('readiness-badge');
+  if (badge) badge.onclick = openReadinessBreakdown;
+}
+
+// ═══ PLANNED vs ACTUAL progress update ═══
+function updateWeekProgress(weekNum, actualKm) {
+  const planWeek = weeks.find(w => w.w === weekNum);
+  if (!planWeek) return;
+  const targetKm = parseInt(planWeek.km);
+  const pct = Math.min((actualKm / targetKm) * 100, 120);
+  const fill = document.getElementById('wprog-fill-' + weekNum);
+  const label = document.getElementById('wkm-actual-' + weekNum);
+  if (fill) {
+    fill.style.width = Math.min(pct, 100) + '%';
+    fill.style.background = pct >= 90 ? '#4caf50' : pct >= 70 ? '#ffb74d' : '#ef5350';
+  }
+  if (label && actualKm > 0) {
+    label.textContent = '(' + actualKm.toFixed(0) + 'km actual)';
+  }
+}
+
+// Update all weeks progress after Strava sync
+function updateAllWeeksProgress(activities) {
+  const weekKm = {};
+  (activities || []).forEach(act => {
+    const slot = dateToSlot((act.start_date_local||'').split('T')[0]);
+    if (!slot) return;
+    weekKm[slot.weekNum] = (weekKm[slot.weekNum] || 0) + (act.distance||0)/1000;
+  });
+  Object.entries(weekKm).forEach(([w, km]) => updateWeekProgress(parseInt(w), km));
+}
+
+
+// ═══ TODAY CARD HIGHLIGHT ═══
+function highlightToday() {
+  const today = new Date();
+  const planStart = new Date('2026-04-20T00:00:00');
+  const diff = Math.floor((today - planStart) / 86400000);
+  if (diff < 0 || diff >= 147) return;
+  const weekNum = Math.floor(diff/7)+1;
+  const dayIdx = diff%7;
+  const el = document.querySelector('#wk'+weekNum+' .day[data-i="'+dayIdx+'"]');
+  if (el) {
+    el.classList.add('today-card');
+    // Add subtle "TODAY" label
+    if (!el.querySelector('.today-label')) {
+      const lbl = document.createElement('div');
+      lbl.className = 'today-label';
+      lbl.style.cssText = 'font-size:8px;font-weight:700;color:#c8f0a0;text-transform:uppercase;'+
+        'letter-spacing:.1em;margin-bottom:3px;opacity:.7';
+      lbl.textContent = 'HÔM NAY';
+      el.insertBefore(lbl, el.firstChild);
+    }
+    // Scroll into view on mobile
+    if (window.innerWidth < 640) {
+      setTimeout(() => el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}), 500);
+    }
+  }
+}
+
 // Khởi tạo
 updateTrailProgress();
 showPhase(0);
 initSprint1();
+setTimeout(()=>{highlightToday();initElevTooltip();},500);
 </script>
 </body>
 </html>
