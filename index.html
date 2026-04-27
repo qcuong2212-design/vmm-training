@@ -1658,6 +1658,11 @@ function resetTabs() {
 }  
   
 function showPhase(p) {  
+  // Restore sidebar when switching back to schedule
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = '';
+  const layout = document.querySelector('.main-layout');
+  if (layout) layout.style.gridTemplateColumns = '';
   const dash=document.getElementById('dashboard-panel');if(dash)dash.style.display='none';
   document.getElementById('tab-dashboard')?.classList?.remove('active');
   activePhase = p;  
@@ -1678,7 +1683,12 @@ function showPhase(p) {
   renderWeeks();  
 }  
   
-function showNutrition() {  
+function showNutrition() {
+  // Ẩn sidebar khi xem dinh dưỡng
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = 'none';
+  const layout = document.querySelector('.main-layout');
+  if (layout) layout.style.gridTemplateColumns = '1fr';  
   resetTabs();  
   document.getElementById('tab-nutri').classList.add('active');  
   document.getElementById('nutri-panel').style.display = 'block';  
@@ -3162,17 +3172,20 @@ async function runStravaProfile() {
 
 // ── G: DASHBOARD ─────────────────────────────────────────────────
 function showDashboard() {
-  // Update tab state
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-dashboard').classList.add('active');
 
-  // Hide other panels
   document.getElementById('week-list').style.display = 'none';
   document.getElementById('phase-banner').style.display = 'none';
   const nutri = document.getElementById('nutri-panel');
   if (nutri) nutri.style.display = 'none';
-  // Deactivate phase tabs
-  document.querySelectorAll('.tab:not(#tab-dashboard)').forEach(t => t.classList.remove('active'));
+
+  // Ẩn sidebar, main-layout full width
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = 'none';
+  const layout = document.querySelector('.main-layout');
+  if (layout) layout.style.gridTemplateColumns = '1fr';
+
   const dash = document.getElementById('dashboard-panel');
   dash.style.display = 'block';
 
