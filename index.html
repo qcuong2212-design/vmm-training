@@ -865,6 +865,95 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .sb-profile-btn:hover { border-color: #c8f0a0; color: #c8f0a0;
   background: rgba(200,240,160,.07); }
 
+
+/* ═══ ONBOARDING WIZARD v2 (CR-01, CR-02, CR-03) ═══ */
+#onboarding-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: var(--bg); display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  overflow-y: auto;
+}
+#onboarding-overlay.active { display: flex; }
+.ob-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 32px 28px; max-width: 540px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5); margin: auto;
+}
+.ob-steps { display: flex; gap: 6px; margin-bottom: 28px; }
+.ob-step { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background .3s; }
+.ob-step.done { background: #c8f0a0; }
+.ob-step.active { background: rgba(200,240,160,.6); }
+.ob-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.ob-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.ob-step-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: 4px; font-family: 'IBM Plex Mono',monospace; }
+.race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+@media(max-width:480px){.race-grid{grid-template-columns:1fr;}}
+.race-card { padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); cursor: pointer; transition: all .15s; text-align: left; }
+.race-card:hover { border-color: var(--border2); }
+.race-card.selected { border-color: #c8f0a0; background: rgba(200,240,160,.08);
+  box-shadow: 0 0 0 1px rgba(200,240,160,.3); }
+.race-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.race-card-meta { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono',monospace; }
+.race-card-dist { font-size: 20px; font-weight: 700; color: #c8f0a0; font-family: 'IBM Plex Mono',monospace; }
+.race-custom-toggle { width: 100%; padding: 10px; border: 1px dashed var(--border);
+  border-radius: 8px; background: transparent; color: var(--muted);
+  font-size: 12px; cursor: pointer; font-family: inherit; transition: all .15s; margin-bottom: 14px; }
+.race-custom-toggle:hover { border-color: var(--border2); color: var(--text); }
+.race-custom-form { display: none; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.race-custom-form.visible { display: flex; }
+.ob-field { margin-bottom: 12px; }
+.ob-label { font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+.ob-input { width: 100%; padding: 9px 12px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 14px; font-family: inherit; color: var(--text); outline: none;
+  transition: border-color .15s; box-sizing: border-box; }
+.ob-input:focus { border-color: var(--border2); }
+.ob-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.date-summary { background: var(--surface2); border-radius: 8px; padding: 12px 14px;
+  margin: 10px 0; border: 1px solid var(--border); display: none; }
+.date-summary.visible { display: block; }
+.date-sum-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+.date-sum-label { color: var(--muted); }
+.date-sum-val { font-weight: 700; font-family: 'IBM Plex Mono',monospace; color: var(--text); }
+.date-warn { background: rgba(231,111,81,.1); border: 1px solid rgba(231,111,81,.3);
+  border-radius: 6px; padding: 10px 12px; margin-top: 10px;
+  font-size: 12px; color: #E76F51; line-height: 1.6; display: none; }
+.date-warn.visible { display: block; }
+.date-ok { background: rgba(45,106,79,.1); border: 1px solid rgba(45,106,79,.3);
+  border-radius: 6px; padding: 8px 12px; margin-top: 10px;
+  font-size: 12px; color: #6abf82; display: none; }
+.date-ok.visible { display: block; }
+.upload-zone { border: 2px dashed var(--border); border-radius: 10px;
+  padding: 24px; text-align: center; cursor: pointer; transition: all .2s;
+  background: var(--surface2); margin-bottom: 10px; }
+.upload-zone:hover, .upload-zone.dragover { border-color: #c8f0a0; background: rgba(200,240,160,.05); }
+.upload-zone-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-zone-text { font-size: 13px; font-weight: 600; color: var(--text); }
+.upload-zone-sub { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.upload-result { background: var(--surface2); border-radius: 8px; padding: 12px 14px;
+  border: 1px solid var(--border); display: none; margin-bottom: 10px; }
+.upload-result.visible { display: block; }
+.upload-stat { font-size: 12px; color: var(--text); padding: 2px 0; }
+.upload-stat span { font-weight: 700; color: #c8f0a0; font-family: 'IBM Plex Mono',monospace; }
+.manual-toggle { font-size: 11px; color: var(--muted); background: none; border: none;
+  cursor: pointer; text-decoration: underline; font-family: inherit; padding: 4px 0; }
+.manual-form { display: none; }
+.manual-form.visible { display: block; }
+.ob-actions { display: flex; gap: 8px; margin-top: 20px; }
+.ob-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 14px;
+  font-weight: 600; cursor: pointer; font-family: inherit; border: none; transition: all .15s; }
+.ob-btn-primary { background: #c8f0a0; color: #0a1f0f; }
+.ob-btn-primary:hover { background: #b5e08a; }
+.ob-btn-primary:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
+.ob-btn-secondary { background: var(--surface2); color: var(--muted);
+  border: 1px solid var(--border); }
+.ob-btn-secondary:hover { color: var(--text); }
+.ob-skip { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; cursor: pointer; }
+.ob-skip:hover { color: var(--text); }
+
 </style>  
 </head>  
 <body>
@@ -888,6 +977,151 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   </div>
 </div>
 
+<!-- ═══ ONBOARDING WIZARD v2.0 ═══ -->
+<div id="onboarding-overlay">
+  <div class="ob-card">
+    <div class="ob-steps">
+      <div class="ob-step active" id="obs-1"></div>
+      <div class="ob-step" id="obs-2"></div>
+      <div class="ob-step" id="obs-3"></div>
+      <div class="ob-step" id="obs-4"></div>
+    </div>
+    <!-- STEP 1: Race Selection (CR-02) -->
+    <div id="ob-step1" class="ob-step-content">
+      <div class="ob-step-label">Bước 1 / 4</div>
+      <div class="ob-title">🏁 Chọn Race mục tiêu</div>
+      <div class="ob-sub">Chọn race bạn đang chuẩn bị. Đây là bước <strong>bắt buộc</strong> — kế hoạch tập luyện sẽ được xây dựng hoàn toàn dựa trên race này.</div>
+      <div class="race-grid" id="race-grid"></div>
+      <button class="race-custom-toggle" onclick="toggleCustomRace()" id="custom-race-toggle">
+        + Nhập race tuỳ chỉnh (race không có trong danh sách)
+      </button>
+      <div class="race-custom-form" id="custom-race-form">
+        <div class="ob-field">
+          <div class="ob-label">Tên race *</div>
+          <input class="ob-input" id="cr-name" type="text" placeholder="Ví dụ: Mộc Châu Ultra 70K">
+        </div>
+        <div class="ob-row">
+          <div class="ob-field">
+            <div class="ob-label">Ngày race *</div>
+            <input class="ob-input" id="cr-date" type="date">
+          </div>
+          <div class="ob-field">
+            <div class="ob-label">Cự ly (km) *</div>
+            <input class="ob-input" id="cr-dist" type="number" placeholder="100">
+          </div>
+          <div class="ob-field">
+            <div class="ob-label">D+ (m)</div>
+            <input class="ob-input" id="cr-dplus" type="number" placeholder="5000">
+          </div>
+        </div>
+      </div>
+      <div class="ob-actions">
+        <button class="ob-btn ob-btn-primary" id="step1-next" onclick="obNext(2)" disabled>Tiếp theo →</button>
+      </div>
+    </div>
+    <!-- STEP 2: Plan Start Date (CR-01) -->
+    <div id="ob-step2" class="ob-step-content" style="display:none">
+      <div class="ob-step-label">Bước 2 / 4</div>
+      <div class="ob-title">📅 Ngày bắt đầu kế hoạch</div>
+      <div class="ob-sub">Chọn ngày bắt đầu tập. Khuyến nghị: trước race ít nhất <strong>16 tuần (112 ngày)</strong>.</div>
+      <div class="ob-field">
+        <div class="ob-label">Ngày bắt đầu *</div>
+        <input class="ob-input" id="ob-start-date" type="date" oninput="updateDateSummary()">
+      </div>
+      <div class="date-summary" id="date-summary">
+        <div class="date-sum-row"><span class="date-sum-label">Race day</span><span class="date-sum-val" id="ds-race-day">—</span></div>
+        <div class="date-sum-row"><span class="date-sum-label">Ngày bắt đầu</span><span class="date-sum-val" id="ds-start">—</span></div>
+        <div class="date-sum-row"><span class="date-sum-label">Số tuần kế hoạch</span><span class="date-sum-val" id="ds-weeks">—</span></div>
+        <div class="date-sum-row"><span class="date-sum-label">Ngày còn lại</span><span class="date-sum-val" id="ds-days">—</span></div>
+      </div>
+      <div class="date-warn" id="date-warn-90">
+        ⚠️ Kế hoạch chỉ còn <span id="warn-weeks">0</span> tuần — dưới mức khuyến nghị 13 tuần. Bạn vẫn có thể tiếp tục.
+      </div>
+      <div class="date-warn" id="date-warn-block" style="background:rgba(198,40,40,.1);border-color:rgba(198,40,40,.3);color:#ef9a9a">
+        ❌ Ngày bắt đầu phải trước ngày race. Vui lòng chọn lại.
+      </div>
+      <div class="date-ok" id="date-ok"><span id="date-ok-text">✅</span></div>
+      <div class="ob-actions">
+        <button class="ob-btn ob-btn-secondary" onclick="obBack(1)">← Quay lại</button>
+        <button class="ob-btn ob-btn-primary" id="step2-next" onclick="obNext(3)" disabled>Tiếp theo →</button>
+      </div>
+    </div>
+    <!-- STEP 3: Fitness Data (CR-03) -->
+    <div id="ob-step3" class="ob-step-content" style="display:none">
+      <div class="ob-step-label">Bước 3 / 4</div>
+      <div class="ob-title">📊 Dữ liệu fitness hiện tại</div>
+      <div class="ob-sub">Upload file export lịch sử tập luyện từ Strava để AI tự phân tích, hoặc nhập thành tích thủ công.</div>
+      <div class="upload-zone" id="upload-zone"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleFileDrop(event)"
+           onclick="document.getElementById('strava-file-input').click()">
+        <input type="file" id="strava-file-input" accept=".csv,.json" style="display:none" onchange="handleFileSelect(event)">
+        <div class="upload-zone-icon">📁</div>
+        <div class="upload-zone-text">Kéo thả hoặc nhấn để chọn file Strava Export</div>
+        <div class="upload-zone-sub">Hỗ trợ: <strong>activities.csv</strong> hoặc <strong>activities.json</strong><br>Lấy tại: Strava → Settings → My Account → Download or Delete Your Account</div>
+      </div>
+      <div class="upload-result" id="upload-result">
+        <div class="upload-stat">📈 Tổng activities: <span id="up-acts">—</span></div>
+        <div class="upload-stat">🏃 Tổng km: <span id="up-km">—</span></div>
+        <div class="upload-stat">⛰️ Tổng D+: <span id="up-elev">—</span></div>
+        <div class="upload-stat">📅 Khoảng thời gian: <span id="up-weeks">—</span> tuần</div>
+        <div class="upload-stat" id="up-warn" style="color:#E76F51;display:none">⚠️ Ít dữ liệu — AI sẽ dùng thông tin khai báo thủ công là chính</div>
+      </div>
+      <button class="manual-toggle" onclick="toggleManualForm()">Hoặc nhập thành tích thủ công →</button>
+      <div class="manual-form" id="manual-form">
+        <div class="ob-row" style="margin-top:10px">
+          <div class="ob-field"><div class="ob-label">Max HR (bpm)</div><input class="ob-input" id="mf-maxhr" type="number" placeholder="185" min="140" max="220"></div>
+          <div class="ob-field"><div class="ob-label">Long run max (km)</div><input class="ob-input" id="mf-longrun" type="number" placeholder="30"></div>
+          <div class="ob-field"><div class="ob-label">km/tuần hiện tại</div><input class="ob-input" id="mf-weekly" type="number" placeholder="50"></div>
+        </div>
+      </div>
+      <div class="ob-actions">
+        <button class="ob-btn ob-btn-secondary" onclick="obBack(2)">← Quay lại</button>
+        <button class="ob-btn ob-btn-primary" onclick="obNext(4)">Tiếp theo →</button>
+      </div>
+      <div class="ob-skip" onclick="obNext(4)">Bỏ qua bước này</div>
+    </div>
+    <!-- STEP 4: Preferences -->
+    <div id="ob-step4" class="ob-step-content" style="display:none">
+      <div class="ob-step-label">Bước 4 / 4</div>
+      <div class="ob-title">⚙️ Sở thích tập luyện</div>
+      <div class="ob-sub">Giúp AI điều chỉnh kế hoạch phù hợp với lịch sinh hoạt của bạn.</div>
+      <div class="ob-field">
+        <div class="ob-label">Số giờ tập luyện mỗi tuần</div>
+        <input class="ob-input" id="pref-hours" type="number" placeholder="8" min="3" max="20">
+      </div>
+      <div class="ob-field">
+        <div class="ob-label">Ngày nghỉ cố định</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px" id="rest-days-picker">
+          <button class="soreness-chip" data-day="0" onclick="toggleRestDay(this)">T2</button>
+          <button class="soreness-chip" data-day="1" onclick="toggleRestDay(this)">T3</button>
+          <button class="soreness-chip" data-day="2" onclick="toggleRestDay(this)">T4</button>
+          <button class="soreness-chip" data-day="3" onclick="toggleRestDay(this)">T5</button>
+          <button class="soreness-chip" data-day="4" onclick="toggleRestDay(this)">T6</button>
+          <button class="soreness-chip" data-day="5" onclick="toggleRestDay(this)">T7</button>
+          <button class="soreness-chip" data-day="6" onclick="toggleRestDay(this)">CN</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="pref-gym"> Có tiếp cận gym
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="pref-treadmill"> Có máy treadmill
+        </label>
+      </div>
+      <div class="ob-actions" style="margin-top:24px">
+        <button class="ob-btn ob-btn-secondary" onclick="obBack(3)">← Quay lại</button>
+        <button class="ob-btn ob-btn-primary" onclick="completeOnboarding()">🚀 Bắt đầu luyện tập!</button>
+      </div>
+      <div class="ob-skip" onclick="completeOnboarding()">Bỏ qua, dùng cài đặt mặc định</div>
+    </div>
+  </div>
+</div>
+
+
+
 <!-- ═══ USER BAR ═══ -->
 <div id="user-bar">
   <div class="user-info">
@@ -903,6 +1137,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
       <span id="readiness-text">Sẵn sàng</span>
     </button>
     <button class="user-action-btn" onclick="openHRZones()">⚡ HR Zones</button>
+    <button class="user-action-btn" id="edit-race-btn" onclick="showOnboarding()" style="display:none">🏁 Đổi race</button>
     <button class="user-action-btn" onclick="openCheckin()">📋 Check-in</button>
     <button class="user-action-btn" onclick="authSignOut()">Đăng xuất</button>
   </div>
@@ -1049,8 +1284,8 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
     <div class="header-left">
       <div class="htop">
         <div class="race-info">
-          <h1>VMM 100M — Lịch tập toàn diện</h1>
-          <p>Uphill · Downhill · Sức mạnh · Dinh dưỡng · Sapa 20/9/2026</p>
+          <h1 id="race-title">VMM 100M — Lịch tập toàn diện</h1>
+          <p id="race-subtitle" class="race-info">Uphill · Downhill · Sức mạnh · Dinh dưỡng · Sapa 20/9/2026</p>
         </div>
         <div class="countdown">
           <div class="countdown-num">21</div>
@@ -2154,6 +2389,8 @@ async function onLoginSuccess(authData, stravaData) {
   showLoggedIn(name, provider, stravaData);
   loadHRZones();
   checkAndShowPWA();
+  // v2: Check if onboarding (race selection) is needed
+  setTimeout(() => checkOnboarding(), 800);
 
   // Auto-trigger check-in if not done today
   const today = new Date().toISOString().split('T')[0];
@@ -3381,6 +3618,406 @@ function initSprint2() {
       };
     }
   }, 1000);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// V2.0: ONBOARDING WIZARD + DYNAMIC PLAN SYSTEM
+// SRS v1.1 — CR-01 (dynamic dates), CR-02 (race selection), CR-03 (strava export)
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Race Database (CR-02) ──────────────────────────────────────────
+const RACES_DB = [{"id": "vmm100", "name": "VMM 100M", "full": "Vietnam Mountain Marathon 100M", "date": "2026-09-20", "dist": 161, "dplus": 8800, "dminus": 8800, "country": "🇻🇳", "category": "Ultra"}, {"id": "vmm70", "name": "VMM 70K", "full": "Vietnam Mountain Marathon 70K", "date": "2026-09-19", "dist": 70, "dplus": 4500, "dminus": 4500, "country": "🇻🇳", "category": "Trail"}, {"id": "vjm100", "name": "VJM 100M", "full": "Vietnam Jungle Marathon 100M", "date": "2026-10-15", "dist": 100, "dplus": 7000, "dminus": 7000, "country": "🇻🇳", "category": "Ultra"}, {"id": "vjm50", "name": "VJM 50K", "full": "Vietnam Jungle Marathon 50K", "date": "2026-10-15", "dist": 50, "dplus": 3500, "dminus": 3500, "country": "🇻🇳", "category": "Trail"}, {"id": "dlut100", "name": "DLUT 100K", "full": "Da Lat Ultra Trail 100K", "date": "2026-11-20", "dist": 100, "dplus": 6500, "dminus": 6500, "country": "🇻🇳", "category": "Ultra"}, {"id": "utmb", "name": "UTMB 170K", "full": "Ultra Trail Mont Blanc", "date": "2026-08-28", "dist": 170, "dplus": 10000, "dminus": 10000, "country": "🇫🇷", "category": "Ultra"}, {"id": "tnf100", "name": "TNF 100K", "full": "The North Face 100K", "date": "2026-05-09", "dist": 100, "dplus": 4800, "dminus": 4800, "country": "🇦🇺", "category": "Ultra"}];
+
+const PROFILE_KEY = 'vmm_user_profile_v2';
+const RACE_KEY    = 'vmm_race_target_v2';
+
+// ── User Profile helpers ───────────────────────────────────────────
+function getUserProfile() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); } catch(e) { return null; }
+}
+function saveUserProfile(data) {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function getRaceTarget() {
+  try { return JSON.parse(localStorage.getItem(RACE_KEY) || 'null'); } catch(e) { return null; }
+}
+function saveRaceTarget(data) {
+  try { localStorage.setItem(RACE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+// ── Dynamic PLAN_START (CR-01) ─────────────────────────────────────
+// Override the hardcoded PLAN_START with user's plan_start_date
+function getDynamicPlanStart() {
+  const profile = getUserProfile();
+  if (profile && profile.plan_start_date) {
+    return new Date(profile.plan_start_date + 'T00:00:00');
+  }
+  // Fallback to hardcoded for backward compatibility
+  return PLAN_START;
+}
+
+function getDynamicRaceDay() {
+  const race = getRaceTarget();
+  if (race && race.date) return new Date(race.date + 'T00:00:00');
+  return new Date('2026-09-20T00:00:00'); // fallback only
+}
+
+function getPlanWeeks() {
+  const start = getDynamicPlanStart();
+  const raceDay = getDynamicRaceDay();
+  return Math.floor((raceDay - start) / (7 * 86400000));
+}
+
+// Patch dateToSlot to use dynamic PLAN_START (CR-01)
+function dateToSlot(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const planStart = getDynamicPlanStart();
+  const diff = Math.floor((d - planStart) / 86400000);
+  const totalWeeks = getPlanWeeks();
+  if (diff < 0 || diff >= totalWeeks * 7) return null;
+  return { weekNum: Math.floor(diff / 7) + 1, dayIdx: diff % 7 };
+}
+
+// ── Onboarding State ───────────────────────────────────────────────
+let _obSelectedRace = null;
+let _obRestDays = [];
+let _obStravaData = null;
+
+function renderRaceGrid() {
+  const grid = document.getElementById('race-grid');
+  if (!grid) return;
+  grid.innerHTML = RACES_DB.map(race => `
+    <div class="race-card" data-id="${race.id}" onclick="selectRace('${race.id}')">
+      <div class="race-card-dist">${race.dist}km</div>
+      <div class="race-card-name">${race.country} ${race.name}</div>
+      <div class="race-card-meta">D+ ${race.dplus.toLocaleString()}m · ${race.date || 'Tuỳ chỉnh'}</div>
+      <div class="race-card-meta" style="margin-top:2px;color:rgba(255,255,255,.25)">${race.full}</div>
+    </div>
+  `).join('');
+}
+
+function selectRace(raceId) {
+  _obSelectedRace = RACES_DB.find(r => r.id === raceId) || null;
+  document.querySelectorAll('.race-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.id === raceId);
+  });
+  document.getElementById('step1-next').disabled = !_obSelectedRace;
+
+  // Pre-fill custom form if custom selected
+  if (raceId === 'custom') {
+    document.getElementById('custom-race-form').classList.add('visible');
+  }
+}
+
+function toggleCustomRace() {
+  const form = document.getElementById('custom-race-form');
+  form.classList.toggle('visible');
+  if (form.classList.contains('visible')) {
+    // Select custom card if not already
+    selectRace('custom');
+  }
+}
+
+// CR-01: Date validation
+function updateDateSummary() {
+  const startInput = document.getElementById('ob-start-date');
+  const startDate = new Date(startInput.value + 'T00:00:00');
+  const race = _obSelectedRace;
+  if (!startInput.value || !race?.date) return;
+
+  const raceDay = new Date(race.date + 'T00:00:00');
+  const diffDays = Math.floor((raceDay - startDate) / 86400000);
+  const weeks = Math.floor(diffDays / 7);
+
+  // Update summary
+  document.getElementById('date-summary').classList.add('visible');
+  document.getElementById('ds-race-day').textContent = raceDay.toLocaleDateString('vi-VN');
+  document.getElementById('ds-start').textContent = startDate.toLocaleDateString('vi-VN');
+  document.getElementById('ds-weeks').textContent = weeks > 0 ? weeks + ' tuần' : 'Không hợp lệ';
+  document.getElementById('ds-days').textContent = diffDays > 0 ? diffDays + ' ngày' : 'Không hợp lệ';
+
+  // Hide all warnings first
+  document.getElementById('date-warn-90').classList.remove('visible');
+  document.getElementById('date-warn-block').classList.remove('visible');
+  document.getElementById('date-ok').classList.remove('visible');
+  document.getElementById('step2-next').disabled = true;
+
+  if (diffDays <= 0) {
+    // Block: start date after race
+    document.getElementById('date-warn-block').classList.add('visible');
+  } else if (diffDays < 90) {
+    // Warning: less than 90 days (13 weeks)
+    document.getElementById('warn-weeks').textContent = weeks;
+    document.getElementById('date-warn-90').classList.add('visible');
+    document.getElementById('step2-next').disabled = false; // Still allow
+  } else {
+    // OK
+    const okEl = document.getElementById('date-ok');
+    okEl.classList.add('visible');
+    document.getElementById('date-ok-text').textContent =
+      weeks >= 16 ? weeks + ' tuần — Tuyệt vời! Đủ thời gian cho kế hoạch đầy đủ.'
+      : weeks + ' tuần — Đủ dùng, kế hoạch sẽ được compact lại.';
+    document.getElementById('step2-next').disabled = false;
+  }
+}
+
+// CR-03: Strava Export File Parser
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) parseStravaFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) parseStravaFile(file);
+}
+
+function parseStravaFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let activities = [];
+      const content = e.target.result;
+
+      if (file.name.endsWith('.json')) {
+        // JSON format
+        const data = JSON.parse(content);
+        activities = Array.isArray(data) ? data : (data.activities || []);
+      } else if (file.name.endsWith('.csv')) {
+        // CSV format — Strava activities.csv
+        const lines = content.split('\n').filter(l => l.trim());
+        if (lines.length < 2) throw new Error('File trống hoặc không đúng định dạng');
+        const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim().toLowerCase());
+        // Find column indices
+        const idxDate = headers.findIndex(h => h.includes('date'));
+        const idxType = headers.findIndex(h => h.includes('type'));
+        const idxDist = headers.findIndex(h => h.includes('distance'));
+        const idxElev = headers.findIndex(h => h.includes('elevation') && h.includes('gain'));
+        const idxTime = headers.findIndex(h => h.includes('time'));
+
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.replace(/"/g,'').trim());
+          if (!cols[idxDate]) continue;
+          activities.push({
+            start_date_local: cols[idxDate] || '',
+            sport_type: cols[idxType] || 'Run',
+            distance: parseFloat(cols[idxDist]) || 0,
+            total_elevation_gain: parseFloat(cols[idxElev]) || 0,
+            moving_time: parseFloat(cols[idxTime]) || 0,
+          });
+        }
+      } else {
+        throw new Error('Định dạng file không được hỗ trợ. Chỉ hỗ trợ .csv và .json');
+      }
+
+      if (!activities.length) throw new Error('Không tìm thấy dữ liệu activities trong file');
+
+      // Calculate stats
+      const totalKm = activities.reduce((s,a) => s + (parseFloat(a.distance)||0)/1000, 0);
+      const totalElev = activities.reduce((s,a) => s + (parseFloat(a.total_elevation_gain)||0), 0);
+      const dates = activities.map(a => new Date(a.start_date_local)).filter(d => !isNaN(d));
+      const weeksSpan = dates.length > 1
+        ? Math.ceil((Math.max(...dates) - Math.min(...dates)) / (7*86400000))
+        : 0;
+
+      _obStravaData = { activities, totalKm, totalElev, weeksSpan };
+
+      // Show results
+      document.getElementById('upload-result').classList.add('visible');
+      document.getElementById('up-acts').textContent = activities.length;
+      document.getElementById('up-km').textContent = totalKm.toFixed(0) + ' km';
+      document.getElementById('up-elev').textContent = (totalElev/1000).toFixed(1) + 'k m';
+      document.getElementById('up-weeks').textContent = weeksSpan;
+      document.getElementById('upload-zone').style.borderColor = '#4caf50';
+      document.getElementById('upload-zone').querySelector('.upload-zone-icon').textContent = '✅';
+      document.getElementById('upload-zone').querySelector('.upload-zone-text').textContent = file.name + ' — đã đọc thành công';
+
+      if (weeksSpan < 4) {
+        document.getElementById('up-warn').style.display = 'block';
+      }
+
+    } catch(err) {
+      document.getElementById('upload-zone').style.borderColor = '#ef5350';
+      document.getElementById('upload-zone').querySelector('.upload-zone-icon').textContent = '❌';
+      document.getElementById('upload-zone').querySelector('.upload-zone-text').textContent = 'Lỗi: ' + err.message;
+      document.getElementById('upload-zone').querySelector('.upload-zone-sub').textContent = 'Vui lòng thử file khác hoặc nhập thủ công bên dưới';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function toggleManualForm() {
+  document.getElementById('manual-form').classList.toggle('visible');
+}
+
+function toggleRestDay(el) {
+  el.classList.toggle('active');
+  const day = parseInt(el.dataset.day);
+  const idx = _obRestDays.indexOf(day);
+  if (idx >= 0) _obRestDays.splice(idx, 1);
+  else _obRestDays.push(day);
+}
+
+// ── Onboarding Navigation ──────────────────────────────────────────
+function obNext(step) {
+  // Validate before moving to step
+  if (step === 2) {
+    if (!_obSelectedRace) { alert('Vui lòng chọn race mục tiêu'); return; }
+    // If custom race, validate fields
+    if (_obSelectedRace.id === 'custom') {
+      const name = document.getElementById('cr-name').value.trim();
+      const date = document.getElementById('cr-date').value;
+      const dist = document.getElementById('cr-dist').value;
+      if (!name || !date || !dist) { alert('Vui lòng điền đầy đủ thông tin race tuỳ chỉnh (Tên, Ngày, Cự ly)'); return; }
+      _obSelectedRace = {
+        id: 'custom_' + Date.now(),
+        name: name,
+        date: date,
+        dist: parseInt(dist),
+        dplus: parseInt(document.getElementById('cr-dplus').value) || 0,
+        dminus: parseInt(document.getElementById('cr-dminus').value) || 0,
+        country: '✏️',
+        category: 'Custom',
+        isCustom: true,
+      };
+    }
+    // Pre-fill date with race day - 112 days as suggestion
+    const suggestStart = new Date(_obSelectedRace.date + 'T00:00:00');
+    suggestStart.setDate(suggestStart.getDate() - 112);
+    document.getElementById('ob-start-date').value = suggestStart.toISOString().split('T')[0];
+    updateDateSummary();
+  }
+
+  // Hide current step, show next
+  document.querySelectorAll('.ob-step-content').forEach(s => s.style.display = 'none');
+  document.getElementById('ob-step' + step).style.display = 'block';
+
+  // Update progress
+  for (let i = 1; i <= 4; i++) {
+    const stepEl = document.getElementById('obs-' + i);
+    if (stepEl) {
+      stepEl.className = 'ob-step' + (i < step ? ' done' : i === step ? ' active' : '');
+    }
+  }
+}
+
+function obBack(step) {
+  document.querySelectorAll('.ob-step-content').forEach(s => s.style.display = 'none');
+  document.getElementById('ob-step' + step).style.display = 'block';
+  for (let i = 1; i <= 4; i++) {
+    const stepEl = document.getElementById('obs-' + i);
+    if (stepEl) {
+      stepEl.className = 'ob-step' + (i < step ? ' done' : i === step ? ' active' : '');
+    }
+  }
+}
+
+function completeOnboarding() {
+  if (!_obSelectedRace) { obBack(1); return; }
+
+  const startDate = document.getElementById('ob-start-date').value;
+  if (!startDate) { obBack(2); return; }
+
+  // Build profile object
+  const profile = {
+    race_id: _obSelectedRace.id,
+    race_name: _obSelectedRace.name,
+    race_date: _obSelectedRace.date,
+    race_dist: _obSelectedRace.dist,
+    race_dplus: _obSelectedRace.dplus,
+    plan_start_date: startDate,
+    plan_weeks: Math.floor((new Date(_obSelectedRace.date) - new Date(startDate)) / (7*86400000)),
+    rest_days: _obRestDays,
+    weekly_hours: parseInt(document.getElementById('pref-hours').value) || 8,
+    gym_available: document.getElementById('pref-gym').checked,
+    treadmill_available: document.getElementById('pref-treadmill').checked,
+    max_hr: parseInt(document.getElementById('mf-maxhr').value) || null,
+    long_run_max_km: parseInt(document.getElementById('mf-longrun').value) || null,
+    weekly_km: parseInt(document.getElementById('mf-weekly').value) || null,
+    strava_export: _obStravaData ? {
+      activities_count: _obStravaData.activities.length,
+      total_km: _obStravaData.totalKm,
+      weeks_span: _obStravaData.weeksSpan,
+    } : null,
+    completed_at: new Date().toISOString(),
+  };
+
+  saveUserProfile(profile);
+  saveRaceTarget(_obSelectedRace);
+
+  // Hide onboarding, show app
+  document.getElementById('onboarding-overlay').classList.remove('active');
+  applyUserProfile(profile);
+
+  if (typeof showToast === 'function') {
+    showToast('🎉 Kế hoạch ' + profile.plan_weeks + ' tuần đã được thiết lập! Race: ' + profile.race_name);
+  }
+
+  // Rebuild weeks if needed
+  if (profile.plan_weeks !== 21) {
+    rebuildWeeksForUser(profile);
+  }
+}
+
+// ── Apply profile to app ───────────────────────────────────────────
+function applyUserProfile(profile) {
+  if (!profile) return;
+
+  // Update header to show race name
+  const h1 = document.querySelector('.race-info h1');
+  if (h1) h1.textContent = profile.race_name + ' — Lịch tập ' + profile.plan_weeks + ' tuần';
+
+  const raceInfoP = document.querySelector('.race-info p');
+  if (raceInfoP) {
+    raceInfoP.textContent = 'Uphill · Downhill · Sức mạnh · ' + profile.race_name + ' ' + profile.race_date;
+  }
+
+  // Update progress bar max
+  const tpMax = document.querySelector('.tp-max');
+  if (tpMax && profile.race_dist) {
+    tpMax.textContent = profile.race_dist + 'km ' + profile.race_name;
+  }
+
+  // Show edit race button in user bar
+  const editBtn = document.getElementById('edit-race-btn');
+  if (editBtn) editBtn.style.display = 'inline';
+}
+
+// ── Check if onboarding needed ─────────────────────────────────────
+function checkOnboarding() {
+  const profile = getUserProfile();
+  if (!profile || !profile.race_id) {
+    // Show onboarding
+    document.getElementById('onboarding-overlay').classList.add('active');
+    renderRaceGrid();
+    return true;
+  }
+  applyUserProfile(profile);
+  return false;
+}
+
+// ── Rebuild weeks for user plan (simplified for non-21-week plans) ─
+function rebuildWeeksForUser(profile) {
+  // For now: just update the week count display
+  // Full plan gen is Sprint 3 (UC-03 AI gen plan)
+  // Current app still uses the 21-week hardcoded plan
+  // but dates and race references are updated dynamically
+  console.log('[v2] Plan weeks:', profile.plan_weeks, 'Race:', profile.race_name);
+}
+
+function showOnboarding() {
+  document.getElementById('onboarding-overlay').classList.add('active');
+  renderRaceGrid();
+  // Restore existing selections if any
+  const profile = getUserProfile();
+  if (profile && profile.race_id) {
+    const existingRace = RACES_DB.find(r => r.id === profile.race_id);
+    if (existingRace) {
+      setTimeout(() => selectRace(profile.race_id), 100);
+    }
+  }
 }
 
 // Khởi tạo
