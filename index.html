@@ -954,7 +954,118 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .ob-skip { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; cursor: pointer; }
 .ob-skip:hover { color: var(--text); }
 
-</style>  
+/* ═══ SPRINT 4: NUTRITION LOG + RACE STRATEGY + FINISH PREDICTION ═══ */
+.nutri-log-modal { font-size: 13px; }
+.nl-field { margin-bottom: 14px; }
+.nl-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-family: monospace;
+  text-transform: uppercase; letter-spacing: .06em; }
+.nl-input, .nl-select {
+  width: 100%; padding: 9px 11px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 5px; font-size: 13px; color: var(--text); font-family: inherit;
+}
+.nl-input:focus, .nl-select:focus { outline: 0; border-color: var(--text); }
+.nl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nl-scale { display: flex; gap: 6px; }
+.nl-scale-btn {
+  flex: 1; padding: 8px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;
+  font-family: monospace; color: var(--muted); transition: all .15s;
+}
+.nl-scale-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.nl-scale-btn:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+.nl-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.nl-chip {
+  padding: 5px 10px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; font-size: 11px; cursor: pointer; color: var(--muted);
+  transition: all .15s;
+}
+.nl-chip.active { background: var(--uphill); color: #fff; border-color: var(--uphill); }
+.nl-chip:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+.nl-prompt-banner {
+  background: linear-gradient(135deg,#fff8e1,#ffecb3); border: 1px solid #f0d890;
+  padding: 11px 14px; border-radius: 6px; margin: 10px 22px 0;
+  display: none; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+}
+.nl-prompt-banner.visible { display: flex; }
+.nl-prompt-text { font-size: 12px; color: #6b4f0a; line-height: 1.5; }
+.nl-prompt-btn {
+  padding: 7px 14px; background: #c0392b; color: #fff; border: none; border-radius: 4px;
+  font-size: 11px; font-weight: 700; cursor: pointer; font-family: monospace;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.nl-prompt-btn:hover { background: #a02818; }
+
+/* Race Day Strategy panel */
+.race-strategy-banner {
+  background: linear-gradient(135deg,#0d0d0d,#1f1f1f); color: #fff;
+  padding: 16px 22px; margin: 0 22px; border-radius: 8px; border: 2px solid #c0392b;
+  display: none; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  box-shadow: 0 4px 16px rgba(192,57,43,.2);
+}
+.race-strategy-banner.visible { display: flex; }
+.rs-text { font-size: 13px; line-height: 1.6; flex: 1; min-width: 240px; }
+.rs-text strong { color: #c8f0a0; }
+.rs-actions { display: flex; gap: 8px; }
+.rs-btn {
+  padding: 8px 14px; background: #c0392b; color: #fff; border: none; border-radius: 5px;
+  font-size: 12px; font-weight: 700; cursor: pointer; font-family: monospace;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.rs-btn:hover { background: #a02818; }
+.rs-btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,.2); }
+
+.session-log-list { max-height: 220px; overflow-y: auto; padding: 6px 0; }
+.session-log-item {
+  display: grid; grid-template-columns: 60px 1fr auto;
+  gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.session-log-item:last-child { border-bottom: 0; }
+.sli-date { font-family: monospace; color: var(--muted); font-size: 11px; }
+.sli-meta { color: var(--text); }
+.sli-meta span { color: var(--muted); }
+.sli-gi { font-family: monospace; font-weight: 700; }
+.sli-gi.good { color: var(--gym); }
+.sli-gi.bad { color: var(--race); }
+.sli-empty { padding: 18px; text-align: center; color: var(--muted); font-size: 11px; }
+
+/* Finish Time Prediction */
+.predict-card {
+  background: linear-gradient(180deg,#fdf5f2,#fff); border: 1px solid #f0c4b0;
+  border-radius: 8px; padding: 18px; margin-top: 8px;
+}
+.predict-time {
+  font-size: 38px; font-weight: 700; color: var(--uphill); font-family: monospace;
+  text-align: center; line-height: 1; letter-spacing: -1px;
+}
+.predict-conf {
+  text-align: center; font-size: 11px; color: var(--muted); margin-top: 4px;
+  font-family: monospace; text-transform: uppercase; letter-spacing: .08em;
+}
+.predict-segs { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 14px; }
+.predict-seg {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+  padding: 8px; text-align: center;
+}
+.predict-seg-name { font-size: 10px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .06em; font-family: monospace; }
+.predict-seg-pace { font-size: 14px; font-weight: 700; font-family: monospace; margin-top: 3px; }
+.predict-risks {
+  margin-top: 12px; padding: 10px 12px; background: #fff8e1; border: 1px solid #f0e6c8;
+  border-radius: 5px; font-size: 12px; line-height: 1.6;
+}
+.predict-risks strong { color: #b08d1e; }
+
+/* Per-activity AI feedback */
+.act-ai-btn {
+  padding: 3px 7px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 3px; color: rgba(255,255,255,.6); font-size: 9px;
+  font-family: monospace; cursor: pointer; margin-left: 6px;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.act-ai-btn:hover { color: #c8f0a0; border-color: #c8f0a0; }
+
+</style>
 </head>  
 <body>
 
@@ -1210,6 +1321,128 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 
 
+<!-- ═══ NUTRITION LOG PROMPT (UC-09) ═══ -->
+<div class="nl-prompt-banner" id="nl-prompt-banner">
+  <div class="nl-prompt-text">
+    🥤 Bạn vừa hoàn thành buổi <strong id="nl-prompt-detail">long run</strong>.
+    Log lại dinh dưỡng & gear để xây Race Day Strategy cá nhân hóa.
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="nl-prompt-btn" onclick="openNutritionLog()">📝 Log ngay</button>
+    <button class="nl-prompt-btn" style="background:transparent;color:#6b4f0a;border:1px solid #6b4f0a"
+            onclick="dismissNutriPrompt()">Để sau</button>
+  </div>
+</div>
+
+<!-- ═══ RACE DAY STRATEGY BANNER (UC-09 trigger T-14) ═══ -->
+<div class="race-strategy-banner" id="race-strategy-banner">
+  <div class="rs-text">
+    🏁 <strong>Race còn <span id="rs-days-left">14</span> ngày!</strong>
+    Đã đến lúc tổng hợp Race Day Strategy cá nhân hóa từ <span id="rs-logs-count">0</span> long run logs của bạn.
+  </div>
+  <div class="rs-actions">
+    <button class="rs-btn" onclick="openRaceStrategy()">🤖 Tạo chiến thuật</button>
+    <button class="rs-btn rs-btn-ghost" onclick="dismissRaceStrategy()">Để sau</button>
+  </div>
+</div>
+
+<!-- ═══ FINISH TIME PREDICTION BANNER (UC-10 trigger T-15) ═══ -->
+<div class="race-strategy-banner" id="finish-predict-banner" style="border-color:#1e6eb5">
+  <div class="rs-text">
+    ⏱ <strong>Race còn <span id="fp-days-left">15</span> ngày.</strong>
+    AI có thể dự đoán finish time dựa trên <span id="fp-weeks-data">0</span> tuần training data.
+  </div>
+  <div class="rs-actions">
+    <button class="rs-btn" style="background:#1e6eb5" onclick="openFinishPredict()">🔮 Dự đoán</button>
+    <button class="rs-btn rs-btn-ghost" onclick="dismissFinishPredict()">Để sau</button>
+  </div>
+</div>
+
+<!-- ═══ NUTRITION LOG MODAL (UC-09) ═══ -->
+<div class="modal-overlay" id="nutri-log-modal" style="display:none">
+  <div class="modal-card nutri-log-modal">
+    <div class="modal-title">🥤 Log dinh dưỡng & gear</div>
+    <div class="modal-sub" id="nl-session-label">Buổi long run hôm nay</div>
+
+    <div class="nl-row">
+      <div class="nl-field">
+        <div class="nl-label">👟 Giày</div>
+        <input type="text" class="nl-input" id="nl-shoes" placeholder="VD: Hoka Speedgoat 5">
+      </div>
+      <div class="nl-field">
+        <div class="nl-label">🏷 Hãng gel</div>
+        <input type="text" class="nl-input" id="nl-gel-brand" placeholder="VD: Maurten Gel 100">
+      </div>
+    </div>
+
+    <div class="nl-row">
+      <div class="nl-field">
+        <div class="nl-label">🍓 Vị</div>
+        <input type="text" class="nl-input" id="nl-gel-flavor" placeholder="Caffeine / Original / ...">
+      </div>
+      <div class="nl-field">
+        <div class="nl-label">🔢 Số gel/thức ăn</div>
+        <input type="number" class="nl-input" id="nl-gel-count" placeholder="3" min="0" max="20">
+      </div>
+    </div>
+
+    <div class="nl-field">
+      <div class="nl-label">🤢 GI status (đường tiêu hoá) — 0 không sao, 5 nôn</div>
+      <div class="nl-scale" id="nl-gi-scale">
+        <button class="nl-scale-btn" data-v="0" onclick="setNLScore('gi',0)">0<br><span style="font-size:9px">Tốt</span></button>
+        <button class="nl-scale-btn" data-v="1" onclick="setNLScore('gi',1)">1</button>
+        <button class="nl-scale-btn" data-v="2" onclick="setNLScore('gi',2)">2<br><span style="font-size:9px">Hơi xốc</span></button>
+        <button class="nl-scale-btn" data-v="3" onclick="setNLScore('gi',3)">3</button>
+        <button class="nl-scale-btn" data-v="4" onclick="setNLScore('gi',4)">4<br><span style="font-size:9px">Đau bụng</span></button>
+        <button class="nl-scale-btn" data-v="5" onclick="setNLScore('gi',5)">5<br><span style="font-size:9px">Nôn</span></button>
+      </div>
+    </div>
+
+    <div class="nl-field">
+      <div class="nl-label">😣 Đau / khó chịu sau buổi (chọn nếu có)</div>
+      <div class="nl-chip-row" id="nl-pain-chips">
+        <span class="nl-chip" data-area="none" onclick="toggleNLPain('none', this)">Không</span>
+        <span class="nl-chip" data-area="knee" onclick="toggleNLPain('knee', this)">🦵 Gối</span>
+        <span class="nl-chip" data-area="itband" onclick="toggleNLPain('itband', this)">IT Band</span>
+        <span class="nl-chip" data-area="achilles" onclick="toggleNLPain('achilles', this)">Achilles</span>
+        <span class="nl-chip" data-area="hip" onclick="toggleNLPain('hip', this)">Hông</span>
+        <span class="nl-chip" data-area="back" onclick="toggleNLPain('back', this)">Lưng</span>
+        <span class="nl-chip" data-area="foot" onclick="toggleNLPain('foot', this)">Bàn chân</span>
+        <span class="nl-chip" data-area="blister" onclick="toggleNLPain('blister', this)">Phồng/da</span>
+        <span class="nl-chip" data-area="chafe" onclick="toggleNLPain('chafe', this)">Cọ xát</span>
+      </div>
+    </div>
+
+    <div class="nl-field">
+      <div class="nl-label">📝 Ghi chú thêm (terrain, thời tiết, balo, ...)</div>
+      <input type="text" class="nl-input" id="nl-note" placeholder="VD: trời nóng 32°C, balo 5L vừa">
+    </div>
+
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:right">
+      Đã log <strong id="nl-existing-count">0</strong> buổi long run từ trước
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeNutritionLog()">Hủy</button>
+      <button class="modal-btn modal-btn-secondary" onclick="viewSessionLogs()">📜 Xem lịch sử</button>
+      <button class="modal-btn modal-btn-primary" onclick="saveNutritionLog()">💾 Lưu log</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SESSION LOGS HISTORY MODAL ═══ -->
+<div class="modal-overlay" id="session-logs-modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">📜 Lịch sử Long Run Logs</div>
+    <div class="modal-sub">Toàn bộ dinh dưỡng & gear đã log — dùng cho Race Day Strategy</div>
+    <div class="session-log-list" id="session-log-list"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="document.getElementById('session-logs-modal').style.display='none'">Đóng</button>
+      <button class="modal-btn modal-btn-primary" onclick="openRaceStrategy()" id="strategy-from-logs-btn" style="display:none">🏁 Tạo Race Strategy</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ RECALIBRATE BANNER ═══ -->
 <div class="recalibrate-banner" id="recalibrate-banner">
   <div class="recalibrate-text">
@@ -1453,9 +1686,8 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
     <p><code>Phút 00:</code> Uống Tailwind/Maurten (10g carb).<br>  
        <code>Phút 20:</code> Cắn nửa thanh Bar/Chew (~15g carb) + Nước.<br>  
        <code>Phút 40:</code> Cắn 1 gói Gel (~25g carb) + Nước.<br>  
-       Mục tiêu nạp được <b>~50-60g Carb/giờ</b>. Tăng dần giới hạn của dạ dày.</p>  
+       Mục tiêu nạp được <b>~50-60g Carb/giờ</b>. Tăng dần giới hạn của dạ dày.</p>
   </div>
-</div>
 </div>
 
 <div class="main-layout">
@@ -3059,9 +3291,10 @@ function updateAllWeeksProgress(activities) {
 // ═══ TODAY CARD HIGHLIGHT ═══
 function highlightToday() {
   const today = new Date();
-  const planStart = new Date('2026-04-20T00:00:00');
+  const planStart = (typeof getDynamicPlanStart === 'function') ? getDynamicPlanStart() : new Date('2026-04-20T00:00:00');
+  const totalWeeks = (typeof getPlanWeeks === 'function') ? getPlanWeeks() : 21;
   const diff = Math.floor((today - planStart) / 86400000);
-  if (diff < 0 || diff >= 147) return;
+  if (diff < 0 || diff >= totalWeeks * 7) return;
   const weekNum = Math.floor(diff/7)+1;
   const dayIdx = diff%7;
   const el = document.querySelector('#wk'+weekNum+' .day[data-i="'+dayIdx+'"]');
@@ -3109,7 +3342,9 @@ let _missedStreak = 0;
 function checkMissedStreak() {
   const done = loadDone();
   const today = new Date();
-  const planStart = new Date('2026-04-20T00:00:00');
+  const planStart = (typeof getDynamicPlanStart === 'function') ? getDynamicPlanStart() : new Date('2026-04-20T00:00:00');
+  const totalWeeks = (typeof getPlanWeeks === 'function') ? getPlanWeeks() : 21;
+  const totalDays = totalWeeks * 7;
   let missed = 0;
   let maxStreak = 0;
   // Check last 7 days
@@ -3117,7 +3352,7 @@ function checkMissedStreak() {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const diff = Math.floor((d - planStart) / 86400000);
-    if (diff < 0 || diff >= 147) continue;
+    if (diff < 0 || diff >= totalDays) continue;
     const weekNum = Math.floor(diff/7)+1;
     const dayIdx = diff%7;
     const planWeek = weeks.find(w => w.w === weekNum);
@@ -3169,13 +3404,19 @@ function openRecalibrate() {
 async function runRecalibrate() {
   const done = loadDone();
   const today = new Date();
-  const planStart = new Date('2026-04-20T00:00:00');
+  const planStart = (typeof getDynamicPlanStart === 'function') ? getDynamicPlanStart() : new Date('2026-04-20T00:00:00');
+  const totalWeeks = (typeof getPlanWeeks === 'function') ? getPlanWeeks() : 21;
   const currentDiff = Math.floor((today - planStart) / 86400000);
-  const currentWeek = Math.floor(currentDiff/7)+1;
+  const currentWeek = Math.max(1, Math.floor(currentDiff/7)+1);
+
+  // Race info (dynamic)
+  const race = (typeof getRaceTarget === 'function') ? getRaceTarget() : null;
+  const raceName = race?.name || 'VMM 100M';
+  const raceDate = race?.date || '2026-09-20';
 
   // Build context for Gemini
   const doneSessions = Object.keys(done).length;
-  const totalSessions = 147;
+  const totalSessions = totalWeeks * 7; // approx, rest days included
   const pctDone = (doneSessions/totalSessions*100).toFixed(0);
 
   // Get next 4 weeks plan summary
@@ -3187,10 +3428,10 @@ async function runRecalibrate() {
   const prompt = `Bạn là HLV trail running chuyên nghiệp. Runner đã bỏ ${_missedStreak} buổi tập liên tiếp.
 
 Trạng thái hiện tại:
-- Tuần hiện tại: W${currentWeek}/21
+- Tuần hiện tại: W${currentWeek}/${totalWeeks}
 - Đã hoàn thành: ${doneSessions}/${totalSessions} buổi (${pctDone}%)
 - Kế hoạch 4 tuần tới: ${weeksSummary}
-- Race day: VMM 100M, 20/9/2026
+- Race day: ${raceName}, ${raceDate}
 
 Yêu cầu: Đề xuất điều chỉnh volume cho 3 tuần tiếp theo để bù deficit an toàn.
 Nguyên tắc bắt buộc từ sách "Training for the Uphill Athlete":
@@ -3461,8 +3702,8 @@ function renderDashboard() {
 
   // Get current week and render last 8 weeks
   const today = new Date();
-  const planStart = new Date('2026-04-20T00:00:00');
-  const currentWeek = Math.floor((today-planStart)/86400000/7)+1;
+  const planStart = (typeof getDynamicPlanStart === 'function') ? getDynamicPlanStart() : new Date('2026-04-20T00:00:00');
+  const currentWeek = Math.max(1, Math.floor((today-planStart)/86400000/7)+1);
   const weekNums = [];
   for (let w=Math.max(1,currentWeek-7); w<=currentWeek; w++) weekNums.push(w);
 
@@ -4020,11 +4261,664 @@ function showOnboarding() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// SPRINT 4: NUTRITION LOG (UC-09) + RACE DAY STRATEGY + FINISH PREDICTION (UC-10)
+// + Per-activity AI feedback (Bước 7 plan)
+// ═══════════════════════════════════════════════════════════════════
+
+const NUTRI_KEY      = 'vmm_session_logs_v1';
+const RACE_STRAT_KEY = 'vmm_race_strategy_v1';
+const FINISH_PRED_KEY= 'vmm_finish_predict_v1';
+const NUTRI_PROMPT_DISMISS_KEY = 'vmm_nutri_prompt_dismiss';
+const RS_DISMISS_KEY = 'vmm_rs_dismiss';
+const FP_DISMISS_KEY = 'vmm_fp_dismiss';
+
+// State
+let _nlState = { gi: -1, pain: [], session: null };
+let _sessionLogs = [];
+
+function loadSessionLogs() {
+  try { _sessionLogs = JSON.parse(localStorage.getItem(NUTRI_KEY) || '[]'); }
+  catch(e) { _sessionLogs = []; }
+  return _sessionLogs;
+}
+function saveSessionLogs() {
+  try { localStorage.setItem(NUTRI_KEY, JSON.stringify(_sessionLogs)); } catch(e){}
+}
+
+// ── UC-09: Detect long run completion → prompt nutrition log ──────
+function detectLongRunCompletion() {
+  // Check most recent Strava activity: if >=15km and no log yet → prompt
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+  if (!acts.length) return;
+  const longRuns = acts.filter(a => {
+    const t = (a.sport_type||a.type||'').toLowerCase();
+    const km = (a.distance||0)/1000;
+    return (t.includes('run') || t.includes('trail')) && km >= 15;
+  });
+  if (!longRuns.length) return;
+
+  loadSessionLogs();
+  const latest = longRuns[0]; // Strava returns sorted desc
+  const latestId = String(latest.id || latest.start_date || '');
+  if (!latestId) return;
+
+  const alreadyLogged = _sessionLogs.some(l => l.activity_id === latestId);
+  const dismissed = localStorage.getItem(NUTRI_PROMPT_DISMISS_KEY) === latestId;
+  if (alreadyLogged || dismissed) return;
+
+  // Show prompt banner
+  const km = ((latest.distance||0)/1000).toFixed(1);
+  const elev = Math.round(latest.total_elevation_gain||0);
+  const dateStr = new Date(latest.start_date_local || latest.start_date)
+    .toLocaleDateString('vi-VN');
+  document.getElementById('nl-prompt-detail').textContent =
+    `${km}km +${elev}m (${dateStr})`;
+  document.getElementById('nl-prompt-banner').classList.add('visible');
+
+  // Stash latest activity
+  _nlState.session = {
+    activity_id: latestId,
+    distance_km: parseFloat(km),
+    elev_gain: elev,
+    date: latest.start_date_local || latest.start_date,
+    name: latest.name || 'Long run',
+  };
+}
+
+function dismissNutriPrompt() {
+  if (_nlState.session?.activity_id) {
+    localStorage.setItem(NUTRI_PROMPT_DISMISS_KEY, _nlState.session.activity_id);
+  }
+  document.getElementById('nl-prompt-banner').classList.remove('visible');
+}
+
+function openNutritionLog() {
+  // If no auto-detected session, allow manual entry of today
+  if (!_nlState.session) {
+    _nlState.session = {
+      activity_id: 'manual_' + Date.now(),
+      distance_km: 0, elev_gain: 0,
+      date: new Date().toISOString(),
+      name: 'Buổi long run thủ công',
+    };
+  }
+  loadSessionLogs();
+  document.getElementById('nl-existing-count').textContent = _sessionLogs.length;
+  const s = _nlState.session;
+  document.getElementById('nl-session-label').textContent =
+    s.name + (s.distance_km ? ` · ${s.distance_km}km +${s.elev_gain}m` : '');
+  // Reset form
+  _nlState.gi = -1; _nlState.pain = [];
+  document.getElementById('nl-shoes').value = '';
+  document.getElementById('nl-gel-brand').value = '';
+  document.getElementById('nl-gel-flavor').value = '';
+  document.getElementById('nl-gel-count').value = '';
+  document.getElementById('nl-note').value = '';
+  document.querySelectorAll('#nl-gi-scale .nl-scale-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#nl-pain-chips .nl-chip').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nutri-log-modal').style.display = 'flex';
+  document.getElementById('nl-prompt-banner').classList.remove('visible');
+}
+function closeNutritionLog() {
+  document.getElementById('nutri-log-modal').style.display = 'none';
+}
+function setNLScore(field, val) {
+  _nlState[field] = val;
+  document.querySelectorAll('#nl-' + field + '-scale .nl-scale-btn')
+    .forEach(b => b.classList.toggle('active', parseInt(b.dataset.v)===val));
+}
+function toggleNLPain(area, el) {
+  if (area === 'none') {
+    _nlState.pain = ['none'];
+    document.querySelectorAll('#nl-pain-chips .nl-chip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    return;
+  }
+  // Remove "none" if previously selected
+  _nlState.pain = _nlState.pain.filter(p=>p!=='none');
+  document.querySelector('#nl-pain-chips .nl-chip[data-area="none"]').classList.remove('active');
+  // Toggle area
+  const idx = _nlState.pain.indexOf(area);
+  if (idx >= 0) { _nlState.pain.splice(idx,1); el.classList.remove('active'); }
+  else { _nlState.pain.push(area); el.classList.add('active'); }
+}
+function saveNutritionLog() {
+  const log = {
+    ..._nlState.session,
+    shoes: document.getElementById('nl-shoes').value.trim(),
+    gel_brand: document.getElementById('nl-gel-brand').value.trim(),
+    gel_flavor: document.getElementById('nl-gel-flavor').value.trim(),
+    gel_count: parseInt(document.getElementById('nl-gel-count').value) || 0,
+    gi_status: _nlState.gi >= 0 ? _nlState.gi : null,
+    pain_areas: _nlState.pain.filter(p=>p!=='none'),
+    note: document.getElementById('nl-note').value.trim(),
+    logged_at: new Date().toISOString(),
+  };
+  loadSessionLogs();
+  // Replace existing log for same activity if any
+  _sessionLogs = _sessionLogs.filter(l => l.activity_id !== log.activity_id);
+  _sessionLogs.push(log);
+  // Keep newest first
+  _sessionLogs.sort((a,b) => new Date(b.date) - new Date(a.date));
+  saveSessionLogs();
+  closeNutritionLog();
+  if (typeof showToast === 'function') showToast('💾 Đã lưu log dinh dưỡng. Tổng: ' + _sessionLogs.length + ' buổi');
+  checkRaceStrategyTrigger();
+}
+
+function viewSessionLogs() {
+  loadSessionLogs();
+  const list = document.getElementById('session-log-list');
+  if (!_sessionLogs.length) {
+    list.innerHTML = '<div class="sli-empty">Chưa có log nào — log buổi long run đầu tiên!</div>';
+  } else {
+    list.innerHTML = _sessionLogs.map(l => {
+      const d = new Date(l.date).toLocaleDateString('vi-VN', {month:'2-digit',day:'2-digit'});
+      const giCls = l.gi_status === null ? '' : (l.gi_status <= 1 ? 'good' : (l.gi_status >= 3 ? 'bad' : ''));
+      const pain = (l.pain_areas||[]).length ? '· ' + l.pain_areas.join(',') : '';
+      return `<div class="session-log-item">
+        <div class="sli-date">${d}</div>
+        <div class="sli-meta">
+          <strong>${l.distance_km||'?'}km</strong>
+          <span>· ${l.gel_brand||'gel?'} × ${l.gel_count||0}</span>
+          <span>${pain}</span>
+          ${l.shoes ? '<br><span style="font-size:10px">👟 '+l.shoes+'</span>' : ''}
+        </div>
+        <div class="sli-gi ${giCls}">GI:${l.gi_status===null?'—':l.gi_status}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('strategy-from-logs-btn').style.display =
+    _sessionLogs.length >= 3 ? 'block' : 'none';
+  document.getElementById('session-logs-modal').style.display = 'flex';
+}
+
+// ── UC-09: Race Day Strategy synthesis (T-14 trigger) ─────────────
+function checkRaceStrategyTrigger() {
+  const race = (typeof getRaceTarget === 'function') ? getRaceTarget() : null;
+  if (!race?.date) return;
+  const raceDay = new Date(race.date + 'T00:00:00');
+  const today = new Date();
+  const daysLeft = Math.floor((raceDay - today) / 86400000);
+  if (daysLeft <= 14 && daysLeft >= 0) {
+    loadSessionLogs();
+    const dismissed = localStorage.getItem(RS_DISMISS_KEY) === race.id + '_' + new Date().toDateString();
+    const stored = localStorage.getItem(RACE_STRAT_KEY);
+    if (!dismissed && _sessionLogs.length >= 1 && !stored) {
+      document.getElementById('rs-days-left').textContent = daysLeft;
+      document.getElementById('rs-logs-count').textContent = _sessionLogs.length;
+      document.getElementById('race-strategy-banner').classList.add('visible');
+    }
+  }
+}
+function dismissRaceStrategy() {
+  const race = (typeof getRaceTarget === 'function') ? getRaceTarget() : null;
+  localStorage.setItem(RS_DISMISS_KEY, (race?.id||'_') + '_' + new Date().toDateString());
+  document.getElementById('race-strategy-banner').classList.remove('visible');
+}
+async function openRaceStrategy() {
+  document.getElementById('race-strategy-banner').classList.remove('visible');
+  document.getElementById('session-logs-modal').style.display = 'none';
+
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'race-strategy-panel';
+  panel.innerHTML = `
+    <div class="ai-card" style="max-width:720px">
+      <div class="ai-card-title">🏁 Race Day Strategy <span class="ai-badge">Gemini Flash</span></div>
+      <div class="ai-card-sub">Tổng hợp toàn bộ dữ liệu long run + dinh dưỡng + gear → chiến thuật cá nhân hóa cho ngày race.</div>
+      <div class="ai-loading" id="rs-loading">
+        <div class="ai-spinner"></div>
+        Đang phân tích ${_sessionLogs.length} long run logs và xây race strategy...
+      </div>
+      <div class="ai-result" id="rs-result" style="display:none;max-height:60vh;overflow-y:auto"></div>
+      <div class="ai-actions" id="rs-final-actions" style="display:none">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('race-strategy-panel')">Đóng</button>
+        <button class="ai-btn ai-btn-secondary" onclick="exportStrategyPDF()">📄 Xuất PDF</button>
+        <button class="ai-btn ai-btn-primary" onclick="regenerateStrategy()">🔄 Tạo lại</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+  await runRaceStrategy();
+}
+
+async function runRaceStrategy() {
+  loadSessionLogs();
+  const race = getRaceTarget() || {};
+  const profile = getUserProfile() || {};
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+
+  // Aggregate gel brand stats
+  const brandStats = {};
+  _sessionLogs.forEach(l => {
+    if (!l.gel_brand) return;
+    if (!brandStats[l.gel_brand]) brandStats[l.gel_brand] = { count:0, gi_total:0, gi_n:0, pain:0 };
+    brandStats[l.gel_brand].count++;
+    if (l.gi_status !== null) {
+      brandStats[l.gel_brand].gi_total += l.gi_status;
+      brandStats[l.gel_brand].gi_n++;
+    }
+    if ((l.pain_areas||[]).length) brandStats[l.gel_brand].pain++;
+  });
+  const brandSummary = Object.keys(brandStats).map(b => {
+    const s = brandStats[b];
+    return `${b}: dùng ${s.count} lần, GI avg=${s.gi_n?(s.gi_total/s.gi_n).toFixed(1):'?'}, pain ${s.pain}/${s.count}`;
+  }).join(' | ');
+
+  const shoeStats = {};
+  _sessionLogs.forEach(l => {
+    if (!l.shoes) return;
+    shoeStats[l.shoes] = (shoeStats[l.shoes]||0)+1;
+  });
+  const topShoe = Object.keys(shoeStats).sort((a,b)=>shoeStats[b]-shoeStats[a])[0] || 'chưa rõ';
+
+  const totalKm = acts.reduce((s,a)=>s+(a.distance||0)/1000,0).toFixed(0);
+  const longestRun = Math.max(0, ...acts.map(a => (a.distance||0)/1000)).toFixed(0);
+
+  const prompt = `Bạn là HLV trail running. Hãy tổng hợp Race Day Strategy cá nhân hóa cho runner này.
+
+THÔNG TIN RACE:
+- Tên: ${race.name || 'Unknown'}
+- Cự ly: ${race.dist || '?'}km, D+ ${race.dplus || '?'}m
+- Ngày: ${race.date || '?'}
+
+DỮ LIỆU TRAINING:
+- Tổng km: ${totalKm}km, longest run: ${longestRun}km
+- Số tuần plan: ${profile.plan_weeks || '?'}
+
+LONG RUN LOGS (${_sessionLogs.length} buổi):
+${_sessionLogs.slice(0,12).map(l =>
+  `- ${l.date?.slice(0,10)}: ${l.distance_km}km +${l.elev_gain}m | gel ${l.gel_brand||'?'} ${l.gel_flavor||''} ×${l.gel_count} | GI=${l.gi_status} | ${l.pain_areas?.join(',')||'no pain'} | ${l.note||''}`
+).join('\n')}
+
+GEL BRAND ANALYSIS: ${brandSummary || 'không đủ data'}
+GIÀY DÙNG NHIỀU NHẤT: ${topShoe}
+
+YÊU CẦU: Trả lời tiếng Việt, format markdown. Bao gồm các phần:
+
+## 1. CHIẾN THUẬT DINH DƯỠNG
+- Gel khuyến nghị (dựa trên GI status thấp nhất): brand + cadence (mỗi X phút)
+- Gel cần TRÁNH (dựa trên data GI cao): brand + lý do
+- Mục tiêu carb/giờ
+- Bù điện giải
+
+## 2. GEAR CHECKLIST
+- Giày đề xuất (dựa trên data + terrain): ${topShoe}
+- Phụ kiện cần thiết theo terrain ${race.dplus}m D+
+
+## 3. PACING THEO SEGMENT
+- Đoạn đầu (0-30%): pace, HR, dinh dưỡng
+- Đoạn giữa (30-70%): pace, mental, dinh dưỡng
+- Đoạn cuối (70-100%): pace, mental tricks, finishing
+
+## 4. RỦI RO CẦN ĐỀ PHÒNG
+- Top 3 rủi ro cá nhân (từ pain pattern + gear) + cách phòng
+
+## 5. TAPER 2 TUẦN CUỐI
+- Tuần T-2: volume, intensity
+- Tuần T-1: volume, race week routine
+
+## 6. RACE MORNING CHECKLIST
+- Bữa sáng cụ thể, timing
+- Warm-up
+- Tâm lý`;
+
+  try {
+    const result = await callGemini(prompt, 'gemini-2.5-flash');
+    document.getElementById('rs-loading').style.display = 'none';
+    const resultEl = document.getElementById('rs-result');
+    resultEl.style.display = 'block';
+    // Convert simple markdown → HTML
+    resultEl.innerHTML = simpleMarkdownToHtml(result);
+    document.getElementById('rs-final-actions').style.display = 'flex';
+    // Persist
+    localStorage.setItem(RACE_STRAT_KEY, JSON.stringify({
+      generated_at: new Date().toISOString(),
+      race_id: race.id, content: result,
+    }));
+  } catch(e) {
+    document.getElementById('rs-loading').innerHTML =
+      '<span style="color:#ef5350">❌ Lỗi: ' + e.message +
+      '<br><small>Cần Gemini API key trên Cloudflare Worker.</small></span>';
+  }
+}
+
+function regenerateStrategy() {
+  document.getElementById('rs-loading').style.display = 'flex';
+  document.getElementById('rs-result').style.display = 'none';
+  document.getElementById('rs-final-actions').style.display = 'none';
+  runRaceStrategy();
+}
+
+function simpleMarkdownToHtml(md) {
+  if (!md) return '';
+  return md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^## (.+)$/gm, '<h3 style="color:var(--uphill);margin:14px 0 6px;font-size:14px;font-family:monospace;text-transform:uppercase;letter-spacing:.05em">$1</h3>')
+    .replace(/^# (.+)$/gm, '<h2 style="color:var(--text);margin:16px 0 8px;font-size:16px">$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li style="margin-left:18px;margin-bottom:3px">$1</li>')
+    .replace(/(<li[\s\S]*?<\/li>\s*)+/g, m=>'<ul style="margin:6px 0">'+m+'</ul>')
+    .replace(/\n\n/g, '</p><p style="margin:6px 0">')
+    .replace(/^(?!<)/gm, '');
+}
+
+function exportStrategyPDF() {
+  const stored = localStorage.getItem(RACE_STRAT_KEY);
+  if (!stored) { alert('Chưa có Race Strategy.'); return; }
+  const data = JSON.parse(stored);
+  const race = getRaceTarget() || {};
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Race Day Strategy — ${race.name||'Race'}</title>
+    <style>
+      body{font-family:Helvetica,Arial,sans-serif;max-width:760px;margin:24px auto;padding:0 18px;color:#1a1814;line-height:1.6}
+      h1{color:#c0392b;border-bottom:2px solid #c0392b;padding-bottom:8px}
+      h3{color:#d4531e;margin-top:24px;text-transform:uppercase;letter-spacing:.06em;font-size:14px}
+      .meta{color:#7a756a;font-size:11px;margin-bottom:14px}
+      ul{padding-left:24px}
+      li{margin-bottom:4px}
+      @media print { body{margin:0} }
+    </style></head><body>
+    <h1>🏁 Race Day Strategy — ${race.name||'Race'}</h1>
+    <div class="meta">Tạo lúc: ${new Date(data.generated_at).toLocaleString('vi-VN')}
+      · Race day: ${race.date || '?'} · ${race.dist||'?'}km +${race.dplus||'?'}m</div>
+    ${simpleMarkdownToHtml(data.content)}
+    <div class="meta" style="margin-top:30px">Sinh tự động bởi VMM Training App · Powered by Gemini AI</div>
+    <script>setTimeout(()=>window.print(),300)<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── UC-10: Race Finish Time Prediction (T-15 trigger) ─────────────
+function checkFinishPredictionTrigger() {
+  const race = (typeof getRaceTarget === 'function') ? getRaceTarget() : null;
+  if (!race?.date) return;
+  const raceDay = new Date(race.date + 'T00:00:00');
+  const today = new Date();
+  const daysLeft = Math.floor((raceDay - today) / 86400000);
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+  const planStart = (typeof getDynamicPlanStart === 'function') ? getDynamicPlanStart() : new Date('2026-04-20T00:00:00');
+  const trainingWeeks = Math.floor((today - planStart)/86400000/7);
+
+  if (daysLeft <= 15 && daysLeft >= 0) {
+    const dismissed = localStorage.getItem(FP_DISMISS_KEY) === race.id + '_' + new Date().toDateString();
+    const stored = localStorage.getItem(FINISH_PRED_KEY);
+    if (!dismissed && trainingWeeks >= 4 && !stored) {
+      document.getElementById('fp-days-left').textContent = daysLeft;
+      document.getElementById('fp-weeks-data').textContent = trainingWeeks;
+      document.getElementById('finish-predict-banner').classList.add('visible');
+    }
+  }
+}
+function dismissFinishPredict() {
+  const race = (typeof getRaceTarget === 'function') ? getRaceTarget() : null;
+  localStorage.setItem(FP_DISMISS_KEY, (race?.id||'_') + '_' + new Date().toDateString());
+  document.getElementById('finish-predict-banner').classList.remove('visible');
+}
+async function openFinishPredict() {
+  document.getElementById('finish-predict-banner').classList.remove('visible');
+
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'finish-predict-panel';
+  panel.innerHTML = `
+    <div class="ai-card" style="max-width:640px">
+      <div class="ai-card-title">⏱ Dự đoán Finish Time <span class="ai-badge">Gemini Flash</span></div>
+      <div class="ai-card-sub">AI phân tích training data và race profile để dự đoán thời gian về đích thực tế.</div>
+      <div class="ai-loading" id="fp-loading">
+        <div class="ai-spinner"></div>
+        Đang phân tích training metrics + race profile...
+      </div>
+      <div id="fp-result" style="display:none"></div>
+      <div class="ai-actions" id="fp-final-actions" style="display:none">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('finish-predict-panel')">Đóng</button>
+        <button class="ai-btn ai-btn-primary" onclick="regenerateFinishPredict()">🔄 Tính lại</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+  await runFinishPredict();
+}
+
+async function runFinishPredict() {
+  const race = getRaceTarget() || {};
+  const profile = getUserProfile() || {};
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+
+  // Calculate training metrics
+  const runs = acts.filter(a => {
+    const t = (a.sport_type||a.type||'').toLowerCase();
+    return t.includes('run') || t.includes('trail');
+  });
+  const totalKm = runs.reduce((s,a)=>s+(a.distance||0)/1000,0);
+  const totalElev = runs.reduce((s,a)=>s+(a.total_elevation_gain||0),0);
+  const longestRun = Math.max(0, ...runs.map(a=>(a.distance||0)/1000));
+  const elevRatio = totalKm > 0 ? (totalElev/totalKm).toFixed(1) : '0';
+  const avgPace = runs.length ? runs.reduce((s,a)=>{
+    const km = (a.distance||0)/1000; const min = (a.moving_time||0)/60;
+    return s + (km>0 ? min/km : 0);
+  }, 0) / runs.length : 0;
+
+  // Recent 4 weeks weekly km
+  const planStart = (typeof getDynamicPlanStart === 'function') ? getDynamicPlanStart() : new Date('2026-04-20T00:00:00');
+  const today = new Date();
+  const totalWeeks = Math.floor((today-planStart)/86400000/7);
+
+  const prompt = `Bạn là HLV trail running. Hãy dự đoán finish time cho race này dựa trên data thực.
+
+RACE:
+- ${race.name || 'Unknown'}: ${race.dist}km, D+ ${race.dplus}m, D- ${race.dminus||race.dplus}m
+- Ngày: ${race.date}
+
+TRAINING METRICS (${totalWeeks} tuần):
+- Total km: ${totalKm.toFixed(0)}km
+- Total D+: ${totalElev.toFixed(0)}m
+- Longest run: ${longestRun.toFixed(0)}km
+- Elevation ratio: ${elevRatio}m/km
+- Average pace: ${avgPace.toFixed(1)} min/km
+- Số activities: ${runs.length}
+
+PROFILE:
+- Plan ${profile.plan_weeks || '?'} tuần
+- Max HR: ${profile.max_hr || '?'} bpm
+- Long run max khai báo: ${profile.long_run_max_km || '?'}km
+
+YÊU CẦU: Trả lời CHÍNH XÁC theo format JSON sau (không thêm markdown, không thêm văn bản):
+
+{
+  "finish_time_hours": <số thập phân>,
+  "finish_time_str": "<HH:MM (vd 24:30)>",
+  "confidence": "<low|medium|high>",
+  "confidence_pct": <0-100>,
+  "segments": [
+    {"name": "Đoạn 1 (0-${Math.round((race.dist||100)/3)}km)", "pace": "<min/km>", "hr_zone": "<Z1-Z3>"},
+    {"name": "Đoạn giữa", "pace": "<min/km>", "hr_zone": "<Z>"},
+    {"name": "Đoạn cuối", "pace": "<min/km>", "hr_zone": "<Z>"}
+  ],
+  "risks": ["<rủi ro 1>", "<rủi ro 2>", "<rủi ro 3>"],
+  "encouragement": "<1 câu động viên 15-25 chữ>"
+}`;
+
+  try {
+    let result = await callGemini(prompt, 'gemini-2.5-flash');
+    // Strip code fence if present
+    result = result.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+    const data = JSON.parse(result);
+
+    // Build pretty UI
+    const segs = (data.segments||[]).map(s => `
+      <div class="predict-seg">
+        <div class="predict-seg-name">${s.name}</div>
+        <div class="predict-seg-pace">${s.pace}</div>
+        <div style="font-size:9px;color:var(--muted);font-family:monospace">${s.hr_zone}</div>
+      </div>`).join('');
+    const risks = (data.risks||[]).map(r => `<li>${r}</li>`).join('');
+
+    document.getElementById('fp-loading').style.display = 'none';
+    const resultEl = document.getElementById('fp-result');
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = `
+      <div class="predict-card">
+        <div class="predict-time">${data.finish_time_str || '?'}</div>
+        <div class="predict-conf">Độ tin cậy: ${data.confidence||'?'} (${data.confidence_pct||0}%)</div>
+        <div class="predict-segs">${segs}</div>
+        <div class="predict-risks"><strong>⚠️ Rủi ro:</strong><ul style="margin:4px 0;padding-left:18px">${risks}</ul></div>
+        <div style="text-align:center;margin-top:14px;padding:10px;background:var(--surface2);border-radius:5px;font-style:italic;color:var(--text)">
+          💪 ${data.encouragement || ''}
+        </div>
+      </div>`;
+    document.getElementById('fp-final-actions').style.display = 'flex';
+
+    localStorage.setItem(FINISH_PRED_KEY, JSON.stringify({
+      generated_at: new Date().toISOString(),
+      race_id: race.id, prediction: data,
+    }));
+  } catch(e) {
+    document.getElementById('fp-loading').innerHTML =
+      '<span style="color:#ef5350">❌ Lỗi: ' + e.message +
+      '<br><small>Có thể AI trả không đúng JSON, thử lại nhé.</small></span>';
+  }
+}
+
+function regenerateFinishPredict() {
+  document.getElementById('fp-loading').style.display = 'flex';
+  document.getElementById('fp-result').style.display = 'none';
+  document.getElementById('fp-final-actions').style.display = 'none';
+  localStorage.removeItem(FINISH_PRED_KEY);
+  runFinishPredict();
+}
+
+// ── Per-activity AI feedback (Bước 7 plan) ────────────────────────
+async function reviewActivityAI(actId) {
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+  const act = acts.find(a => String(a.id) === String(actId));
+  if (!act) { alert('Không tìm thấy activity'); return; }
+
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'act-review-panel';
+  const km = ((act.distance||0)/1000).toFixed(1);
+  const elev = Math.round(act.total_elevation_gain||0);
+  const minutes = Math.round((act.moving_time||0)/60);
+  const pace = (act.distance>0) ? (act.moving_time/60 / ((act.distance||0)/1000)).toFixed(2) : '?';
+
+  panel.innerHTML = `
+    <div class="ai-card" style="max-width:560px">
+      <div class="ai-card-title">🔍 Phân tích buổi tập <span class="ai-badge">Gemini Lite</span></div>
+      <div class="ai-card-sub">${act.name || 'Activity'} · ${km}km +${elev}m · ${minutes}ph · pace ${pace}</div>
+      <div class="ai-loading" id="ar-loading">
+        <div class="ai-spinner"></div>Đang phân tích chất lượng buổi tập...
+      </div>
+      <div class="ai-result" id="ar-result" style="display:none;max-height:50vh;overflow-y:auto"></div>
+      <div class="ai-actions" id="ar-actions" style="display:none">
+        <button class="ai-btn ai-btn-secondary" onclick="closeAIPanel('act-review-panel')">Đóng</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+
+  // Find matching plan day
+  let planContext = 'Không khớp ngày kế hoạch';
+  if (typeof dateToSlot === 'function') {
+    const slot = dateToSlot(act.start_date_local || act.start_date);
+    if (slot) {
+      const w = weeks.find(x => x.w === slot.weekNum);
+      if (w && w.days[slot.dayIdx]) {
+        const d = w.days[slot.dayIdx];
+        planContext = `W${slot.weekNum} ${d.label || ''}: ${(d.blocks||[]).map(b=>b.replace(/<[^>]+>/g,'')).join(', ').slice(0,150)}`;
+      }
+    }
+  }
+
+  const profile = getUserProfile() || {};
+  const hrZones = (function(){ try { return JSON.parse(localStorage.getItem('vmm_hr_zones_v1')||'null'); } catch(e){ return null; } })();
+
+  const prompt = `Bạn là HLV trail running, đánh giá ngắn 1 buổi tập của runner.
+
+BUỔI TẬP STRAVA:
+- ${act.name||'Run'} · ${km}km · D+ ${elev}m · ${minutes} phút · pace TB ${pace} min/km
+- Loại: ${act.sport_type||act.type||'?'}
+- Avg HR: ${act.average_heartrate||'?'}, Max HR: ${act.max_heartrate||'?'}
+
+KẾ HOẠCH GỐC: ${planContext}
+
+PROFILE: max HR ${profile.max_hr||'?'}, long run max ${profile.long_run_max_km||'?'}km
+HR ZONES: ${hrZones ? `Z1<${hrZones.z1?.[1]||'?'}, Z2<${hrZones.z2?.[1]||'?'}, Z3<${hrZones.z3?.[1]||'?'}` : '(chưa thiết lập)'}
+
+Trả lời ngắn gọn (3-5 câu) tiếng Việt theo format:
+**Đánh giá:** [1 câu — buổi tập có khớp kế hoạch không, có đạt mục tiêu không]
+**HR & Pace:** [1-2 câu — phân bố HR có đúng zone target không, pace consistent không]
+**Gợi ý:** [1 câu — điều chỉnh cho buổi tương tự lần sau]`;
+
+  try {
+    const result = await callGemini(prompt, 'gemini-2.5-flash-lite');
+    document.getElementById('ar-loading').style.display = 'none';
+    const r = document.getElementById('ar-result');
+    r.style.display = 'block';
+    r.innerHTML = simpleMarkdownToHtml(result);
+    document.getElementById('ar-actions').style.display = 'flex';
+  } catch(e) {
+    document.getElementById('ar-loading').innerHTML =
+      '<span style="color:#ef5350">❌ Lỗi: ' + e.message + '</span>';
+  }
+}
+
+// Hook: add AI button on each rendered activity item in sidebar
+function patchSidebarActivitiesForAI() {
+  // Observe and inject AI button
+  const sb = document.getElementById('sb-activities');
+  if (!sb) return;
+  const obs = new MutationObserver(() => {
+    sb.querySelectorAll('[data-act-id]:not([data-ai-patched])').forEach(el => {
+      el.setAttribute('data-ai-patched','1');
+      const id = el.getAttribute('data-act-id');
+      const btn = document.createElement('button');
+      btn.className = 'act-ai-btn';
+      btn.textContent = '🤖 AI';
+      btn.title = 'AI phân tích buổi tập này';
+      btn.onclick = (e) => { e.stopPropagation(); reviewActivityAI(id); };
+      // Try to find a header in the activity card
+      const target = el.querySelector('.sb-act-name, .sb-act-meta, .sb-act-header') || el;
+      target.appendChild(btn);
+    });
+  });
+  obs.observe(sb, { childList: true, subtree: true });
+}
+
+// ── Sprint 4 init ─────────────────────────────────────────────────
+function initSprint4() {
+  loadSessionLogs();
+
+  // After Strava sync, run detection
+  const _origStravaSync = window.stravaSync;
+  if (typeof _origStravaSync === 'function') {
+    window.stravaSync = async function(...args) {
+      const r = await _origStravaSync.apply(this, args);
+      setTimeout(() => {
+        try { detectLongRunCompletion(); } catch(e){}
+        try { checkRaceStrategyTrigger(); } catch(e){}
+        try { checkFinishPredictionTrigger(); } catch(e){}
+      }, 600);
+      return r;
+    };
+  }
+
+  // Patch sidebar to add AI buttons
+  patchSidebarActivitiesForAI();
+
+  // Initial trigger checks (in case user already has data)
+  setTimeout(() => {
+    try { detectLongRunCompletion(); } catch(e){}
+    try { checkRaceStrategyTrigger(); } catch(e){}
+    try { checkFinishPredictionTrigger(); } catch(e){}
+  }, 2500);
+}
+
 // Khởi tạo
 updateTrailProgress();
 showPhase(0);
 initSprint1();
 initSprint2();
+initSprint4();
 setTimeout(()=>{highlightToday();initElevTooltip();},500);
 </script>
 </body>
