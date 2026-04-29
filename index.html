@@ -1260,6 +1260,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
     </button>
     <button class="user-action-btn" onclick="openHRZones()">⚡ HR Zones</button>
     <button class="user-action-btn" id="edit-race-btn" onclick="showOnboarding()" style="display:none">🏁 Đổi race</button>
+    <button class="user-action-btn" id="edit-start-btn" onclick="openEditStartDate()" style="display:none">📅 Ngày bắt đầu</button>
     <button class="user-action-btn" onclick="openCheckin()">📋 Check-in</button>
     <button class="user-action-btn" onclick="authSignOut()">Đăng xuất</button>
   </div>
@@ -1331,6 +1332,40 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 </div>
 
 
+
+<!-- ═══ PRE-PLAN ACTIVITIES BANNER ═══ -->
+<div class="nl-prompt-banner" id="prepan-banner" style="background:linear-gradient(135deg,#e8f4fd,#d0e8f7);border-color:#7ec8e3">
+  <div class="nl-prompt-text" style="color:#0a3d6b">
+    🗓️ Có <strong id="prepan-count">0</strong> hoạt động Strava xảy ra <strong>trước</strong> ngày bắt đầu kế hoạch của bạn (<span id="prepan-start">—</span>).
+    Bạn muốn dời ngày bắt đầu kế hoạch sớm hơn để các buổi này được tính?
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="nl-prompt-btn" style="background:#1e6eb5" onclick="openEditStartDate()">📅 Đổi ngày bắt đầu</button>
+    <button class="nl-prompt-btn" style="background:transparent;color:#0a3d6b;border:1px solid #0a3d6b"
+            onclick="dismissPrepan()">Để sau</button>
+  </div>
+</div>
+
+<!-- ═══ EDIT PLAN START DATE MODAL ═══ -->
+<div class="modal-overlay" id="edit-start-modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">📅 Đổi ngày bắt đầu kế hoạch</div>
+    <div class="modal-sub">Điều chỉnh ngày bắt đầu kế hoạch để các activity Strava đã có được map đúng tuần.</div>
+    <div class="modal-field">
+      <div class="modal-label">Ngày bắt đầu kế hoạch</div>
+      <input type="date" class="modal-input" id="esd-input">
+    </div>
+    <div class="modal-field" id="esd-summary" style="font-size:11px;color:var(--muted);font-family:monospace;display:none">
+      <div>Race day: <span id="esd-race">—</span></div>
+      <div>Số tuần plan mới: <span id="esd-weeks">—</span></div>
+      <div>Hoạt động sẽ map vào plan: <span id="esd-acts">—</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="document.getElementById('edit-start-modal').style.display='none'">Hủy</button>
+      <button class="modal-btn modal-btn-primary" onclick="saveEditStartDate()">💾 Cập nhật</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ NUTRITION LOG PROMPT (UC-09) ═══ -->
 <div class="nl-prompt-banner" id="nl-prompt-banner">
@@ -2749,7 +2784,7 @@ async function stravaSync() {
     if (activities) renderSidebarActivities(activities);
     const done = loadDone(); let marked=0;
     // Sort newest first so the "primary" activity for a slot wins
-    const sorted = [...activities].sort((a,b)=>new Date(b.start_date_local)-new Date(a.start_date_local));
+    const sorted = [...activities].sort((a,b)=>stravaLocalDate(b.start_date_local)-stravaLocalDate(a.start_date_local));
     sorted.forEach(act => {
       const s = dateToSlot((act.start_date_local||'').split('T')[0]);
       if (!s) return;
@@ -3029,7 +3064,26 @@ let _stravaActivities = [];
 let _selectedAnalysisWeek = 1;
 
 function fmtDur(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?h+'g'+(m>0?m+'p':''):m+'ph';}
-function fmtDate(d){if(!d)return'';const x=new Date(d);return x.getDate()+'/'+(x.getMonth()+1);}
+// Strava bug: start_date_local is local time WITH a misleading 'Z' suffix.
+// Parsing with new Date() re-interprets as UTC and shifts the date.
+// Solution: strip 'Z' so JS parses it as local time.
+function stravaLocalDate(s) {
+  if (!s) return null;
+  // Take only the date+time part (no timezone)
+  const cleaned = String(s).replace(/Z$/, '').replace(/[+-]\d{2}:?\d{2}$/, '');
+  return new Date(cleaned);
+}
+function fmtDate(d){
+  if(!d)return'';
+  const x = (typeof d === 'string') ? stravaLocalDate(d) : new Date(d);
+  if (!x || isNaN(x)) return '';
+  return x.getDate()+'/'+(x.getMonth()+1);
+}
+// Get just the YYYY-MM-DD date part from start_date_local
+function stravaDateOnly(s) {
+  if (!s) return '';
+  return String(s).split('T')[0];
+}
 function actIcon(t){const s=(t||'').toLowerCase();
   if(s.includes('trail'))return'🏔';if(s.includes('run'))return'🏃';
   if(s.includes('weight')||s.includes('workout')||s.includes('crossfit'))return'💪';
@@ -3042,7 +3096,7 @@ function renderSidebarActivities(activities) {
   if (!activities || !activities.length) {
     el.innerHTML = '<div class="no-acts">Chưa có buổi tập nào</div>'; return;
   }
-  const sorted = [...activities].sort((a,b)=>new Date(b.start_date_local)-new Date(a.start_date_local)).slice(0,15);
+  const sorted = [...activities].sort((a,b)=>stravaLocalDate(b.start_date_local)-stravaLocalDate(a.start_date_local)).slice(0,15);
   const totalKm = activities.reduce((s,a)=>s+(a.distance||0)/1000,0);
   const totalElev = activities.reduce((s,a)=>s+(a.total_elevation_gain||0),0);
   const totalTime = activities.reduce((s,a)=>s+(a.moving_time||0),0);
@@ -3057,8 +3111,9 @@ function renderSidebarActivities(activities) {
     const icon=actIcon(act.sport_type||act.type);
     const type=(act.sport_type||act.type||'').replace(/_/g,' ');
     const actId = act.id || '';
-    const slot = dateToSlot((act.start_date_local||'').split('T')[0]);
+    const slot = dateToSlot(stravaDateOnly(act.start_date_local));
     const slotInfo = slot ? `W${slot.weekNum} · ${['T2','T3','T4','T5','T6','T7','CN'][slot.dayIdx]}` : 'ngoài plan';
+    // Per SRS: sidebar = weekly review only. Per-activity AI is on day cards (UC-07).
     return '<div class="act-item" data-act-id="'+actId+'">'+
       '<div class="act-header"><span class="act-name" title="'+(act.name||'')+'">'+icon+' '+(act.name||'').substring(0,22)+'</span>'+
       '<span class="act-date">'+fmtDate(act.start_date_local)+'</span></div>'+
@@ -3066,7 +3121,6 @@ function renderSidebarActivities(activities) {
       '<div class="act-stats"><span class="act-stat"><span>'+km+'</span>km</span>'+
       '<span class="act-stat"><span>'+dur+'</span></span>'+
       (gain>0?'<span class="act-stat" style="color:#c8f0a0"><span>+'+gain+'</span>m</span>':'')+
-      (actId ? '<button class="act-ai-btn" onclick="event.stopPropagation();reviewActivityAI(\''+actId+'\')">🤖 AI nhận xét</button>' : '')+
       '</div></div>';
   }).join('');
   renderWeekSelector(activities);
@@ -4305,6 +4359,8 @@ function applyUserProfile(profile) {
   // Show edit race button in user bar
   const editBtn = document.getElementById('edit-race-btn');
   if (editBtn) editBtn.style.display = 'inline';
+  const editStartBtn = document.getElementById('edit-start-btn');
+  if (editStartBtn) editStartBtn.style.display = 'inline';
 
   // Regenerate weekly dates so display matches dynamic plan_start_date (CR-01)
   regenerateWeekDates(profile);
@@ -4369,6 +4425,102 @@ function showOnboarding() {
       setTimeout(() => selectRace(profile.race_id), 100);
     }
   }
+}
+
+// ── Edit plan start date (CR-01 in-app adjustment) ─────────────────
+function openEditStartDate() {
+  const profile = getUserProfile();
+  const race = getRaceTarget();
+  if (!profile || !race) { showOnboarding(); return; }
+  document.getElementById('esd-input').value = profile.plan_start_date || '';
+  document.getElementById('esd-race').textContent = race.date || '—';
+  updateEsdSummary();
+  document.getElementById('edit-start-modal').style.display = 'flex';
+  document.getElementById('esd-input').oninput = updateEsdSummary;
+}
+function updateEsdSummary() {
+  const startVal = document.getElementById('esd-input').value;
+  const race = getRaceTarget();
+  if (!startVal || !race?.date) {
+    document.getElementById('esd-summary').style.display = 'none';
+    return;
+  }
+  const start = new Date(startVal + 'T00:00:00');
+  const raceDay = new Date(race.date + 'T00:00:00');
+  const days = Math.floor((raceDay - start) / 86400000);
+  const weeks = Math.floor(days / 7);
+  // Count Strava activities that would map within plan
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+  let inPlan = 0;
+  acts.forEach(a => {
+    const dStr = stravaDateOnly(a.start_date_local);
+    if (!dStr) return;
+    const d = new Date(dStr + 'T12:00:00');
+    const diff = Math.floor((d - start) / 86400000);
+    if (diff >= 0 && diff < weeks * 7) inPlan++;
+  });
+  document.getElementById('esd-summary').style.display = 'block';
+  document.getElementById('esd-weeks').textContent = days > 0 ? weeks + ' tuần' : 'Không hợp lệ';
+  document.getElementById('esd-acts').textContent = inPlan + '/' + acts.length;
+}
+function saveEditStartDate() {
+  const startVal = document.getElementById('esd-input').value;
+  const profile = getUserProfile();
+  const race = getRaceTarget();
+  if (!startVal) { alert('Chọn ngày'); return; }
+  const start = new Date(startVal + 'T00:00:00');
+  const raceDay = new Date(race.date + 'T00:00:00');
+  if (start >= raceDay) { alert('Ngày bắt đầu phải trước ngày race'); return; }
+  profile.plan_start_date = startVal;
+  profile.plan_weeks = Math.floor((raceDay - start) / (7 * 86400000));
+  saveUserProfile(profile);
+  document.getElementById('edit-start-modal').style.display = 'none';
+  // Apply changes
+  applyUserProfile(profile);
+  // Re-sync activities to slots
+  if (_stravaActivities && _stravaActivities.length) {
+    setTimeout(() => {
+      try { renderSidebarActivities(_stravaActivities); } catch(e){}
+      try { stravaSync(); } catch(e){}
+    }, 200);
+  }
+  if (typeof showToast === 'function') showToast('✅ Đã cập nhật ngày bắt đầu kế hoạch');
+  document.getElementById('prepan-banner').classList.remove('visible');
+}
+
+// Detect activities that fall before plan_start_date and prompt user
+function checkPrePlanActivities() {
+  const profile = getUserProfile();
+  if (!profile || !profile.plan_start_date) return;
+  const acts = (typeof _stravaActivities !== 'undefined') ? _stravaActivities : [];
+  if (!acts.length) return;
+  const start = new Date(profile.plan_start_date + 'T00:00:00');
+  let prePlanCount = 0;
+  acts.forEach(a => {
+    const dStr = stravaDateOnly(a.start_date_local);
+    if (!dStr) return;
+    const d = new Date(dStr + 'T12:00:00');
+    if (d < start) prePlanCount++;
+  });
+  // Only show if a meaningful chunk (>=2 activities) are pre-plan
+  // and user hasn't dismissed it for this start date
+  const dismissKey = 'vmm_prepan_dismiss_' + profile.plan_start_date;
+  const dismissed = localStorage.getItem(dismissKey);
+  if (prePlanCount >= 2 && !dismissed) {
+    document.getElementById('prepan-count').textContent = prePlanCount;
+    document.getElementById('prepan-start').textContent =
+      new Date(profile.plan_start_date+'T00:00:00').toLocaleDateString('vi-VN');
+    document.getElementById('prepan-banner').classList.add('visible');
+  } else {
+    document.getElementById('prepan-banner').classList.remove('visible');
+  }
+}
+function dismissPrepan() {
+  const profile = getUserProfile();
+  if (profile?.plan_start_date) {
+    localStorage.setItem('vmm_prepan_dismiss_' + profile.plan_start_date, '1');
+  }
+  document.getElementById('prepan-banner').classList.remove('visible');
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -5007,6 +5159,7 @@ function initSprint4() {
         try { detectLongRunCompletion(); } catch(e){}
         try { checkRaceStrategyTrigger(); } catch(e){}
         try { checkFinishPredictionTrigger(); } catch(e){}
+        try { checkPrePlanActivities(); } catch(e){}
       }, 600);
       return r;
     };
