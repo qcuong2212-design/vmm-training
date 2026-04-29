@@ -1058,12 +1058,23 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 /* Per-activity AI feedback */
 .act-ai-btn {
-  padding: 3px 7px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 3px; color: rgba(255,255,255,.6); font-size: 9px;
-  font-family: monospace; cursor: pointer; margin-left: 6px;
-  text-transform: uppercase; letter-spacing: .05em;
+  padding: 4px 8px; background: rgba(126,200,227,.12); border: 1px solid rgba(126,200,227,.3);
+  border-radius: 4px; color: #7ec8e3; font-size: 10px;
+  font-family: monospace; cursor: pointer; margin-left: 6px; margin-top: 4px;
+  text-transform: uppercase; letter-spacing: .05em; font-weight: 600;
+  width: 100%;
 }
-.act-ai-btn:hover { color: #c8f0a0; border-color: #c8f0a0; }
+.act-ai-btn:hover { background: rgba(126,200,227,.25); color: #c8f0a0; border-color: #c8f0a0; }
+
+/* Per-day AI feedback button on day cards */
+.day-ai-btn {
+  display: block; margin-top: 6px; width: 100%;
+  padding: 4px 6px; background: linear-gradient(90deg,#7ec8e3,#1e6eb5); color: #fff;
+  border: none; border-radius: 3px; font-size: 9.5px; font-weight: 700;
+  font-family: monospace; cursor: pointer; text-transform: uppercase;
+  letter-spacing: .05em; transition: opacity .15s;
+}
+.day-ai-btn:hover { opacity: .85; }
 
 </style>
 </head>  
@@ -2223,8 +2234,15 @@ const MILESTONES = [
   {km:160, msg:'🏆 FINISH! Đã sẵn sàng cho VMM 100M. Đi chinh phục thôi!'},
 ];
 
+// Helper: get plan for a given day index in current week (best-effort)
+function currentDayPlan(di) {
+  // Cannot know weekNum without context — caller should pass weekNum.
+  // Used only in actMatches; fallback to weeks[0].
+  return null;
+}
+
 function loadDone() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } 
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
   catch(e) { return {}; }
 }
 function saveDone(done) {
@@ -2341,13 +2359,17 @@ function showMilestoneToast(msg) {
 
 function toggleDayDone(weekNum, dayIdx, el, event) {
   if (event) event.stopPropagation();
+  // Don't toggle if clicking on a sub-button (AI feedback, etc)
+  if (event && event.target && event.target.closest('button,.day-ai-btn,.act-ai-btn,.sblock')) return;
   const done = loadDone();
   const key = doneKey(weekNum, dayIdx);
   const prevCount = Object.keys(done).length;
-  
+
   if (done[key]) {
     delete done[key];
-    el.classList.remove('done');
+    el.classList.remove('done','strava-done');
+    // Clear any badges from strava sync
+    el.querySelectorAll('.strava-act-badge,.day-ai-btn').forEach(n=>n.remove());
   } else {
     done[key] = 1;
     el.classList.add('done');
@@ -2377,9 +2399,40 @@ function initDayStates(weekNum) {
   weeks.filter(w => w.w === weekNum).forEach(w => {
     w.days.forEach((_, i) => {
       const el = document.querySelector(`#wk${weekNum} .day[data-i="${i}"]`);
-      if (el && done[doneKey(weekNum, i)]) el.classList.add('done');
+      if (!el) return;
+      const k = doneKey(weekNum, i);
+      const d = done[k];
+      // Reset state
+      el.classList.remove('done','strava-done');
+      el.querySelectorAll('.strava-act-badge,.day-ai-btn').forEach(n=>n.remove());
+      if (d) {
+        el.classList.add('done');
+        if (d.strava) {
+          el.classList.add('strava-done');
+          const b = document.createElement('div');
+          b.className = 'strava-act-badge';
+          b.textContent = '🔁 ' + (d.km||'?') + 'km' + (d.elev>0 ? ' +' + d.elev + 'm' : '');
+          el.appendChild(b);
+          // Add per-day AI feedback button (UC-07)
+          if (d.actId) {
+            const aiBtn = document.createElement('button');
+            aiBtn.className = 'day-ai-btn';
+            aiBtn.textContent = '🤖 AI nhận xét';
+            aiBtn.title = 'AI phân tích buổi tập này';
+            aiBtn.onclick = (e) => { e.stopPropagation(); reviewActivityAI(d.actId); };
+            el.appendChild(aiBtn);
+          }
+        }
+      }
     });
     updateWeekBadge(weekNum);
+  });
+}
+
+// Force re-render of all currently-open week details + apply strava badges
+function refreshAllWeekStates() {
+  weeks.forEach(w => {
+    initDayStates(w.w);
   });
 }
 
@@ -2651,15 +2704,34 @@ function dateToSlot(dateStr) {
   if (diff<0||diff>=147) return null;
   return {weekNum:Math.floor(diff/7)+1, dayIdx:diff%7};
 }
-function actMatches(act, di) {
+function actMatches(act, di, weekNum) {
+  const dist=(act.distance||0)/1000, mt=act.moving_time||0;
+  // Lenient mode (v2): any meaningful activity on a non-rest day → match.
+  // Original strict checks moved to actMatchScore below for "khớp/không khớp" labelling.
+  if (dist < 1 && mt < 600) return false;
+  // Skip rest days from the actual plan
+  if (typeof weekNum === 'number') {
+    const w = weeks.find(x => x.w === weekNum);
+    const d = w && w.days[di];
+    if (d && /Nghỉ|Rest|Phục hồi/i.test(d.label || '')) {
+      // Allow if substantial activity (eg. 10km+ run) — runner moved on a rest day
+      return dist > 10;
+    }
+  }
+  return true;
+}
+
+// Returns 'match' | 'partial' | 'mismatch' for display labelling
+function actMatchScore(act, di) {
   const t=(act.sport_type||act.type||'').toLowerCase();
   const g=act.total_elevation_gain||0, dist=(act.distance||0)/1000, mt=act.moving_time||0;
-  if(di===6) return (t.includes('run')||t.includes('trail'))&&(g>200||dist>10);
-  if(di===5) return t.includes('run')&&dist>8;
-  if(di===0||di===2) return t.includes('weight')||t.includes('crossfit')||
-    t.includes('workout')||t.includes('elliptical')||(t.includes('run')&&mt>=900&&mt<=5400);
-  if(di===1||di===3) return t.includes('run')&&dist>=5;
-  return dist>3||mt>600;
+  if(di===6 && (t.includes('run')||t.includes('trail'))&&(g>200||dist>10)) return 'match';
+  if(di===5 && t.includes('run')&&dist>8) return 'match';
+  if((di===0||di===2) && (t.includes('weight')||t.includes('crossfit')||t.includes('workout')||t.includes('elliptical'))) return 'match';
+  if((di===1||di===3) && t.includes('run')&&dist>=5) return 'match';
+  if(di===4 && (t.includes('run')||t.includes('walk'))) return 'match';
+  if (dist >= 3 || mt >= 1200) return 'partial';
+  return 'mismatch';
 }
 async function stravaSync() {
   const btn=document.getElementById('strava-sync-btn');
@@ -2676,29 +2748,34 @@ async function stravaSync() {
     if (athlete_name) document.getElementById('strava-name').textContent = athlete_name.split(' ')[0];
     if (activities) renderSidebarActivities(activities);
     const done = loadDone(); let marked=0;
-    activities.forEach(act => {
+    // Sort newest first so the "primary" activity for a slot wins
+    const sorted = [...activities].sort((a,b)=>new Date(b.start_date_local)-new Date(a.start_date_local));
+    sorted.forEach(act => {
       const s = dateToSlot((act.start_date_local||'').split('T')[0]);
       if (!s) return;
-      if (actMatches(act, s.dayIdx)) {
+      if (actMatches(act, s.dayIdx, s.weekNum)) {
         const k = doneKey(s.weekNum, s.dayIdx);
-        if (!done[k]) {
-          done[k] = {strava:true, actId:act.id,
-            km:((act.distance||0)/1000).toFixed(1),
-            elev:Math.round(act.total_elevation_gain||0)};
-          marked++;
-          // Add visual badge to open week
-          const el = document.querySelector('#wk'+s.weekNum+' .day[data-i="'+s.dayIdx+'"]');
-          if (el && !el.querySelector('.strava-act-badge')) {
-            el.classList.add('done','strava-done');
-            const b=document.createElement('div'); b.className='strava-act-badge';
-            b.textContent='🔁 '+done[k].km+'km'+(done[k].elev>0?' +'+done[k].elev+'m':'');
-            el.appendChild(b);
-          }
+        // Only auto-mark if not already manually toggled OR previously synced
+        if (!done[k] || done[k].strava) {
+          const wasNew = !done[k];
+          done[k] = {
+            strava: true,
+            actId: act.id,
+            actName: act.name || '',
+            km: ((act.distance||0)/1000).toFixed(1),
+            elev: Math.round(act.total_elevation_gain||0),
+            mt: act.moving_time||0,
+            type: act.sport_type||act.type||'',
+            score: actMatchScore(act, s.dayIdx),
+            date: act.start_date_local || act.start_date,
+          };
+          if (wasNew) marked++;
         }
       }
     });
     saveDone(done); updateTrailProgress();
-    weeks.forEach(w=>updateWeekBadge(w.w));
+    // Re-render ALL weeks (closed or open) so badges stick after re-open
+    refreshAllWeekStates();
     const now = new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
     status.textContent = now+' · +'+marked+' buổi';
     localStorage.setItem('vmm_last_sync', Date.now().toString());
@@ -2979,13 +3056,17 @@ function renderSidebarActivities(activities) {
     const dur=fmtDur(act.moving_time||0);
     const icon=actIcon(act.sport_type||act.type);
     const type=(act.sport_type||act.type||'').replace(/_/g,' ');
-    return '<div class="act-item">'+
+    const actId = act.id || '';
+    const slot = dateToSlot((act.start_date_local||'').split('T')[0]);
+    const slotInfo = slot ? `W${slot.weekNum} · ${['T2','T3','T4','T5','T6','T7','CN'][slot.dayIdx]}` : 'ngoài plan';
+    return '<div class="act-item" data-act-id="'+actId+'">'+
       '<div class="act-header"><span class="act-name" title="'+(act.name||'')+'">'+icon+' '+(act.name||'').substring(0,22)+'</span>'+
       '<span class="act-date">'+fmtDate(act.start_date_local)+'</span></div>'+
-      '<div class="act-type-badge">'+type+'</div>'+
+      '<div class="act-type-badge">'+type+' · '+slotInfo+'</div>'+
       '<div class="act-stats"><span class="act-stat"><span>'+km+'</span>km</span>'+
       '<span class="act-stat"><span>'+dur+'</span></span>'+
       (gain>0?'<span class="act-stat" style="color:#c8f0a0"><span>+'+gain+'</span>m</span>':'')+
+      (actId ? '<button class="act-ai-btn" onclick="event.stopPropagation();reviewActivityAI(\''+actId+'\')">🤖 AI nhận xét</button>' : '')+
       '</div></div>';
   }).join('');
   renderWeekSelector(activities);
@@ -4224,6 +4305,35 @@ function applyUserProfile(profile) {
   // Show edit race button in user bar
   const editBtn = document.getElementById('edit-race-btn');
   if (editBtn) editBtn.style.display = 'inline';
+
+  // Regenerate weekly dates so display matches dynamic plan_start_date (CR-01)
+  regenerateWeekDates(profile);
+}
+
+// Regenerate the static `weeks` array `dates` field from plan_start_date.
+// Keeps original training content but shifts displayed dates to user's plan.
+function regenerateWeekDates(profile) {
+  if (!profile || !profile.plan_start_date) return;
+  const start = new Date(profile.plan_start_date + 'T00:00:00');
+  if (isNaN(start)) return;
+  if (typeof weeks === 'undefined' || !Array.isArray(weeks)) return;
+  const fmt = (d) => d.getDate() + '/' + (d.getMonth()+1);
+  weeks.forEach((w, i) => {
+    const ws = new Date(start);
+    ws.setDate(ws.getDate() + i*7);
+    const we = new Date(ws);
+    we.setDate(we.getDate() + 6);
+    w.dates = fmt(ws) + '–' + fmt(we);
+  });
+  // Re-render the week list if already rendered
+  if (typeof renderWeeks === 'function') {
+    try { renderWeeks(); } catch(e) {}
+  }
+  // Re-apply done states (some weeks may have been re-rendered)
+  setTimeout(() => {
+    if (typeof refreshAllWeekStates === 'function') refreshAllWeekStates();
+    if (typeof highlightToday === 'function') highlightToday();
+  }, 50);
 }
 
 // ── Check if onboarding needed ─────────────────────────────────────
