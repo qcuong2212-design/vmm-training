@@ -2426,22 +2426,25 @@ function dateToSlot(dateStr) {
   return { weekNum: Math.floor(diff/7)+1, dayIdx: diff%7 };
 }
 function actMatches(act, di) {
-  // di=4 (T6) = Nghi — khong match bat ky activity nao
-  if (di === 4) return false;
   const t = (act.sport_type || act.type || '').toLowerCase();
   const g = act.total_elevation_gain || 0;
   const dist = (act.distance || 0) / 1000;
   const mt = act.moving_time || 0;
   const isRun = t.includes('run') || t.includes('trail');
-  const isGym = t.includes('weight') || t.includes('crossfit') || t.includes('workout') || t.includes('elliptical') || t.includes('strength');
-  // CN (di=6): trail/nui dai — accept run/trail/hike > 8km
+  const isGym = t.includes('weight') || t.includes('crossfit') || t.includes('workout')
+              || t.includes('elliptical') || t.includes('strength');
+
+  // CN (di=6): trail/nui dai
   if (di === 6) return (isRun || t.includes('hike')) && (g > 100 || dist > 8);
-  // T7 (di=5): road run — accept run/trail > 5km
+  // T7 (di=5): road run
   if (di === 5) return isRun && dist > 5;
-  // T2/T4 (di=0,2): Gym day — accept gym OR run thay the > 20ph
+  // T2/T4 (di=0,2): Gym day — accept gym hoac run thay the >20ph
   if (di === 0 || di === 2) return isGym || (isRun && mt >= 1200);
-  // T3/T5 (di=1,3): Run/Recovery — accept run/trail/bike/swim > 3km hoac > 20ph
+  // T3/T5 (di=1,3): Run/Recovery
   if (di === 1 || di === 3) return (isRun || t.includes('ride') || t.includes('swim')) && (dist >= 3 || mt >= 1200);
+  // T6 (di=4): Nghi theo ke hoach — NHUNG van accept neu user tap (dist>3 hoac >20ph)
+  // Badge se hien tren card "Nghi", tinh la bonus session
+  if (di === 4) return dist > 3 || mt > 1200;
   return dist > 2 || mt > 600;
 }
 // stravaSync — alias cho incremental sync
@@ -4121,8 +4124,27 @@ async function stravaIncrementalSync() {
   if (!stravaData?.athlete_id) return;
 
   const meta = getSyncMeta();
-  const since_ts = meta?.last_sync_ts || Math.floor(new Date('2026-04-20').getTime()/1000);
   const isFirstSync = !meta?.last_sync_ts;
+
+  // Fix: dùng last_activity_ts (không phải last_sync_ts) để tránh bỏ sót
+  // Buffer 2 ngày (172800s) để cover timezone và trường hợp sync muộn
+  let since_ts;
+  if (isFirstSync) {
+    since_ts = Math.floor(new Date('2026-04-20').getTime()/1000);
+  } else {
+    // Tính ts của activity cuối trong _stravaActivities
+    const lastActTs = _stravaActivities.length > 0
+      ? Math.max(..._stravaActivities.map(a => {
+          const d = (a.start_date_local||a.start_date||'').replace('Z','');
+          return d ? Math.floor(new Date(d).getTime()/1000) : 0;
+        }).filter(t => t > 0))
+      : 0;
+    // since = max(last_activity, 2 ngay truoc last_sync) - buffer 2 ngay
+    const lastSync = meta.last_sync_ts || 0;
+    since_ts = Math.max(lastActTs, lastSync - 172800) - 172800;
+    // Không sync trước plan_start
+    since_ts = Math.max(since_ts, Math.floor(new Date('2026-04-20').getTime()/1000));
+  }
 
   btn.disabled = true;
   btn.textContent = isFirstSync ? '↻ Sync lần đầu...' : '↻ Cập nhật mới...';
