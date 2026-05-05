@@ -2414,10 +2414,16 @@ function stravaDisconnect() {
 
 // ── STRAVA SYNC ──────────────────────────────────────────────────
 function dateToSlot(dateStr) {
-  const d = new Date(dateStr+'T12:00:00');
-  const diff = Math.floor((d - PLAN_START)/86400000);
-  if (diff<0||diff>=147) return null;
-  return {weekNum:Math.floor(diff/7)+1, dayIdx:diff%7};
+  if (!dateStr) return null;
+  // Fix 3: Parse local date (avoid UTC shift) + dynamic plan start
+  const planStart = typeof getDynamicPlanStart === 'function' ? getDynamicPlanStart() : PLAN_START;
+  const parts = dateStr.split('-');
+  if (parts.length < 3) return null;
+  const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]), 12, 0, 0);
+  const diff = Math.floor((d - planStart) / 86400000);
+  const maxWeeks = typeof getPlanWeeks === 'function' ? getPlanWeeks() : 21;
+  if (diff < 0 || diff >= maxWeeks * 7) return null;
+  return { weekNum: Math.floor(diff/7)+1, dayIdx: diff%7 };
 }
 function actMatches(act, di) {
   const t=(act.sport_type||act.type||'').toLowerCase();
@@ -3608,6 +3614,7 @@ function getUserProfile() {
 }
 function saveUserProfile(data) {
   try { localStorage.setItem(PROFILE_KEY, JSON.stringify(data)); } catch(e) {}
+  saveProfileToSupabase(data).catch(()=>{}); // async, non-blocking
 }
 function getRaceTarget() {
   try { return JSON.parse(localStorage.getItem(RACE_KEY) || 'null'); } catch(e) { return null; }
@@ -3956,10 +3963,15 @@ function applyUserProfile(profile) {
 }
 
 // ── Check if onboarding needed ─────────────────────────────────────
-function checkOnboarding() {
-  const profile = getUserProfile();
+async function checkOnboarding() {
+  // First check localStorage (fast)
+  let profile = getUserProfile();
   if (!profile || !profile.race_id) {
-    // Show onboarding
+    // Fallback: try Supabase (cross-device)
+    profile = await loadProfileFromSupabase();
+  }
+  if (!profile || !profile.race_id) {
+    // No profile anywhere → show onboarding
     document.getElementById('onboarding-overlay').classList.add('active');
     renderRaceGrid();
     return true;
@@ -4056,7 +4068,8 @@ async function loadActivitiesFromSupabase(athlete_id) {
     if (data.activities && data.activities.length > 0) {
       // Restore activities to app
       renderSidebarActivities(data.activities);
-      applyActivitiesToSchedule(data.activities);
+      // Delay badge apply để DOM tuần kịp render (Fix 2)
+      setTimeout(() => applyActivitiesToSchedule(data.activities), 800);
 
       // Save sync meta
       setSyncMeta({
@@ -4134,14 +4147,18 @@ async function stravaIncrementalSync() {
       } else {
         // First full sync
         renderSidebarActivities(newActivities);
-        applyActivitiesToSchedule(newActivities);
+        setTimeout(() => applyActivitiesToSchedule(newActivities), 600); // Fix 4b: delay for DOM
         if (typeof showToast === 'function') {
           showToast('🔄 Strava: đã đồng bộ ' + newActivities.length + ' buổi tập!');
         }
       }
     } else {
+      // Fix 4: Dù không có activities mới, vẫn re-apply cached để đảm bảo badges hiển thị
+      if (_stravaActivities.length > 0) {
+        setTimeout(() => applyActivitiesToSchedule(_stravaActivities), 500);
+      }
       if (typeof showToast === 'function') {
-        showToast('✅ Đã đồng bộ — không có buổi tập mới.');
+        showToast('✅ Đã đồng bộ — dữ liệu đã cập nhật mới nhất.');
       }
     }
 
@@ -4202,6 +4219,43 @@ function applyActivitiesToSchedule(activities) {
     weeks.forEach(w => updateWeekBadge(w.w));
     updateAllWeeksProgress && updateAllWeeksProgress(activities);
   }
+}
+
+
+// ── Profile Sync to Supabase (Fix 1: cross-device) ────────────────
+async function saveProfileToSupabase(profile) {
+  if (!profile) return;
+  try {
+    const auth = getAuth();
+    const userId = auth?.user?.id || ('strava_' + (JSON.parse(localStorage.getItem(STRAVA_KEY)||'{}').athlete_id || 'unknown'));
+    await sbUpsert('user_profiles', {
+      user_id: userId,
+      profile_data: profile,
+      updated_at: new Date().toISOString()
+    });
+  } catch(e) { console.log('saveProfileToSupabase error:', e); }
+}
+
+async function loadProfileFromSupabase() {
+  try {
+    const auth = getAuth();
+    if (!auth?.user?.id && !JSON.parse(localStorage.getItem(STRAVA_KEY)||'{}').athlete_id) return null;
+    const userId = auth?.user?.id || ('strava_' + JSON.parse(localStorage.getItem(STRAVA_KEY)||'{}').athlete_id);
+    const row = await sbGet('user_profiles', 'user_id=eq.' + userId);
+    if (row && row.profile_data) {
+      // Save to localStorage for fast access
+      localStorage.setItem('vmm_user_profile_v2', JSON.stringify(row.profile_data));
+      localStorage.setItem('vmm_race_target_v2', JSON.stringify({
+        id: row.profile_data.race_id,
+        name: row.profile_data.race_name,
+        date: row.profile_data.race_date,
+        dist: row.profile_data.race_dist,
+        dplus: row.profile_data.race_dplus,
+      }));
+      return row.profile_data;
+    }
+    return null;
+  } catch(e) { console.log('loadProfileFromSupabase error:', e); return null; }
 }
 
 // Khởi tạo
