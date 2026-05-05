@@ -2426,14 +2426,23 @@ function dateToSlot(dateStr) {
   return { weekNum: Math.floor(diff/7)+1, dayIdx: diff%7 };
 }
 function actMatches(act, di) {
-  const t=(act.sport_type||act.type||'').toLowerCase();
-  const g=act.total_elevation_gain||0, dist=(act.distance||0)/1000, mt=act.moving_time||0;
-  if(di===6) return (t.includes('run')||t.includes('trail'))&&(g>200||dist>10);
-  if(di===5) return t.includes('run')&&dist>8;
-  if(di===0||di===2) return t.includes('weight')||t.includes('crossfit')||
-    t.includes('workout')||t.includes('elliptical')||(t.includes('run')&&mt>=900&&mt<=5400);
-  if(di===1||di===3) return t.includes('run')&&dist>=5;
-  return dist>3||mt>600;
+  // di=4 (T6) = Nghi — khong match bat ky activity nao
+  if (di === 4) return false;
+  const t = (act.sport_type || act.type || '').toLowerCase();
+  const g = act.total_elevation_gain || 0;
+  const dist = (act.distance || 0) / 1000;
+  const mt = act.moving_time || 0;
+  const isRun = t.includes('run') || t.includes('trail');
+  const isGym = t.includes('weight') || t.includes('crossfit') || t.includes('workout') || t.includes('elliptical') || t.includes('strength');
+  // CN (di=6): trail/nui dai — accept run/trail/hike > 8km
+  if (di === 6) return (isRun || t.includes('hike')) && (g > 100 || dist > 8);
+  // T7 (di=5): road run — accept run/trail > 5km
+  if (di === 5) return isRun && dist > 5;
+  // T2/T4 (di=0,2): Gym day — accept gym OR run thay the > 20ph
+  if (di === 0 || di === 2) return isGym || (isRun && mt >= 1200);
+  // T3/T5 (di=1,3): Run/Recovery — accept run/trail/bike/swim > 3km hoac > 20ph
+  if (di === 1 || di === 3) return (isRun || t.includes('ride') || t.includes('swim')) && (dist >= 3 || mt >= 1200);
+  return dist > 2 || mt > 600;
 }
 // stravaSync — alias cho incremental sync
 async function stravaSync() {
@@ -2689,7 +2698,12 @@ let _stravaActivities = [];
 let _selectedAnalysisWeek = 1;
 
 function fmtDur(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?h+'g'+(m>0?m+'p':''):m+'ph';}
-function fmtDate(d){if(!d)return'';const x=new Date(d);return x.getDate()+'/'+(x.getMonth()+1);}
+function fmtDate(d){
+  if (!d) return '';
+  const p = d.split('T')[0].split('-');
+  if (p.length < 3) return d;
+  return parseInt(p[2])+'/'+parseInt(p[1])+'/'+p[0];
+}
 function actIcon(t){const s=(t||'').toLowerCase();
   if(s.includes('trail'))return'🏔';if(s.includes('run'))return'🏃';
   if(s.includes('weight')||s.includes('workout')||s.includes('crossfit'))return'💪';
@@ -2723,10 +2737,17 @@ function renderSidebarActivities(activities) {
     const dur=fmtDur(act.moving_time||0);
     const icon=actIcon(act.sport_type||act.type);
     const type=(act.sport_type||act.type||'').replace(/_/g,' ');
+    const _slot = dateToSlot((act.start_date_local||'').split('T')[0]);
+    const _dL = ['T2','T3','T4','T5','T6','T7','CN'];
+    const _sL = _slot ? ' · W'+String(_slot.weekNum).padStart(2,'0')+' '+_dL[_slot.dayIdx] : '';
+    const _ok = _slot && actMatches(act, _slot.dayIdx);
+    const _tick = _ok
+      ? '<span style="color:#c8f0a0;font-size:9px;margin-left:3px">✓</span>'
+      : '<span style="color:rgba(255,255,255,.2);font-size:9px;margin-left:3px">—</span>';
     return '<div class="act-item">'+
       '<div class="act-header"><span class="act-name" title="'+(act.name||'')+'">'+icon+' '+(act.name||'').substring(0,22)+'</span>'+
-      '<span class="act-date">'+fmtDate(act.start_date_local)+'</span></div>'+
-      '<div class="act-type-badge">'+type+'</div>'+
+      '<span class="act-date">'+fmtDate(act.start_date_local)+_sL+'</span></div>'+
+      '<div class="act-type-badge">'+type+_tick+'</div>'+
       '<div class="act-stats"><span class="act-stat"><span>'+km+'</span>km</span>'+
       '<span class="act-stat"><span>'+dur+'</span></span>'+
       (gain>0?'<span class="act-stat" style="color:#c8f0a0"><span>+'+gain+'</span>m</span>':'')+
@@ -4194,20 +4215,28 @@ function applyActivitiesToSchedule(activities) {
     if (!s) return;
     if (actMatches(act, s.dayIdx)) {
       const k = doneKey(s.weekNum, s.dayIdx);
-      if (!done[k]) {
+      const actKm = ((act.distance||0)/1000);
+      const existKm = done[k] ? parseFloat(done[k].km||0) : 0;
+      if (!done[k] || actKm > existKm) {
+        const isNew = !done[k];
         done[k] = {
           strava: true, actId: act.id,
-          km: ((act.distance||0)/1000).toFixed(1),
-          elev: Math.round(act.total_elevation_gain||0)
+          km: actKm.toFixed(1),
+          elev: Math.round(act.total_elevation_gain||0),
+          name: act.name || ''
         };
-        marked++;
+        if (isNew) marked++;
         // Visual badge on open week cards
         const el = document.querySelector('#wk'+s.weekNum+' .day[data-i="'+s.dayIdx+'"]');
         if (el && !el.querySelector('.strava-act-badge')) {
           el.classList.add('done','strava-done');
+          const oldBadge = el.querySelector('.strava-act-badge');
+          if (oldBadge) oldBadge.remove();
           const b = document.createElement('div');
           b.className = 'strava-act-badge';
-          b.textContent = '🔁 '+done[k].km+'km'+(done[k].elev>0?' +'+done[k].elev+'m':'');
+          const _bDate = (act.start_date_local||'').split('T')[0].split('-');
+          const _bLbl = _bDate.length>=3 ? _bDate[2]+'/'+_bDate[1] : '';
+          b.textContent = '🔁 '+done[k].km+'km'+(done[k].elev>0?' +'+done[k].elev+'m':'')+(_bLbl?' ('+_bLbl+')':'');
           el.appendChild(b);
         }
       }
