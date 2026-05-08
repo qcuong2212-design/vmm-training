@@ -4083,13 +4083,42 @@ function saveRaceTarget(data) {
 }
 
 // ── Dynamic PLAN_START (CR-01) ─────────────────────────────────────
-// Override the hardcoded PLAN_START with user's plan_start_date
+// SOURCE OF TRUTH: weeks[0].dates is what the user sees in the calendar.
+// dateToSlot must use the SAME anchor, otherwise activity 28/4 on calendar
+// "T2 = 28/4" would be placed on T3 slot (off-by-one bug we just fixed).
 function getDynamicPlanStart() {
-  const profile = getUserProfile();
-  if (profile && profile.plan_start_date) {
-    return new Date(profile.plan_start_date + 'T00:00:00');
+  // 1) Prefer parsing from weeks[0].dates so display ↔ slot are always consistent
+  if (typeof weeks !== 'undefined' && weeks[0] && weeks[0].dates) {
+    const m = weeks[0].dates.match(/(\d+)\s*\/\s*(\d+)/);
+    if (m) {
+      const day = parseInt(m[1]);
+      const mon = parseInt(m[2]) - 1;
+      // Year: prefer race year if profile exists, else current year
+      let year = new Date().getFullYear();
+      try {
+        const race = getRaceTarget && getRaceTarget();
+        if (race?.date) year = new Date(race.date+'T00:00:00').getFullYear();
+      } catch(e){}
+      // If parsed date is months ahead of today within the same year, accept;
+      // otherwise check if previous year makes sense (race in future year edge case)
+      const candidate = new Date(year, mon, day, 0, 0, 0);
+      // Sanity: if candidate > today + 1y, try previous year
+      const now = new Date();
+      const oneYearMs = 365*86400000;
+      if (candidate - now > oneYearMs) {
+        return new Date(year-1, mon, day, 0, 0, 0);
+      }
+      return candidate;
+    }
   }
-  // Fallback to hardcoded for backward compatibility
+  // 2) Fallback: profile.plan_start_date
+  try {
+    const profile = getUserProfile && getUserProfile();
+    if (profile && profile.plan_start_date) {
+      return new Date(profile.plan_start_date + 'T00:00:00');
+    }
+  } catch(e){}
+  // 3) Last-resort: hardcoded
   return PLAN_START;
 }
 
